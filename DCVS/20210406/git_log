@@ -1,0 +1,36 @@
+ds16@ds16-TP:~/catkin/src/tauristar_platform$ git stash
+Saved working directory and index state WIP on master: 6ca964b reset deps path
+HEAD is now at 6ca964b reset deps path
+ds16@ds16-TP:~/catkin/src/tauristar_platform$ git pull
+remote: Counting objects: 133, done.
+remote: Compressing objects: 100% (133/133), done.
+remote: Total 133 (delta 112), reused 0 (delta 0)
+Receiving objects: 100% (133/133), 34.49 KiB | 0 bytes/s, done.
+Resolving deltas: 100% (112/112), completed with 51 local objects.
+From ssh://120.78.195.113:23/jiangwei/TauristarPlatform
+   6ca964b..8ca1ee3  master     -> origin/master
+ * [new branch]      J3_demo    -> origin/J3_demo
+Updating 6ca964b..8ca1ee3
+Fast-forward
+ src/tauristar_platform/tauristar_operations/control_module/path_operations.cpp              |  13 ++-
+ src/tauristar_platform/tauristar_operations/control_module/path_operations.h                |   1 +
+ src/tauristar_platform/tauristar_perception/tauristar_avm/app/CMakeLists.txt                |   1 +
+ src/tauristar_platform/tauristar_perception/tauristar_avm/app/run_s3d/CMakeLists.txt        |   8 ++
+ src/tauristar_platform/tauristar_perception/tauristar_avm/app/run_s3d/S3DModel.xml          |  13 +++
+ src/tauristar_platform/tauristar_perception/tauristar_avm/app/run_s3d/conf.yaml             |   9 ++
+ src/tauristar_platform/tauristar_perception/tauristar_avm/app/run_s3d/s3d_app.cpp           |  63 ++++++++++++++
+ src/tauristar_platform/tauristar_perception/tauristar_avm/library/avm_lib/CMakeLists.txt    |   1 +
+ src/tauristar_platform/tauristar_perception/tauristar_avm/library/avm_lib/single3dmodel.cpp | 268 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ src/tauristar_platform/tauristar_perception/tauristar_avm/library/avm_lib/single3dmodel.h   |  45 ++++++++++
+ src/tauristar_platform/tauristar_perception/tauristar_avm/library/avm_lib/singleudis.h      |   2 -
+ src/tauristar_platform/tauristar_perception/tauristar_avm/library/avm_util/xmlResolve.cpp   |  16 ++++
+ src/tauristar_platform/tauristar_perception/tauristar_avm/library/avm_util/xmlResolve.h     |  10 +++
+ 13 files changed, 446 insertions(+), 4 deletions(-)
+ create mode 100644 src/tauristar_platform/tauristar_perception/tauristar_avm/app/run_s3d/CMakeLists.txt
+ create mode 100644 src/tauristar_platform/tauristar_perception/tauristar_avm/app/run_s3d/S3DModel.xml
+ create mode 100644 src/tauristar_platform/tauristar_perception/tauristar_avm/app/run_s3d/conf.yaml
+ create mode 100644 src/tauristar_platform/tauristar_perception/tauristar_avm/app/run_s3d/s3d_app.cpp
+ create mode 100644 src/tauristar_platform/tauristar_perception/tauristar_avm/library/avm_lib/single3dmodel.cpp
+ create mode 100644 src/tauristar_platform/tauristar_perception/tauristar_avm/library/avm_lib/single3dmodel.h
+ds16@ds16-TP:~/catkin/src/tauristar_platform$ 
+
