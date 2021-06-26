@@ -1,0 +1,24 @@
+this document records general steps for linux basic personal environment setups whenever and wherever you want to quickly install a ubuntu-linux OS and development env. with following requirements
+
+*. fast install and setup ready for project development ()()
+2. with Chinese language input method (*)(*)
+
+3. with pycharm and clion ()()
+
+4. with redmine setup ready ()()
+
+5. with gitlab setup ready (add secure key) ()()
+
+6. with python pip installed and upgrade ready ()()
+
+7. setup preference for terminator ()()
+
+8. setup ready for pycharm and clion Chinese input environment ()()
+
+9. install nvidia driver (*)(*)
+
+
+10. grub name and booting sequence setup ()()
+
+
+这个是中文测试
