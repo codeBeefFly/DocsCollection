@@ -6,6 +6,20 @@
 
 ---
 
+## 20210624 操作
+
+目标：xingyun 小车上 使用 docker host network 模式，rostopic 接收 lslidar 数据
+
+### 尝试 1
+
+
+
+
+
+
+
+---
+
 ## 20210623 操作
 
 目标：双系统中实现 docker rostopic 的 lslidar 数据读取
@@ -580,6 +594,8 @@ d0788757c5ac   host      host      local
 
 目标：完成 20210618 剩余步骤，在 ros rviz 中显示 lslidar_c16 的点云图。已经可以ping通 192.168.1.200
 
+### 尝试 1：在 linux ros rviz 下显示 lslidar 点云（done）
+
 ![image-20210621173625476](docker_ros_lidarC16.assets/image-20210621173625476.png)
 
 <img src="docker_ros_lidarC16.assets/image-20210621175313072.png" alt="image-20210621175313072" style="zoom:80%;float:left" />
@@ -587,6 +603,9 @@ d0788757c5ac   host      host      local
 ![image-20210621175852574](docker_ros_lidarC16.assets/image-20210621175852574.png)
 
 ![image-20210621175502011](docker_ros_lidarC16.assets/image-20210621175502011.png)
+
+
+### 尝试 2：在 linux docker ros 下通过 rostopic 获取点云数据（unsuccessful）
 
 <img src="docker_ros_lidarC16.assets/image-20210621175929324.png" alt="image-20210621175929324" style="zoom:80%;float:left" />
 
@@ -614,7 +633,7 @@ d0788757c5ac   host      host      local
 
 
 
-### 2. docker + ros + rviz + lslidar
+### 2. docker + ros + rviz + lslidar（todo）
 
 
 
@@ -696,9 +715,9 @@ root@7d8685722712:~/catkin_ws#
 
 
 
+---
 
-
-
+## -----------------------
 
 
 
