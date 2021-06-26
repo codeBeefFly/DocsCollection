@@ -1,5 +1,5 @@
 # DocsCollection
-all documentations as private note
+all documentations collection
 
 # update
 ## 20210626
