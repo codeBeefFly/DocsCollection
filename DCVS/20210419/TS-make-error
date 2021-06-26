@@ -1,0 +1,26 @@
+# TS-make-error-collection-20210419
+
+[toc]
+
+---
+
+## cmake: unable to find the requested boost libraries
+
+solution: (stackoverflow)
+
+```
+sudo apt-get install libboost-all-dev
+```
+
+
+
+---
+
+## make: fatal error curl/curl.h no such file or directory
+
+solution: (stackoverflow)
+
+```
+sudo apt-get install libcurl4-openssl-dev
+```
+
