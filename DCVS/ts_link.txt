@@ -1,0 +1,8 @@
+ts_simu:
+ssh://git@35.247.3.214:23/tauristar/TauristarPlatformSimulation.git
+
+ts_recp:
+ssh://git@120.78.195.113:23/jiangwei/TauristarPlatformRecipe.git
+
+ts_data:
+ssh://git@120.78.195.113:23/jiangwei/TauristarPlatformData.git
