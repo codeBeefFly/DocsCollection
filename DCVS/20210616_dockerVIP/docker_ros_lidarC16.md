@@ -596,6 +596,13 @@ d0788757c5ac   host      host      local
 
 ### 尝试 1：在 linux ros rviz 下显示 lslidar 点云（done）
 
+```
+source /opt/ros/kinetic/setup.bash
+rosrun rviz rviz
+```
+
+
+
 ![image-20210621173625476](docker_ros_lidarC16.assets/image-20210621173625476.png)
 
 <img src="docker_ros_lidarC16.assets/image-20210621175313072.png" alt="image-20210621175313072" style="zoom:80%;float:left" />
