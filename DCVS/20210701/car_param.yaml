@@ -1,0 +1,95 @@
+CAR_LEN: 6.2
+CAR_WIDTH: 2.4
+FRONT_WHEEL_AXIS: 0.942
+REAR_WHEEL_AXIS: 0.888
+FRONT_REAR_WHEEL_LEN: 2.825
+MAX_STEERING_ANGLE: 0.3
+MIN_CAR_SPEED: 0.1
+ASTAR_CAR_LEN: 4.655
+ASTAR_CAR_WIDTH: 1.9
+ASTAR_FRONT_WHEEL_AXIS: 0.942
+ASTAR_REAR_WHEEL_AXIS: 0.888
+ASTAR_FRONT_REAR_WHEEL_LEN: 2.825
+HEAD_CAM_OFFSET: 1.78817
+WHEEL_GAP: 1.702
+WHEEL_R: 0.7157
+WHEEL_EDGE: 43
+WHEEL_MAX_NUM: 255
+EDGE_LEFT_FRONT: 0.052768199
+EDGE_RIGHT_FRONT: 0.052932105
+EDGE_LEFT_REAR: 0.05298908
+EDGE_RIGHT_REAR: 0.052932105
+PARKING_OFFSET: -3.2
+HORIZONTAL_PARKING_OFFSET: 1.0
+CAR_TURN_RADIUS: 5.6
+STEER_FACTOR: 0.001
+STEER_OFFSET: 0.0
+USE_STEERING: 1
+SPEED_FACTOR: 0.05625
+SPEED_OFFSET: 0.0
+WHEEL_SPEED_FACTOR: 0.05625
+WHEEL_SPEED_OFFSET: 0.0
+ACCEL_FACTOR: 0.027126736
+ACCEL_OFFSET: -21.593
+FV_CO_FACTOR: 0.000244141
+FV_CO_OFFSET: 0.0
+FV_OBJ_X_FACTOR: 1.5
+FV_OBJ_X_OFFSET: 100.0
+FV_OBJ_Y_FACTOR: 1.5
+FV_OBJ_Y_OFFSET: 0.0
+FRONT_WHEEL_X_OFFSET: -1
+FRONT_WHEEL_Y_OFFSET: 140
+REAR_WHEEL_X_OFFSET: 1
+REAR_WHEEL_Y_OFFSET: -142
+RADAR_XY_DIR: false
+IS_KERNEL_FINDER: false
+HOR_LOW_CONFIRM_SPEED: 1
+HOR_MED_CONFIRM_SPEED: 3
+VER_LOW_CONFIRM_SPEED: 1
+VER_MED_CONFIRM_SPPED: 2
+HOR_LOW_CONFIRM_NUM: 9
+HOR_MED_CONFIRM_NUM: 4
+HOR_HIGH_CONFIRM_NUM: 0
+VER_LOW_CONFIRM_NUM: 14
+VER_MED_CONFIRM_NUM: 9
+VER_HIGH_CONFIRM_NUM: 4
+HOR_WIDTH_REQUIRE: 1.5
+VER_WIDTH_REQUIRE: 2.0
+SLOP_WIDTH_REQUIRE: 0.0
+HOR_HEIGHT_REQUIRE: 4.0
+VER_HEIGHT_REQUIRE: 4.0
+SLOP_HEIGHT_REQUIRE: 0.0
+FUSE_FVCO: -1
+CAM_WIDTH: 1280
+CAM_HEIGHT: 720
+RADAR_MAX: 3276
+RADAR_MIN: -3276
+PRINT_DEBUG: 0
+PRINT_LOG: 0
+PRINT_WARN: 0
+PRINT_INFO: 0
+PRINT_ERROR: 1
+ONLY_CAN: 1
+HAVE_REAR_CNN: 1
+FIX_RETURN_COORD: 1
+FIX_RETURN_COORD_CD: 1
+RUN_TS: 1
+coordinate_cam_file:
+    left: /app/apa_left_cam.dat
+    right: /app/apa_right_cam.dat
+    rear: /app/apa_rear_cam.dat
+    front: /app/apa_front_cam.dat
+radar_front_info:
+    - {id: 1,dist_to_center: -917,search_dist: 5000,serach_ang: 80.0,ang_to_center: -88.0}
+    - {id: 2,dist_to_center: -818,search_dist: 1500,serach_ang: 50.0,ang_to_center: -19.0}
+    - {id: 3,dist_to_center: -330,search_dist: 1500,serach_ang: 50.0,ang_to_center: -10.0}
+    - {id: 4,dist_to_center: 330,search_dist: 1500,serach_ang: 50.0,ang_to_center: 10.0}
+    - {id: 5,dist_to_center: 818,search_dist: 1500,serach_ang: 50.0,ang_to_center: 19.0}
+    - {id: 6,dist_to_center: 917,search_dist: 5000,serach_ang: 80.0,ang_to_center: 88.0}
+radar_rear_info:
+    - {id: 7,dist_to_center: -934,search_dist: 5000,serach_ang: 80.0,ang_to_center: -81.0}
+    - {id: 8,dist_to_center: -740,search_dist: 1500,serach_ang: 50.0,ang_to_center: -23.5}
+    - {id: 9,dist_to_center: -305,search_dist: 1500,serach_ang: 50.0,ang_to_center: -5.1}
+    - {id: 10,dist_to_center: 305,search_dist: 1500,serach_ang: 50,ang_to_center: 5.1}
+    - {id: 11,dist_to_center: 740,search_dist: 1500,serach_ang: 50,ang_to_center: 23.5}
+    - {id: 12,dist_to_center: 917,search_dist: 5000,serach_ang: 80,ang_to_center: 81.0}

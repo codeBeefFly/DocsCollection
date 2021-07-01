@@ -26,6 +26,11 @@
 
 ## PC SIM
 
+DVR structure：
+
+<img src="Yaml_Doc.assets/image-20210701141625955.png" alt="image-20210701141625955" style="zoom:80%; float:left" />
+
+test0f.yaml modification for PC SIM：
 ```yaml
       - key: APAReadTxt                            ## PC SIM, 读取 canbus.txt 文件
         ignore: 1  # DVR                           # 1: 跳过此功能，0：启用此功能
