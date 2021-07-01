@@ -4,6 +4,50 @@
 
 
 
+---
+
+## 20210630
+
+目标：lslidar 构建地库高清地图
+
+![image-20210630105224642](lslidar_vslam.assets/image-20210630105224642.png)
+
+移动小车时，角度不能转太大。
+
+
+
+安装 `map_server` package：
+
+`sudo apt install ros-kinetic-map-server`
+
+<img src="lslidar_vslam.assets/image-20210630105619499.png" alt="image-20210630105619499" style="zoom:100%;float:left" />
+
+
+
+查看 package map server 信息
+
+```
+rospack list | grep map_*
+rospack find map_server
+rosls map_server
+```
+
+<img src="lslidar_vslam.assets/image-20210630112842748.png" alt="image-20210630112842748" style="zoom:100%;float:left" />
+
+<img src="lslidar_vslam.assets/image-20210630112938491.png" alt="image-20210630112938491" style="zoom:100%;float:left" />
+
+![image-20210630113606789](lslidar_vslam.assets/image-20210630113606789.png)
+
+![image-20210630113536100](lslidar_vslam.assets/image-20210630113536100.png)
+
+
+
+map is not good
+
+![image-20210630122809971](lslidar_vslam.assets/image-20210630122809971.png)
+
+![image-20210630123547909](lslidar_vslam.assets/image-20210630123547909.png)
+
 
 
 ---
