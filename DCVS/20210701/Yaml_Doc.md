@@ -70,7 +70,19 @@ test0f.yaml modification for PC SIM：
 
 ## 4959 vertical parking
 
-test0f.yaml for vertical parking:
+**car_param.yaml**
+
+**car_param.yaml**
+
+```yaml
+HORIZONTAL_PARKING_OFFSET: 0.0					    # 水平车位向外偏移量（m）
+FIX_RETURN_COORD: 1									# 启用二次识别修正车位坐标 AB
+FIX_RETURN_COORD_CD: 1								# 启用二次识别修正车位坐标 CD
+```
+
+
+
+**test0f.yaml for vertical parking:**
 
 relevant ticket: 4264, 4523
 
@@ -139,4 +151,55 @@ currently focus on #4959 vertical parking yaml.
 ---
 
 ## 4459 parallel parking
+
+**car_param.yaml**
+
+```yaml
+HORIZONTAL_PARKING_OFFSET: 1.0					    # 水平车位向外偏移量（m）
+FIX_RETURN_COORD: 1									# 启用二次识别修正车位坐标 AB
+FIX_RETURN_COORD_CD: 1								# 启用二次识别修正车位坐标 CD
+```
+
+
+
+**test0f.yaml for parallel parking:**
+
+currently focus on #4959 vertical parking yaml. 
+
+```yaml
+      - key: ParkingMiddleGoals
+        #ignore: 1
+        output_path: expect_path
+        log_level: 5
+        output: middle_goal_pose
+        parking_mode: 10						   # 10：垂直车位泊车模式
+        steering_angle: 0.3
+        parking_spot_width: 6.1 #add this
+        lane_width: 3
+        perp_distance: 3
+        para_distance: 4
+        goal1_angle: 0.174
+        angle_tolerance: 0.0 # 10 deg
+        distance_tolerance: 0.3
+        iterations: 1
+        save_to_apa: 1
+        update_goal: 1
+        apa_mode: 1 #change this
+        use_astar: 0
+        
+      - ...
+      
+      - key: ComputeControlValue
+        output: control_value
+        expect_pose: expect_pose_layer
+        traj_debug: traj_cache_layer
+        delta_gain: 2
+        slow_turn: 2			     # 当车偏离轨迹，0：不减速，1：依据偏移量减速，2：依据转向角度减速
+        catchup_cache: 1
+        min_speed: 0.1
+        time_step: 0.05
+        goal_correction: 1  # 4459-64          # 1：启用寻迹结束没有达到goal，重新计算轨迹，0：禁止
+```
+
+注：`##`说明，`#`开放参数，可以改动。其余可修改参数参考 #4959 垂直车位 yaml。
 
