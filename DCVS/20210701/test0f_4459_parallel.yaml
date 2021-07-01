@@ -1,0 +1,219 @@
+
+params:
+  thread_num: 4 # Use to keep a good consistency.
+  yaml_variables:
+    number:  # We use double to store all number variables.
+        # The variable names can be given by users, not related to the source code.
+        - commonFrameRate: 20.
+    string:
+      - inputVideo1: ./data/Videos/200.mp4
+      - inputVideo2: ./data/Videos/201.mp4
+      - inputCanbusTxt: /data/canbus.txt
+      - uartAddress: /dev/Camera1
+  program_params:
+    # the parameters names are defined in the program already.
+    carLength: 6.2
+    tireRadius: 0.7157
+    max_steering_wheel_velocity_delta: 0.1
+    max_steer_angular_velocity_delta: 0.2
+    max_tangential_velocity: 0.35
+    error_feedback_gains_x: 1
+    error_feedback_gains_y: 1
+    error_feedback_gains_theta: 1
+    error_feedback_gains_phi: 1
+
+  system_params:
+    #loglevel: 3
+    #logfile: logfile.txt
+    #logfile: processor.log
+    max_frame_counter: -1
+    log_freq_frame_counter: 1
+    input_queue_size: 16
+    output_queue_size: 16
+
+  car_config_params:
+    config_file: car_param.yaml
+    
+  odometry_params:
+    use_mcu: 1
+    lut:
+      gen_lut: 1
+      use_lut: 1
+      lut_filename: sin_lut
+      n: 100001
+    vehicle_info:
+      wheel_edge: 43
+      wheeledge_max: 255
+      rear_axial: 1.702
+      wheel_radius: 0.7157
+      wheel_speed: 0.05625
+      edge2m: [0.052768199, 0.052932105, 0.05298908, 0.052932105]
+      edge2m_factor: 1.0
+      steer_factor: 0.001
+      steer_offset: 0
+      wheelbase: 2.825
+
+threads:
+  - thread_name: read_txt
+    frame_memory: 5
+    frame_rate: 20
+    thread_procedure:
+      - key: SubInputData
+        output: not_used_txt_str_layer
+          
+      - key: SetPose
+        pose: {x: 0.0, y: 0.0, theta: 0.0}
+        relative_position: 0 
+        output: start_pose_layer
+
+      - key: SaveCurPoseIntoState
+        input: start_pose_layer
+        save_once: 1
+
+      - key: APAReadTxt
+        ignore: 1  #DVR
+        input: H002_DVR/DVR_2/left.txt
+        output: txt_str_layer
+        accurate_time: 1
+
+      - key: APAInfoProcess
+        ignore: 1  # DVR
+        coordinate_cam_file:
+          left: H002_DVR/apa_left_cam.dat
+          right: H002_DVR/apa_right_cam.dat
+          rear: H002_DVR/apa_rear_cam.dat
+          front: H002_DVR/apa_front_cam.dat
+        car_param: H002_DVR/car_param.yaml
+        video_file: 
+          left_h264: H002_DVR/DVR_2/left.h264
+          left_hdr: H002_DVR/DVR_2/left.hdr
+          right_h264: H002_DVR/DVR_2/right.h264
+          right_hdr: H002_DVR/DVR_2/right.hdr
+        #input_cam: [left_cam, right_cam]
+        input_txt: txt_str_layer
+        pub_pose: 1
+        show_image: 1
+        output_resolution: 0.2
+        output: grid_map_layer
+        enable_tsp: 1
+
+      - key: FetchGridMapFromApaInfoProcess
+        output: grid_map_layer
+        output_resolution: 0.2
+        draw_parking_lines: 0
+        
+      - key: ComputeOdom
+        #ignore: 1
+        set_pose_state: 1
+        use_steeringwheel: 1
+        steer_lookup: 0
+        #input: txt_str_layer
+        output: odom_pose_layer
+
+      - key: ApaInfoProcessPublishPose
+      #  set_pose_state: 1
+        output: apa_pose_layer
+
+      - key: PrintPoseLayer
+        #ignore: 1
+        input: apa_pose_layer
+        header: APAPose
+
+      - key: PrintPoseLayer
+        #ignore: 1
+        input: odom_pose_layer
+        header: Odom
+
+      - key: LoadCurPoseFromState
+        #ignore: 1
+        output: cur_pose_layer
+        
+      - key: PrintPoseLayer
+        #ignore: 1
+        input: cur_pose_layer
+        header: Current
+
+      - key: ProcessRadarData
+        input_map: grid_map_layer
+        output_map: obstacle_map_layer
+        output_points: obstacle_layer
+        sweep_mode: 1
+        scan_front: 1
+
+      - key: ParkingMiddleGoals
+        #ignore: 1
+        output_path: expect_path
+        log_level: 5
+        output: middle_goal_pose
+        parking_mode: 10
+        steering_angle: 0.3
+        parking_spot_width: 6.1 #add this
+        lane_width: 3
+        perp_distance: 3
+        para_distance: 4
+        goal1_angle: 0.174
+        angle_tolerance: 0.0 # 10 deg
+        distance_tolerance: 0.3
+        iterations: 1
+        save_to_apa: 1
+        update_goal: 1
+        apa_mode: 1 #change this
+        use_astar: 0
+
+      - key: ComputePath
+        ignore: 1
+        input: middle_goal_pose
+        eval_result: eval_result
+        output: expect_path
+        simple_path_type: RS
+        #astar_mode: 1
+        backward: 1
+        max_steer: 0.42
+        #check_collision: 2
+        min_incr_dist: 0.05
+        map_layer: gridmap_layer
+        use_local: 0
+        save_path: 1
+        apa_mode: 1
+        wait_for_map: 0
+        car_scale: 0.78
+        smooth_path: 0
+        
+      - key: SavePathToApaInfoProcess
+        input_path: expect_path
+
+      - key: TrajectoryEngine
+        path_input: expect_path
+        min_dist: 0.03
+        max_acc: 0.5
+        obstacle_input: obstacle_layer
+        sweep_area: sweep_layer
+        front_ext: 0.2
+        side_ext: 0.2
+        time_step: 0.05
+        
+      - key: ComputeControlValue
+        output: control_value
+        expect_pose: expect_pose_layer
+        traj_debug: traj_cache_layer
+        delta_gain: 2
+        slow_turn: 2
+        catchup_cache: 1
+        min_speed: 0.1
+        time_step: 0.05
+        goal_correction: 1  # 4459-64
+        
+      - key: PubControl
+        input: control_value
+        speed_scale: 1
+        steer_scale: 1
+        max_steer: 0.5
+        max_speed: 0.4
+       # always_publish: 1 
+  
+         
+  - thread_name: runtime_thread
+    frame_rate: 0.1
+    thread_procedure:
+        - key: RuntimeReport
+          report_dir: runtime_report.txt
