@@ -1,4 +1,8 @@
 this file is to practice git branch command.
 20210702
 
-edit this file on main branch, see what would happen. done.
+<<<<<<< HEAD
+
+=======
+now try to modify this file in branch feature1. done.
+>>>>>>> feature1
