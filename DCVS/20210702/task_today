@@ -1,0 +1,19 @@
+1. read code
+	1. parking mode 5
+	2. parking mode 10
+
+2. git create local repository  --  http://www.redmine.org.cn/manual
+3. copy and modify local code, related ticket #5406, convention for naming jacob's mode is: original mode number suffix with 9
+	1. mode 5 <-> 59 
+	2. mode 10 <-> 109
+
+
+
+
+=====================================
+a long term plan: 
+1. path planning
+2. ros + simulation
+3. docker
+4. n-xaviar + apollo
+5. lidar + point cloud
