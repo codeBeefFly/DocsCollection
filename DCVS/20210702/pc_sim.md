@@ -112,3 +112,12 @@ PC_SIM 文件路径：`/home/marvin/work/ts/PC_SIM`
 
 ## 2. using vmware
 
+```
+export LD_LIBRARY_PATH=/usr/lib:/home/ds16v2/Work/TS_PC/PC_TEST_2/PC_SIM/lib:/usr/local/opencv/opencv-3.4.5/lib~
+
+# 
+# /usr/lib
+# /home/ds16v2/Work/TS_PC/PC_TEST_2/PC_SIM/lib
+# /usr/local/opencv/opencv-3.4.5/lib~
+```
+
