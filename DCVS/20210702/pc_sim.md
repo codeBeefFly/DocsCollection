@@ -192,7 +192,11 @@ ln -s libGeographic.so.19 libGeographic.so
 转到 `/dvr_template` 文件夹下：
 
 ```
+export LD_LIBRARY_PATH=/*路径*/essential/local_lib:/*路径*/essential/opencv_lib:/*路径*/essential/ts_lib
+
+
 sudo chmod 777 processor_node_local
+
 
 ./processor_node_local -o conf=test0f_pc.yaml  或
 ./processor_node_local -o conf=test0f_pc.yaml > session_pc.log
@@ -201,3 +205,5 @@ sudo chmod 777 processor_node_local
 输出结果：
 
 ![image-20210703170132634](pc_sim.assets/image-20210703170132634.png)
+
+![image-20210703170411879](pc_sim.assets/image-20210703170411879.png)
