@@ -121,3 +121,83 @@ export LD_LIBRARY_PATH=/usr/lib:/home/ds16v2/Work/TS_PC/PC_TEST_2/PC_SIM/lib:/us
 # /usr/local/opencv/opencv-3.4.5/lib~
 ```
 
+
+
+从服务器下载 PC_SIM_PROTABLE（包含processor_node 以及一些 .so 文件），服务器存放地址：`/disk3/PC_SIM_PROTABLE`
+
+PC_SIM_PROTABLE 文件结构：
+
+```
+.
+├── dvr_template									# dvr 模板文件，包含一个 processor_node 以及pc模拟必要文件
+│   ├── canbus.txt
+│   ├── car_param.yaml
+│   ├── computed_path2.txt
+│   ├── computed_path.txt
+│   ├── front.h264
+│   ├── front.hdr
+│   ├── left.h264
+│   ├── left.hdr
+│   ├── naive_trajectory_fixed_dt_fwd_simXY.txt
+│   ├── naive_trajectory_fixed_dt.txt
+│   ├── naive_trajectory_fixed_dtXY.txt
+│   ├── naive_trajectory.txt
+│   ├── naive_trajectoryXY.txt
+│   ├── plots
+│   ├── processor_node_local						# 用于 pc 模拟的 二进制文件
+│   ├── rear.h264
+│   ├── rear.hdr
+│   ├── right.h264
+│   ├── right.hdr
+│   ├── session.log
+│   ├── session_pc.log
+│   ├── sin_lut_8.bin
+│   ├── test0f_pc.yaml
+│   └── test0f.yaml
+├── essential										# 必要的动态库文件集
+│   ├── local_lib									# 需要挂载的本地的必要动态文件 .so
+│   ├── opencv_lib									# 需要挂载的 opencv 动态文件 .so
+│   └── ts_lib										# 需要挂载的 TS 平台动态文件 .so
+├── IC421											# IC421 环影配置文件	
+│   ├── apa_front_cam.dat
+│   ├── apa_left_cam.dat
+│   ├── apa_rear_cam.dat
+│   ├── apa_right_cam.dat
+│   └── BV3D.xml
+└── path
+
+```
+
+
+
+下载到本地虚拟机的任意文件夹，并在 `/essental`中打开命令行输入如下命令，创建链接文件。
+
+```
+ln -s libyaml-cpp.so.0.6.2 libyaml-cpp.so.0.6
+ln -s libyaml-cpp.so.0.6 libyaml-cpp.so
+
+ln -s libpugixml.so.1.10 libpugixml.so.1
+ln -s libpugixml.so.1 libpugixml.so
+
+ln -s libGeographic.so.19.0.1 libGeographic.so.19
+ln -s libGeographic.so.19 libGeographic.so
+```
+
+通过`ls -l`查看结果：
+
+![image-20210703165722890](pc_sim.assets/image-20210703165722890.png)
+
+
+
+转到 `/dvr_template` 文件夹下：
+
+```
+sudo chmod 777 processor_node_local
+
+./processor_node_local -o conf=test0f_pc.yaml  或
+./processor_node_local -o conf=test0f_pc.yaml > session_pc.log
+```
+
+输出结果：
+
+![image-20210703170132634](pc_sim.assets/image-20210703170132634.png)
