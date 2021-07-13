@@ -16,6 +16,22 @@ aim: achieve hector_slam with lidar
 
 ---
 
+
+
+## log0: rewrite hector slam launch file
+
+2021年7月13日
+
+
+
+
+
+
+
+
+
+---
+
 ## archive: bst - tsp cross make env. dependencies
 
 ![image-20210712204336720](log_hecotr_slam.assets/image-20210712204336720.png)

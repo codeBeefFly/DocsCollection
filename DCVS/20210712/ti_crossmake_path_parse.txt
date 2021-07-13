@@ -209,5 +209,32 @@ OpenVX_LIBS
 
 
 
+====================================================================================================================================
+
+if (cross_make)
+    if (BUILD_HORIZON)
+        set(EIGEN3_INCLUDE_DIRS ${DEPS_ROOT}/eigen3/include/eigen3)
+    else ()
+        set(EIGEN3_INCLUDE_DIRS ${TAURISTAR_SRC_DIR}/cross_components/eigen3)
+    endif ()
+    set(EIGEN3_INCLUDE_DIR ${EIGEN3_INCLUDE_DIRS})
+else ()
+    set(EIGEN3_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/third_party/eigen3)
+    set(EIGEN3_INCLUDE_DIR ${EIGEN3_INCLUDE_DIRS})
+endif ()
+
+include_directories(${EIGEN3_INCLUDE_DIRS})
+message(STATUS "EIGEN3_INCLUDE_DIRS = ${EIGEN3_INCLUDE_DIRS}")
 
 
+${PROJECT_SOURCE_DIR} = xxx/tauristar_platform 
+
+
+EIGEN3_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/third_party/eigen3
+	xxx/tauristar_platform/third_party/eigen3
+
+EIGEN3_INCLUDE_DIR ${EIGEN3_INCLUDE_DIRS}
+	xxx/tauristar_platform/third_party/eigen3
+
+
+====================================================================================================================================
