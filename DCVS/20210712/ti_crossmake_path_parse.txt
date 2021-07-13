@@ -1,0 +1,213 @@
+    
+==》 cross_make.sh
+
+HOME=/home/aitronx
+
+TI_SW_ROOT=${HOME}/PROCESSOR_SDK_VISION_03_05_00_00/ti_components
+CODEGEN_PATH_A15=${TI_SW_ROOT}/os_tools/linux/linaro/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf
+ARM_STRIP=${CODEGEN_PATH_A15}/bin/arm-linux-gnueabihf-strip
+
+TI_SW_ROOT=/home/aitronx/PROCESSOR_SDK_VISION_03_05_00_00/ti_components
+
+
+==》 vsdk.cmake
+
+set(HOME /home/marvin)
+OPTION(BUILD_TDA2 "build TDA2 target" ON)
+
+set(TI_SW_ROOT ${HOME}/PROCESSOR_SDK_VISION_03_05_00_00/ti_components)
+set(CODEGEN_PATH_A15 ${TI_SW_ROOT}/os_tools/linux/linaro/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf)
+set(A15_TOOLCHAIN_PREFIX ${CODEGEN_PATH_A15}/bin/arm-linux-gnueabihf-)
+set(TARGET_FS_PATH ${TI_SW_ROOT}/os_tools/linux/targetfs)
+
+
+TI_SW_ROOT=/home/marvin/PROCESSOR_SDK_VISION_03_05_00_00/ti_components
+
+
+
+
+==> CMakeLists.txt
+
+
+    if (BUILD_TDA2)
+        
+        set(A15_Linux_OpenCV_PREBUILD_PATH ${TI_SW_ROOT}/open_compute/opencv/opencv-3.1.0)
+        set(A15_Linux_OpenCV_INCLUDE_PATH ${A15_Linux_OpenCV_PREBUILD_PATH}/include)
+        set(A15_Linux_OpenCV_LIB_PATH ${A15_Linux_OpenCV_PREBUILD_PATH}/psdk_opencv)
+        
+        set(Boost_INCLUDE_DIRS ${TAURISTAR_CORSS_COMPONENTS_DIR}/boost_1_60/include)
+        set(Boost_LIBRARIES_PATH ${TAURISTAR_CORSS_COMPONENTS_DIR}/boost_1_60/lib)
+        
+        set(OPENSSL_INCLUDE_DIR ${TAURISTAR_CORSS_COMPONENTS_DIR}/openssl/include)
+        set(OPENSSL_LIBRARIES_PATH ${TAURISTAR_CORSS_COMPONENTS_DIR}/openssl/lib)
+        
+        set(TIOVX_DIR ${TI_SW_ROOT}/ti_components/open_compute/tiovx_01_00_01_00)
+        
+        set(OpenVX_INCLUDE_DIRS
+                ${TIOVX_DIR}/include
+                ${TIOVX_DIR}/kernels/include
+                ${TIOVX_DIR}/utils/include
+                )
+        set(OpenVX_LIBS_DIR ${TIOVX_DIR}/lib/TDAX/A15/LINUX/release)
+        set(OpenVX_LIBS
+                -lvx_tiovx_ivision_tests
+                -lvx_tiovx_tests -lvx_conformance_tests -lvx_conformance_engine -lvx_conformance_tests_testmodule
+                -lvx_vxu -lvx_framework
+                -lvx_kernels_host_utils -lvx_kernels_ivision
+                -lvx_platform_vision_sdk_linux
+                -lvx_kernels_openvx_core
+                -lvx_sample_usecases
+                -lvx_tutorial
+                )
+
+    endif ()
+
+
+
+==> parse CMakeLists.txt paths
+
+===> parse A15_Linux_OpenCV
+
+TI_SW_ROOT=/home/marvin/PROCESSOR_SDK_VISION_03_05_00_00/ti_components
+
+A15_Linux_OpenCV_PREBUILD_PATH ${TI_SW_ROOT}/open_compute/opencv/opencv-3.1.0
+
+A15_Linux_OpenCV_INCLUDE_PATH=
+${A15_Linux_OpenCV_PREBUILD_PATH}/include
+${TI_SW_ROOT}/open_compute/opencv/opencv-3.1.0/include
+/home/marvin/PROCESSOR_SDK_VISION_03_05_00_00/ti_components/open_compute/opencv/opencv-3.1.0/include  # .h & .cpp & .hpp
+
+
+A15_Linux_OpenCV_LIB_PATH=
+${A15_Linux_OpenCV_PREBUILD_PATH}/psdk_opencv
+${TI_SW_ROOT}/open_compute/opencv/opencv-3.1.0/psdk_opencv
+/home/marvin/PROCESSOR_SDK_VISION_03_05_00_00/ti_components/open_compute/opencv/opencv-3.1.0/psdk_opencv  # libopencv_xxx.so
+
+
+===> parse Boost
+
+TAURISTAR_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+TAURISTAR_CORSS_COMPONENTS_DIR ${TAURISTAR_SRC_DIR}/cross_components
+
+-- TAURISTAR_SRC_DIR: /home/marvin/work/ts/TauristarPlatform/src/tauristar_platform
+
+
+Boost_INCLUDE_DIRS=
+${TAURISTAR_CORSS_COMPONENTS_DIR}/boost_1_60/include
+${TAURISTAR_SRC_DIR}/cross_components/boost_1_60/include
+/home/marvin/work/ts/TauristarPlatform/src/tauristar_platform/cross_components/boost_1_60/include  # .hpp
+
+
+Boost_LIBRARIES_PATH=
+${TAURISTAR_CORSS_COMPONENTS_DIR}/boost_1_60/lib
+${TAURISTAR_SRC_DIR}/cross_components/boost_1_60/lib
+${CMAKE_CURRENT_SOURCE_DIR}/cross_components/boost_1_60/lib
+/home/marvin/work/ts/TauristarPlatform/src/tauristar_platform/cross_components/boost_1_60/lib  # libboost_xxx.so
+
+
+===> parse OPENSSL 
+
+TAURISTAR_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+TAURISTAR_CORSS_COMPONENTS_DIR ${TAURISTAR_SRC_DIR}/cross_components
+
+-- TAURISTAR_SRC_DIR: /home/marvin/work/ts/TauristarPlatform/src/tauristar_platform
+
+
+OPENSSL_INCLUDE_DIR 
+${TAURISTAR_CORSS_COMPONENTS_DIR}/openssl/include
+${TAURISTAR_SRC_DIR}/cross_components/openssl/include
+/home/marvin/work/ts/TauristarPlatform/src/tauristar_platform/cross_components/openssl/include  # .h
+
+
+OPENSSL_LIBRARIES_PATH 
+${TAURISTAR_CORSS_COMPONENTS_DIR}/openssl/lib
+${TAURISTAR_SRC_DIR}/cross_components/openssl/lib
+/home/marvin/work/ts/TauristarPlatform/src/tauristar_platform/cross_components/openssl/lib  # libssl.so & libcrypto.so
+
+
+===> parse TIOVX
+
+
+TI_SW_ROOT=/home/marvin/PROCESSOR_SDK_VISION_03_05_00_00/ti_components
+
+
+
+TIOVX_DIR 
+${TI_SW_ROOT}/ti_components/open_compute/tiovx_01_00_01_00
+/home/marvin/PROCESSOR_SDK_VISION_03_05_00_00/ti_components/ti_components/open_compute/tiovx_01_00_01_00  # 有问题，没有使用
+
+
+
+===> 
+
+
+TIOVX_DIR 
+${TI_SW_ROOT}/ti_components/open_compute/tiovx_01_00_01_00
+/home/marvin/PROCESSOR_SDK_VISION_03_05_00_00/ti_components/ti_components/open_compute/tiovx_01_00_01_00  # 有问题，没有使用
+
+
+set(OpenVX_INCLUDE_DIRS
+        ${TIOVX_DIR}/include
+        ${TIOVX_DIR}/kernels/include
+        ${TIOVX_DIR}/utils/include
+        )
+
+
+# 错误路径
+OpenVX_INCLUDE_DIRS
+/home/marvin/PROCESSOR_SDK_VISION_03_05_00_00/ti_components/ti_components/open_compute/tiovx_01_00_01_00/include
+/home/marvin/PROCESSOR_SDK_VISION_03_05_00_00/ti_components/ti_components/open_compute/tiovx_01_00_01_00/kernels/include
+/home/marvin/PROCESSOR_SDK_VISION_03_05_00_00/ti_components/ti_components/open_compute/tiovx_01_00_01_00/utils/include
+
+
+# 正确路径
+OpenVX_INCLUDE_DIRS
+/home/marvin/PROCESSOR_SDK_VISION_03_05_00_00/ti_components/open_compute/tiovx_01_00_01_00/include              # .h
+/home/marvin/PROCESSOR_SDK_VISION_03_05_00_00/ti_components/open_compute/tiovx_01_00_01_00/kernels/include      # .h
+/home/marvin/PROCESSOR_SDK_VISION_03_05_00_00/ti_components/open_compute/tiovx_01_00_01_00/utils/include        # 没有目标路径
+
+
+
+set(OpenVX_LIBS_DIR ${TIOVX_DIR}/lib/TDAX/A15/LINUX/release)
+
+
+# 错误路径
+OpenVX_LIBS_DIR 
+/home/marvin/PROCESSOR_SDK_VISION_03_05_00_00/ti_components/ti_components/open_compute/tiovx_01_00_01_00/lib/TDAX/A15/LINUX/release
+
+
+# 正确路径
+OpenVX_LIBS_DIR 
+/home/marvin/PROCESSOR_SDK_VISION_03_05_00_00/ti_components/open_compute/tiovx_01_00_01_00/lib/TDAX/A15/LINUX/release  # .a
+
+
+set(OpenVX_LIBS
+        -lvx_tiovx_ivision_tests
+        -lvx_tiovx_tests -lvx_conformance_tests -lvx_conformance_engine -lvx_conformance_tests_testmodule
+        -lvx_vxu -lvx_framework
+        -lvx_kernels_host_utils -lvx_kernels_ivision
+        -lvx_platform_vision_sdk_linux
+        -lvx_kernels_openvx_core
+        -lvx_sample_usecases
+        -lvx_tutorial
+        )
+
+
+OpenVX_LIBS  
+-lvx_tiovx_ivision_tests
+-lvx_tiovx_tests -lvx_conformance_tests -lvx_conformance_engine -lvx_conformance_tests_testmodule
+-lvx_vxu -lvx_framework
+-lvx_kernels_host_utils -lvx_kernels_ivision
+-lvx_platform_vision_sdk_linux
+-lvx_kernels_openvx_core
+-lvx_sample_usecases
+-lvx_tutorial
+
+注：上面的库的地址由 OpenVS_LIBS_DIR 指定，当前为:
+/home/marvin/PROCESSOR_SDK_VISION_03_05_00_00/ti_components/open_compute/tiovx_01_00_01_00/lib/TDAX/A15/LINUX/release  # .a，静态库
+
+
+
+
+
+
