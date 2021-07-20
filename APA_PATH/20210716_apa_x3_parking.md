@@ -32,7 +32,7 @@ In the session.log recorded during real car running, after final goal has been r
 
    ![image-20210719212039214](20210716_apa_x3_parking.assets/image-20210719212039214.png)
 
-   (more details)
+   (more details) we need to pass this status to apainforprocess.
 
 ### 2. **modification on backward trajectory as correction trajectory** **(suggestion)**
 
