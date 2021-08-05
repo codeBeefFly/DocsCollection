@@ -22,6 +22,20 @@
 
 
 
+**task: 20210804:**（todo）
+
+
+
+**task: 20210803:**（done）
+
+昨天：定位到 computed path 生成与 active、m_active_goal 有关。
+
+今天：找出 如何赋值 activate、m_activate_goal。（done）
+
+计划：因为 20210803 下午需要调试 lidar，之后关于 apa 代码，需要进一步了解 m_active_goal 的赋值机制，即 cur_state --> setGoal(cur_pose) 是如何工作的。 
+
+
+
 ---
 
 # 1. analysis target log 1021
@@ -126,7 +140,11 @@ PoseState 类对象 m_pose_goal 被声明在 CurrentPoseState 类中；进入 Po
 
 ![image-20210804201713350](20210802_apa_x3_shanghai.assets/image-20210804201713350.png)
 
+**现在需要关注的是 content_message 与 split_results，他们是在读取到 canbus.txt 中的什么数据时被触发的？（20210802）**
 
+
+
+**意外：**
 
 根据各种乱撞，发现在 session_xxx.log 中有 的内容：
 
@@ -185,16 +203,95 @@ m_txt_id 表示在 canbus.txt 中读取的行号，txt 表示行内容。
 
 
 
+---
+
+# 2. 分析 CurrentPoseState::getGoal: active: x, m_goal_activate: x 值变化原因
+
+![image-20210805100855729](20210802_apa_x3_shanghai.assets/image-20210805100855729.png)
+
+![image-20210805100916110](20210802_apa_x3_shanghai.assets/image-20210805100916110.png)
+
+
+
+意外，最近一次运行，session_xxx.log 中没有出现下面的内容：
+
+```
+[2021-08-04 15:02:05.763] [info] camera: 0 time: 36605 tCnn: 36391
+[2021-08-04 15:02:05.763] [info] camera: 1 time: 36601 tCnn: 36391
+[2021-08-04 15:02:05.763] [info] [APAInfoProcess] found target in txt
+[2021-08-04 15:02:05.763] [info] [APAInfoProcess] Setting Target Pose from txt
+[2021-08-04 15:02:05.763] [info] InputSetTargetPose() armTime0 seg 0
+```
+
+更新，老的 session_xxx.log 中也有这段内容，注意 Activate goal：
+
+![image-20210805103823364](20210802_apa_x3_shanghai.assets/image-20210805103823364.png)
+
+取而代之的是这段内容（这段代码在老 session_xxx.log 中也有）：
+
+![image-20210805103449773](20210802_apa_x3_shanghai.assets/image-20210805103449773.png)
+
+`[APAInfoProcess] Activate goal` 定位代码，当 canbus.txt 中有字符串 `InputsetStartPose` 时，打印这个log：
+
+![image-20210805104438388](20210802_apa_x3_shanghai.assets/image-20210805104438388.png)
+
+重新对 canbus.txt 进行关键词查找： `inputset`
+
+![image-20210805104737997](20210802_apa_x3_shanghai.assets/image-20210805104737997.png)
+
+![image-20210805104751206](20210802_apa_x3_shanghai.assets/image-20210805104751206.png)
+
+m_goal_active 赋值定位到这段代码：
+
+![image-20210805113747968](20210802_apa_x3_shanghai.assets/image-20210805113747968.png)
+
+![image-20210805130822683](20210802_apa_x3_shanghai.assets/image-20210805130822683.png)
+
+![image-20210805131041160](20210802_apa_x3_shanghai.assets/image-20210805131041160.png)
+
+![image-20210805131141260](20210802_apa_x3_shanghai.assets/image-20210805131141260.png)
+
+找到了 m_goal_active 赋值 1 的代码，在 `setGoal` 中，如果 active 的值为 1，则根据 `m_goal_active = m_goal_active | int8_t(1)`，m_goal_active 为 1。
+
+
+
+现在需要定位 setGoal 是被如何调用的。
+
+根据 调速器 中的堆栈：
+
+<img src="20210802_apa_x3_shanghai.assets/image-20210805131938179.png" alt="image-20210805131938179" style="zoom:100%;float:left" />
+
+![image-20210805132015611](20210802_apa_x3_shanghai.assets/image-20210805132015611.png)
+
+![image-20210805132826719](20210802_apa_x3_shanghai.assets/image-20210805132826719.png)
+
+可以在旧的 session_xxx.log 中找到相应log字段：
+
+![image-20210805133058011](20210802_apa_x3_shanghai.assets/image-20210805133058011.png)
+
+
+
+关于 类 SubInputDataStep，在 test0f_01.yaml 中，启用了这个类：
+
+![image-20210805133710850](20210802_apa_x3_shanghai.assets/image-20210805133710850.png)
+
+
+
+**完成 20210803 任务（done）。**接下来需要继续了解 SubInputdataStep 类的 工作原理，是如何赋值的。
+
+![image-20210805133141837](20210802_apa_x3_shanghai.assets/image-20210805133141837.png)
+
 
 
 
 
 ---
 
-# 2. 可能需要看的内容
+# &. 可能需要看的内容
 
 ![image-20210803164204642](20210802_apa_x3_shanghai.assets/image-20210803164204642.png)
 
 ![image-20210803164827191](20210802_apa_x3_shanghai.assets/image-20210803164827191.png)
 
 需要了解如何将 canbus 中的数据转换成坐标的。
+
