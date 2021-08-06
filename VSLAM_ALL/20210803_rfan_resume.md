@@ -94,7 +94,7 @@ link7：[hector-slam安装与使用 （ubuntu 16.04）（使用数据包运行he
 
 link8：[Robosense 激光雷达slam建图（2）：使用pointcloud_to_laserscan包实现三维转二维](https://blog.csdn.net/geerniya/article/details/84880514?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-15.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-15.control)
 
-
+link9：[https://ardupilot.org/dev/docs/ros-slam.html](https://ardupilot.org/dev/docs/ros-slam.html)
 
 
 
@@ -487,6 +487,251 @@ No tf data.  Actual error: Fixed Frame [map] does not exist
 5. 利用 rqt_graph 进行排查。
 
 
+
+### 3.1. solve global status: warn: fixed frame no tf data
+
+<img src="20210803_rfan_resume.assets/image-20210806140209513.png" alt="image-20210806140209513" style="zoom:100%;float:left" />
+
+link：[ROS RVIZ: How to visualize a point cloud that doesn't have a fixed frame transform](https://stackoverflow.com/questions/52420672/ros-rviz-how-to-visualize-a-point-cloud-that-doesnt-have-a-fixed-frame-transfo)
+
+![image-20210806140403827](20210803_rfan_resume.assets/image-20210806140403827.png)
+
+这个问题很烦人，很多教程都没有涉及这个最基本但是十分重要的内容。下面这位大佬讲的很好。但是第二种解决方法需要创建更多的 tf 转换。
+
+<img src="20210803_rfan_resume.assets/image-20210806140906757.png" alt="image-20210806140906757" style="zoom:100%;float:left" />
+
+这是当前 `rqt_graph`生成的节点图：
+
+![image-20210806141114284](20210803_rfan_resume.assets/image-20210806141114284.png)
+
+这是当前的效果图：
+
+![image-20210806141229611](20210803_rfan_resume.assets/image-20210806141229611.png)
+
+开启了四个 terminal:
+
+```
+# 启动 rfans 激光雷达
+terminal 1: $ roslaunch rfans_driver node_manager.launch
+
+# 启动 hector slam
+terminal 2: $ roslaunch hector_slam_launch rfans_slam_main.launch
+
+# 启动 rviz
+terminal 3: $ rviz
+
+# 启动 tf (map --> rfans_link)
+terminal 4: $ rosrun tf static_transform_publisher 0 0 0 0 0 0 map rfans_link 100
+```
+
+
+
+现在的问题，1. slam，2. 如何将 3D 点云转到 2D，3. 各个坐标系的转换（继续研究）以及：
+
+<img src="20210803_rfan_resume.assets/image-20210806144242425.png" alt="image-20210806144242425" style="zoom:100%;float:left" />
+
+```
+[ INFO] [1628231853.657086681]: Successfully initialized hector_geotiff MapWriter plugin TrajectoryMapWriter.
+[ INFO] [1628231853.657143847]: Geotiff node started
+[ WARN] [1628231873.496827324]: No transform between frames /map and scanmatcher_frame available after 20.002183 seconds of waiting. This warning only prints once.
+```
+
+
+
+![image-20210806150842655](20210803_rfan_resume.assets/image-20210806150842655.png)
+
+
+
+### 3.2. able to run hector slam with rfans32, optimization still needed though（done）
+
+上面的 node graph 不准确，因为 pointcloud_to_laserscan 的 `<param name="scan_topic" value="$(arg scan_topic)"/>` 其中 `<arg name="scan_topic" default="front/scan"/>`，这个值是从 节点 node：pointcloud to laserscan 的 `<remap from="scan" to="/front/scan"/>`的到。
+
+![image-20210806160947114](20210803_rfan_resume.assets/image-20210806160947114.png)
+
+![image-20210806161214316](20210803_rfan_resume.assets/image-20210806161214316.png)
+
+问题：
+
+1. pointcloud 跳动
+2. slam 生成速度慢
+3. 没有办法 继续进行 rfans slam 建图，因为物理原因
+
+
+
+今后优化：
+
+1. 小车平台
+2. 如何通信
+
+
+
+计划：
+
+1. 今天下午（2021年08月06日）对 launch 文件进行更深入的理解。
+2. 开始整合 slam 项目，将 hector_slam，lslidar，rfans package 包同时编译。
+3. 有时间的话，继续在小车上调试 slam
+
+
+
+### 3.3. 相关脚本文件
+
+rfans_slam_main.launch
+
+```xml
+<?xml version="1.0"?>
+
+<launch>
+
+    <!--<arg name="geotiff_map_file_path" default="$(find hector_geotiff)/maps"/>-->
+
+    <!--<param name="/use_sim_time" value="true"/>-->
+
+    <node pkg="rviz" type="rviz" name="rviz"
+          args="-d $(find hector_slam_launch)/rviz_cfg/rfans_simple_cfg.rviz"/>
+
+    <!-- map to base_link -->
+    <node pkg="tf" type="static_transform_publisher" name="map_to_base"
+          args="0 0 0 0 0 0 /map /base_link 100"/>
+
+    <!-- base_link to rfans_link -->
+    <node pkg="tf" type="static_transform_publisher" name="base_to_rfans"
+          args="0 0 0 0 0 0 /base_link /rfans_link 100"/>
+
+
+    <!-- change mapping_default_original.launch to rfans_slam_mapping.launch -->
+    <include file="$(find hector_mapping)/launch/rfans_slam_mapping.launch"/>
+
+    <!-- use default geotiff_mapper -->
+    <include file="$(find hector_geotiff_launch)/launch/geotiff_mapper.launch">
+        <arg name="trajectory_source_frame_name" value="scanmatcher_frame"/>
+        <!--<arg name="map_file_path" value="$(arg geotiff_map_file_path)"/>-->
+    </include>
+
+</launch>
+```
+
+rfans_slam_mapping.launch
+
+```xml
+<?xml version="1.0"?>
+
+<launch>
+    <arg name="tf_map_scanmatch_transform_frame_name" default="scanmatcher_frame"/>
+    <!--<arg name="base_frame" default="base_footprint"/>-->
+    <arg name="base_frame" default="base_link"/>
+    <arg name="odom_frame" default="nav"/>
+    <arg name="pub_map_odom_transform" default="true"/>
+    <arg name="scan_subscriber_queue_size" default="5"/>
+    <!--<arg name="scan_topic" default="scan"/>-->
+    <arg name="scan_topic" default="front/scan"/>
+    <arg name="map_size" default="2048"/>
+
+    <!-- PointCloud to laserscan -->
+    <node pkg="pointcloud_to_laserscan"
+          type="pointcloud_to_laserscan_node"
+          name="pointcloud_to_laserscan">
+
+        <!-- <remap from="cloud_in" to="/rfans_driver/rfans_points" /> -->
+        <remap from="cloud_in" to="/lidar_points"/>
+        <remap from="scan" to="/front/scan"/>
+
+        <!-- <param name="target_frame"    value="rfans" /> -->
+        <param name="target_frame" value="base_link"/>
+        <param name="min_height" value="0.0"/>
+        <param name="max_height" value="1.0"/>
+        <!--<param name="angle_min" value="-3.14"/>-->
+        <!--<param name="angle_max" value="3.14"/>-->
+        <!--<param name="angle_increment" value="0.00655"/>-->
+        <!--<param name="scan_time" value="0.0"/>-->
+        <param name="range_min" value="0.45"/>
+        <param name="range_max" value="10.0"/>
+        <param name="concurrency_level" value="1"/>
+        <param name="use_inf" value="true"/>
+    </node>
+
+    <!--  Hector SLAM  -->
+    <node pkg="hector_mapping" type="hector_mapping" name="hector_mapping" output="screen">
+
+        <!-- Frame names -->
+        <param name="map_frame" value="map"/>
+        <param name="base_frame" value="$(arg base_frame)"/>
+        <param name="odom_frame" value="$(arg base_frame)"/>
+
+        <!-- Tf use -->
+        <param name="use_tf_scan_transformation" value="true"/>
+        <param name="use_tf_pose_start_estimate" value="false"/>
+        <param name="pub_map_odom_transform" value="$(arg pub_map_odom_transform)"/>
+
+        <!-- Map size / start point -->
+        <param name="map_resolution" value="0.050"/>
+        <param name="map_size" value="$(arg map_size)"/>
+        <param name="map_start_x" value="0.5"/>
+        <param name="map_start_y" value="0.5"/>
+        <param name="map_multi_res_levels" value="2"/>
+
+        <!-- Map update parameters -->
+        <param name="update_factor_free" value="0.4"/>
+        <param name="update_factor_occupied" value="0.9"/>
+        <param name="map_update_distance_thresh" value="0.4"/>
+        <param name="map_update_angle_thresh" value="0.06"/>
+        <param name="laser_z_min_value" value="-1.0"/>
+        <param name="laser_z_max_value" value="1.0"/>
+
+        <!-- Advertising config -->
+        <param name="advertise_map_service" value="true"/>
+
+        <param name="scan_subscriber_queue_size" value="$(arg scan_subscriber_queue_size)"/>
+        <param name="scan_topic" value="$(arg scan_topic)"/>
+
+        <!-- Debug parameters -->
+        <!--
+          <param name="output_timing" value="false"/>
+          <param name="pub_drawings" value="true"/>
+          <param name="pub_debug_output" value="true"/>
+        -->
+        <param name="tf_map_scanmatch_transform_frame_name" value="$(arg tf_map_scanmatch_transform_frame_name)"/>
+    </node>
+
+    <!--<node pkg="tf" type="static_transform_publisher" name="map_nav_broadcaster" args="0 0 0 0 0 0 map nav 100"/>-->
+
+</launch>
+```
+
+node_manager.launch
+
+```xml
+<?xml version="1.0"?>
+
+<launch>
+
+    <arg name="read_fast" default="false"/>
+    <arg name="read_once" default="false"/>
+    <arg name="repeat_delay" default="0.0"/>
+    <!--<param name="frame_id" value="world"/>-->
+    <param name="frame_id" value="rfans_link"/>
+    <param name="model" value="R-Fans-16"/>
+
+    <node pkg="rfans_driver" type="driver_node" name="rfans_driver" output="screen">
+        <param name="advertise_name" value="rfans_packets"/>
+        <param name="control_name" value="rfans_control"/>
+        <param name="device_ip" value="192.168.0.3"/>
+        <param name="device_port" value="2014"/>
+        <param name="rps" value="10"/>
+        <param name="readfile_path" value=""/>
+        <!-- <param name="cfg_path"  value=""/> -->
+        <param name="cfg_path" value="/home/ds16v2/ros_ws/src/StarROS/launch/revise.ini"/>
+        <param name="save_xyz" value="false"/>
+        <param name="OutExport_path" value=""/>
+        <param name="use_double_echo" value="false"/>
+        <param name="use_gps" value="false"/>
+        <param name="read_fast" value="$(arg read_fast)"/>
+        <param name="read_once" value="$(arg read_once)"/>
+        <param name="repeat_delay" value="$(arg repeat_delay)"/>
+        <param name="cut_angle_range" value="360.0"/>
+    </node>
+
+</launch>
+```
 
 
 
