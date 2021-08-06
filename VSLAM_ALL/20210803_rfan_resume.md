@@ -92,6 +92,10 @@ link6：[tu-darmstadt-ros-pkg](https://github.com/tu-darmstadt-ros-pkg)/**[hecto
 
 link7：[hector-slam安装与使用 （ubuntu 16.04）（使用数据包运行hector-slam）](https://blog.csdn.net/me1171115772/article/details/105110851/?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_title~default-0.control&spm=1001.2101.3001.4242)
 
+link8：[Robosense 激光雷达slam建图（2）：使用pointcloud_to_laserscan包实现三维转二维](https://blog.csdn.net/geerniya/article/details/84880514?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-15.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-15.control)
+
+
+
 
 
 现在根据 link7 进行 hector_slam 的源码安装，安装目录 `...\slam_ws`：
@@ -439,7 +443,50 @@ link：[lauch problems; ResourceNotFound](https://answers.ros.org/question/37826
 
 ---
 
-## 3. hector_slam 中使用 rfans32
+## 3. hector_slam with rfans32
+
+hector_slam package 中的两个文件，需要备份+修改：
+
+1. tutorial.launch
+2. mapping_default.launch
+
+<img src="20210803_rfan_resume.assets/image-20210805214153181.png" alt="image-20210805214153181" style="zoom:100%;float:left" />
+
+<img src="20210803_rfan_resume.assets/image-20210805221614518.png" alt="image-20210805221614518" style="zoom:100%;float:left" />
+
+
+
+可以用的配置：
+
+<img src="20210803_rfan_resume.assets/image-20210805222020487.png" alt="image-20210805222020487" style="zoom:100%;float:left" />
+
+<img src="20210803_rfan_resume.assets/image-20210805222046778.png" alt="image-20210805222046778" style="zoom:100%;float:left" />
+
+![image-20210805222106166](20210803_rfan_resume.assets/image-20210805222106166.png)
+
+![image-20210806094817104](20210803_rfan_resume.assets/image-20210806094817104.png)
+
+
+
+遇到问题：transform frame
+
+For frame [rfans_frame]: Fixed Frame [base_footprint] does not exist
+
+No transform from [map] to [base_footprint]
+
+No tf data.  Actual error: Fixed Frame [map] does not exist
+
+
+
+目前不知道该如何解决，尝试步骤：
+
+1. 重写 tutorial.launch。(hector_slam)
+2. 重写 mapping_default.launch。(hector_slam)
+3. 最好弄清每一段代码的作用。
+4. 重写 node_manager.launch。（hector_slam）
+5. 利用 rqt_graph 进行排查。
+
+
 
 
 
