@@ -569,7 +569,8 @@ terminal 4: $ rosrun tf static_transform_publisher 0 0 0 0 0 0 map rfans_link 10
 
 1. 今天下午（2021年08月06日）对 launch 文件进行更深入的理解。
 2. 开始整合 slam 项目，将 hector_slam，lslidar，rfans package 包同时编译。
-3. 有时间的话，继续在小车上调试 slam
+3. 有时间的话，继续在小车上调试 slam。
+4. 对了，还要弄清 rosbag 的使用。
 
 
 
@@ -730,6 +731,85 @@ node_manager.launch
         <param name="cut_angle_range" value="360.0"/>
     </node>
 
+</launch>
+```
+
+
+
+---
+
+## 4. 参数了解
+
+link1：[SLAM-hector_slam 简介与使用](https://www.guyuehome.com/25572)
+
+link2：[ros中的hector_mapping节点详细介绍](https://blog.csdn.net/sunyoop/article/details/78110895)
+
+
+
+根据 link，launch hector_slam 标准文件：hector.launch
+
+```xml
+<?xml version="1.0"?>
+
+<launch>
+
+    <!--  -->
+    
+    <node pkg="hector_mapping" type="hector_mapping" name="hector_mapping" output="screen">
+        <!-- Frame names -->
+        <param name="pub_map_odom_transform" value="true"/>
+        <param name="map_frame" value="map"/>
+        <param name="base_frame" value="base_link"/>
+        <param name="odom_frame" value="base_link"/>
+
+        <!-- Tf use -->
+        <param name="use_tf_scan_transformation" value="true"/>
+        <param name="use_tf_pose_start_estimate" value="false"/>
+
+        <!-- Map size / start point -->
+        <param name="map_resolution" value="0.05"/>  <!-- m(米)，单位网格长度 -->
+        <param name="map_size" value="2048"/>  <!-- 单轴网格数目 -->
+        <param name="map_start_x" value="0.5"/>  <!-- 地图在网格x轴的中心，网格长1 -->
+        <param name="map_start_y" value="0.5"/>  <!-- 地图在网格y轴的中心，网格长1 -->
+        <param name="laser_z_min_value" value="-1.0"/> <!-- 相对laser_scan_frame 最低高度 -->
+        <param name="laser_z_max_value" value="1.0"/> <!-- 相对laser_scan_frame 最高高度 -->
+        <param name="map_multi_res_levels" value="2"/> <!-- ? -->
+        <param name="map_pub_period" value="2"/>  <!-- s(秒)，地图发布频率 -->
+        <param name="laser_min_dist" value="0.4"/>  <!-- m(米)，激光末端点最小距离 -->
+        <param name="laser_max_dist" value="5.5"/>  <!-- m(米)，激光末端点最大距离 -->
+        <param name="output_timing" value="false"/>  <!-- 输出时间，ROS_INFO 处理每一次扫描 -->
+        <param name="pub_map_scanmatch_transform" value="true"/>
+        <!-- 决定是否发布 scanmatcher->map 的 transform 的标志。scanmatcher 坐标系名称				              由'tf_map_scanmatch_transform_frame_name' 参数决定 -->
+        <!-- ~tf_map_scanmatch_transform_frame_name (string, default: scanmatcher_frame) ：              用来发布scanmatch到map转换的坐标名 -->
+
+        <!-- Map update parameters -->
+        <param name="update_factor_free" value="0.4"/>
+        <param name="update_factor_occupied" value="0.7"/>
+        <param name="map_update_distance_thresh" value="0.2"/> <!-- m(米)，地图更新长度阈值 -->
+        <param name="map_update_angle_thresh" value="0.06"/> <!-- rad(弧度)，更新角度阈值 -->
+
+        <!-- Advertising config -->
+        <param name="advertise_map_service" value="true"/>
+        <param name="scan_subscriber_queue_size" value="5"/> 
+        <!-- 订阅/scan的队列大小（buffer）,日志回放用的 -->
+        <param name="scan_topic" value="scan"/>
+
+    </node>
+</launch>
+```
+
+
+
+hector_demo.launch，启动这个文件时，回同时启动 hector.launch 文件。
+
+```xml
+<?xml version="1.0"?>
+
+<launch>
+    <include file="$(find my_robot_navigation)/launch/hector.launch"/>
+    <!-- run rviz -->
+    <node pkg="rviz" type="rviz" name="rviz"
+          args="-d $(find my_robot_navigation)/rviz/gmapping.rviz"/>
 </launch>
 ```
 
