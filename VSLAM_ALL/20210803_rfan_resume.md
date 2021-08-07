@@ -4,7 +4,7 @@
 
 ---
 
-## 0. review
+## 0. review + loglist
 
 1. 相关 ticket：
    1. 5044：ros 建图。最后更新：使用 lslidar_C16 可以建图，但是没有办法形成闭环。
@@ -13,6 +13,12 @@
    1. 回顾 **5044**，5638，分析 launch 文件，重新启动 lidar。
    2. 使用 lslidarC16 的 launch code（5044），启动 rfans-32。
    3. 做好资料记录，总结。
+
+
+
+log list:
+
+2021年08月07日：在整合的 slam lidar 项目中启动 lslidar + rfans，同时在 clion 下进行编译。再做定点 slam。
 
 
 
@@ -748,6 +754,8 @@ link2：[ros中的hector_mapping节点详细介绍](https://blog.csdn.net/sunyoo
 
 根据 link，launch hector_slam 标准文件：hector.launch
 
+这个demo 应该使用的是单线激光雷达，所以没有使用 pointcloud to laserscan. 
+
 ```xml
 <?xml version="1.0"?>
 
@@ -812,6 +820,38 @@ hector_demo.launch，启动这个文件时，回同时启动 hector.launch 文�
           args="-d $(find my_robot_navigation)/rviz/gmapping.rviz"/>
 </launch>
 ```
+
+
+
+---
+
+
+
+## 5. slam of (hector + lslidar + rfans)
+
+<img src="20210803_rfan_resume.assets/image-20210806201443267.png" alt="image-20210806201443267" style="zoom:100%;float:left" />
+
+Document 中的 StarRos 有问题，可以拷贝其他地方的 package 到当前 src/ 下进行编译。clion, find_package error:
+
+![image-20210806202134762](20210803_rfan_resume.assets/image-20210806202134762.png)
+
+
+
+**2021年08月07日：完成对应的 loglist 中的任务，如果有时间，学习rosbag。**
+
+需要知道：ros 调试
+
+ros 开发编译中，代码在 src，编译好的可执行文件在 devel/lib/
+
+```
+ros_ws
+	src: 代码空间
+	build: 编译空间
+	devel: 开发空间
+	install: 安装空间
+```
+
+
 
 
 
