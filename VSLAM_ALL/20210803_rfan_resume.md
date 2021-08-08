@@ -912,9 +912,13 @@ ros_ws
 
    
 
-   接下来的任务，休息一下，再在楼上跑一个低速闭环（尝试确定临界速度、axis跟随问题），完成后，在地库进行闭环。2x2=4。
+接下来的任务，休息一下，再在楼上跑一个低速闭环（尝试确定临界速度、axis跟随问题），完成后，在地库进行闭环。2x2=4。
 
-   
+刚才看了 Youtube 关于 Hector SLAM 的教程，地址：[RPLidar and Hector SLAM for Beginners | ROS Tutorial #8](https://www.youtube.com/watch?v=Qrtz0a7HaQ4)，教程中的 rviz 显示如下，有 path 根 pose（需要调出来）：
+
+![image-20210807183954379](20210803_rfan_resume.assets/image-20210807183954379.png)
+
+![image-20210807201734868](20210803_rfan_resume.assets/image-20210807201734868.png)
 
 ---
 
