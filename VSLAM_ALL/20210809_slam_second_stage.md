@@ -30,7 +30,9 @@ hector mapping, gmapping, cartograher 三个经典 slam 算法可以详细了解
 
    参考 1：[智能小车建图导航-在rviz中导航（运行）<在高清地图创建完成后，需要做的事情>](https://www.guyuehome.com/34378)
 
-   
+   ![img](https://img-blog.csdnimg.cn/20200608204539742.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDkxNzM5MA==,size_16,color_FFFFFF,t_70)
+
+3. 还是关于 apa，探讨了是否可以通过已知 start point，goal point，规划曲线。不用 rs 路径。
 
 
 
@@ -43,6 +45,10 @@ hector mapping, gmapping, cartograher 三个经典 slam 算法可以详细了解
 **典型的 slam 技术框架**
 
 ![image-20210810104534547](20210809_slam_second_stage.assets/image-20210810104534547.png)
+
+![image-20210810163642861](20210809_slam_second_stage.assets/image-20210810163642861.png)
+
+![image-20210810163725452](20210809_slam_second_stage.assets/image-20210810163725452.png)
 
 
 
@@ -86,13 +92,15 @@ hector mapping, gmapping, cartograher 三个经典 slam 算法可以详细了解
 
    
 
-3. **cartographer**
+3. **cartographer**（重点）
 
    3.1. overview: 
 
    [Cartographer](https://github.com/cartographer-project/cartographer) (制图师) is a system that provides real-time simultaneous localization and mapping ([SLAM](https://en.wikipedia.org/wiki/Simultaneous_localization_and_mapping)) in 2D and 3D across multiple platforms and sensor configurations.
 
    累计误差较前两种算法低，能天然的输出协方差矩阵，后端优化的输入项。成本较低的雷达也能跑出不错的效果。是Google开源的一个ROS系统支持的2D和3D SLAM（simultaneous localization and mapping）库。参考: [机器人SLAM与自主导航简介(笔记)<这篇文章提供了slam相关的总结>](https://www.guyuehome.com/34462)。
+
+   分清 **激光雷达里程计**和**惯性里程计**，cartographer 是否需要使用两个里程计。
 
    <img src="https://camo.githubusercontent.com/10d0032636bb1b2a266209bdc0b4fa48ab9ef9fb47dcf834701aa8a50384ddc3/68747470733a2f2f6a2e676966732e636f6d2f777033424a4d2e676966" alt="Cartographer 3D SLAM Demo" style="zoom:150%;float:left" />
 
@@ -122,6 +130,16 @@ hector mapping, gmapping, cartograher 三个经典 slam 算法可以详细了解
 
 6. leGO_LOAM
 
+   6.1. overview:
+
+   6.2. system requirment:
+
+   6.3. sites:
+
+   ​	site 0: [SC-LEGO-LOAM 扩展以及深度解析（一）](https://www.guyuehome.com/34082)
+
+   
+
 
 7. vins mono
 
@@ -130,6 +148,22 @@ hector mapping, gmapping, cartograher 三个经典 slam 算法可以详细了解
 **注：**1-3 可以作为 slam 基础研究实践，4-6 作为进阶研究实践。4-6 在研究过程中可以适当增删，1-3 结合 视觉 slam 研究。如果时间允许。
 
 
+
+---
+
+## 2. cartographer
+
+
+
+解决 **rosdep init ROS安装问题：**
+
+![image-20210810180437280](20210809_slam_second_stage.assets/image-20210810180437280.png)
+
+
+
+**解决 protobuf3 安装更新问题：**
+
+首先要写 shell 脚本。
 
 
 
