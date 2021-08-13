@@ -155,6 +155,16 @@ rosdep update       # 报错则重新执行(网络原因)
 rosdep install --from-paths src --ignore-src --rosdistro=${ROS_DISTRO} -y
 ```
 
+![image-20210812202411724](20210809_slam_second_stage_cartographer.assets/image-20210812202411724.png)
+
+![image-20210812202427143](20210809_slam_second_stage_cartographer.assets/image-20210812202427143.png)
+
+![image-20210812203416991](20210809_slam_second_stage_cartographer.assets/image-20210812203416991.png)
+
+
+
+
+
 
 
 
@@ -615,6 +625,12 @@ Add distro "rolling"
 updated cache in /home/ds16v2/.ros/rosdep/sources.cache
 ```
 
+![image-20210812202241737](20210809_slam_second_stage_cartographer.assets/image-20210812202241737.png)
+
+![image-20210812202314086](20210809_slam_second_stage_cartographer.assets/image-20210812202314086.png)
+
+
+
 
 
 
@@ -625,6 +641,11 @@ updated cache in /home/ds16v2/.ros/rosdep/sources.cache
 2. [rosdep安装与使用<使用ipaddr解决rosdep update问题，未解决>](https://blog.csdn.net/weixin_45378779/article/details/103617471)
 3. [解决ROS系统 rosdep update超时问题的新方法<使用修改rosdep资源下载函数解决rosdep update问题>](https://blog.csdn.net/leida_wt/article/details/115120940?utm_medium=distribute.pc_relevant_download.none-task-blog-2~default~BlogCommendFromBaidu~default-4.nonecase&depth_1-utm_source=distribute.pc_relevant_download.none-task-blog-2~default~BlogCommendFromBaidu~default-4.nonecas)
 4. [ubuntu安装ROS进行到rosdep update时出现错误，如ERROR: unable to process source ...](https://blog.csdn.net/mrh1714348719/article/details/103803110)
+5. [rosdep update time out及失败解决方案](https://www.guyuehome.com/33258)
+6. [rosdep init ROS安装问题解决方案](https://www.guyuehome.com/12640)
+7. [ROS:sudo rosdep init出错常规方法都无效后解决办法记录](https://zhuanlan.zhihu.com/p/77483614)
+
+
 
 
 
