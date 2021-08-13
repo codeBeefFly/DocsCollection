@@ -2,6 +2,8 @@
 
 [toc]
 
+
+
 ---
 
 记录 cartographer 的安装与运行
@@ -236,6 +238,59 @@ gbpdistro https://raw.githubusercontent.com/ros/rosdistro/master/releases/fuerte
 
 # newer distributions (Groovy, Hydro, ...) must not be listed anymore, they are being fetched from the rosdistro index.yaml instead
 ```
+
+2021年08月13日：编译成功：
+
+```
+[50/384] Building CXX object CMakeFiles/cartographer.dir/cartographer/io/coloring_points_processor.cc.o
+[51/384] Building CXX object CMakeFiles/cartographer.dir/cartographer/io/probability_grid_points_processor.cc.o
+FAILED: /usr/bin/c++   -D__CLANG_SUPPORT_DYN_ANNOTATION__ -isystem /usr/include/eigen3 -isystem /usr/local/include -isystem /usr/include/lua5.2 -I. -I/home/ds16v2/catkin_x/cartographer_ws/src/cartographer -O3 -DNDEBUG    -pthread -fPIC  -Wall -Wpedantic -Werror=format-security -Werror=missing-braces -Werror=reorder -Werror=return-type -Werror=switch -Werror=uninitialized -O3 -DNDEBUG -MMD -MT CMakeFiles/cartographer.dir/cartographer/mapping/internal/trajectory_connectivity_state.cc.o -MF CMakeFiles/cartographer.dir/cartographer/mapping/internal/trajectory_connectivity_state.cc.o.d -o CMakeFiles/cartographer.dir/cartographer/mapping/internal/trajectory_connectivity_state.cc.o -c /home/ds16v2/catkin_x/cartographer_ws/src/cartographer/cartographer/mapping/internal/trajectory_connectivity_state.cc
+In file included from /usr/include/c++/5/chrono:35:0,
+                 from /home/ds16v2/catkin_x/cartographer_ws/src/cartographer/cartographer/common/time.h:20,
+                 from /home/ds16v2/catkin_x/cartographer_ws/src/cartographer/cartographer/mapping/internal/trajectory_connectivity_state.h:20,
+                 from /home/ds16v2/catkin_x/cartographer_ws/src/cartographer/cartographer/mapping/internal/trajectory_connectivity_state.cc:17:
+/usr/include/c++/5/bits/c++0x_warning.h:32:2: error: #error This file requires compiler and library support for the ISO C++ 2011 standard. This support must be enabled with the -std=c++11 or -std=gnu++11 compiler options.
+ #error This file requires compiler and library support \
+```
+
+在三个文件包的 CMakeLists.txt 中添加：`set(CMAKE_CXX_STANDARD 11)`
+
+编译完成：（哇啊啊）
+
+```
+-- Installing: /home/ds16v2/catkin_x/cartographer_ws/install_isolated/lib/cmake/Ceres/CeresTargets.cmake
+-- Installing: /home/ds16v2/catkin_x/cartographer_ws/install_isolated/lib/cmake/Ceres/CeresTargets-release.cmake
+-- Installing: /home/ds16v2/catkin_x/cartographer_ws/install_isolated/lib/cmake/Ceres/CeresConfig.cmake
+-- Installing: /home/ds16v2/catkin_x/cartographer_ws/install_isolated/lib/cmake/Ceres/CeresConfigVersion.cmake
+-- Installing: /home/ds16v2/catkin_x/cartographer_ws/install_isolated/lib/cmake/Ceres/FindEigen.cmake
+-- Installing: /home/ds16v2/catkin_x/cartographer_ws/install_isolated/lib/cmake/Ceres/FindGlog.cmake
+-- Installing: /home/ds16v2/catkin_x/cartographer_ws/install_isolated/lib/cmake/Ceres/FindGflags.cmake
+-- Installing: /home/ds16v2/catkin_x/cartographer_ws/install_isolated/lib/libceres.a
+<== Finished processing package [5 of 5]: 'ceres-solver'
+ds16v2@ds16v2:~/catkin_x/cartographer_ws$ 
+```
+
+编译 1：cartographer：
+
+![image-20210813175934310](20210809_slam_second_stage_cartographer.assets/image-20210813175934310.png)
+
+编译 2：cartographer_ros_msgs：
+
+![image-20210813180002381](20210809_slam_second_stage_cartographer.assets/image-20210813180002381.png)
+
+编译 3：cartographer_ros：
+
+![image-20210813180031245](20210809_slam_second_stage_cartographer.assets/image-20210813180031245.png)
+
+
+
+![image-20210813180116738](20210809_slam_second_stage_cartographer.assets/image-20210813180116738.png)
+
+![image-20210813180155672](20210809_slam_second_stage_cartographer.assets/image-20210813180155672.png)
+
+![image-20210813180233631](20210809_slam_second_stage_cartographer.assets/image-20210813180233631.png)
+
+
 
 
 
