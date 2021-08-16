@@ -127,6 +127,34 @@ log file: /home/ds16v2/.ros/log/6e8df6f8-fc20-11eb-a857-a0c589ac1e85/playbag-6*.
 
 
 
+成功运行 demo_2d.bag：
+
+回环检测很耗时间。
+
+```
+ds16v2@ds16v2:~/catkin_x/cartographer_ws$ roslaunch cartographer_ros demo_backpack_2d.launch bag_filename:=/home/ds16v2/Downloads/cartographer_paper_deutsches_museum.bag
+```
+
+![image-20210813212618869](20210813_slam_cartographer_attempt_2.assets/image-20210813212618869.png)
+
+
+
+成功运行 demo_3d.bag：
+
+3D 包含了高度信息。
+
+```
+roslaunch cartographer_ros demo_backpack_3d.launch bag_filename:=${HOME}/Downloads/b3-2016-04-05-14-14-00.bag
+```
+
+![image-20210813215846984](20210813_slam_cartographer_attempt_2.assets/image-20210813215846984.png)
+
+![image-20210813220010516](20210813_slam_cartographer_attempt_2.assets/image-20210813220010516.png)
+
+![image-20210813220654595](20210813_slam_cartographer_attempt_2.assets/image-20210813220654595.png)
+
+
+
 ### reference
 
 1. [google激光雷达slam算法Cartographer的安装及bag包demo测试](http://community.bwbot.org/topic/136/google%E6%BF%80%E5%85%89%E9%9B%B7%E8%BE%BEslam%E7%AE%97%E6%B3%95cartographer%E7%9A%84%E5%AE%89%E8%A3%85%E5%8F%8Abag%E5%8C%85demo%E6%B5%8B%E8%AF%95)
