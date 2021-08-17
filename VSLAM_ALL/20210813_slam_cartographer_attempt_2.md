@@ -4,9 +4,15 @@
 
 ---
 
-reference to **2021年08月11日：安装运行 ros slam cartographer**, reinstall cartograher and cartographer_ros.
+log: 2021年08月13日：
 
+reference to **2021年08月11日：安装运行 ros slam cartographer**, reinstall cartographer and cartographer_ros.
 
+完成 cartographer 的 2d，3d ros bag 的运行，但是还是需要总结 cartographer 的安装部分（如果需要使用 cartographer 作为建图的初始框架，需要能重复稳定的安装流程）
+
+log: 2021年08月17日：
+
+回顾 0813 的结果，查看 ros bag 的运行代码。
 
 ---
 
@@ -100,7 +106,7 @@ ds16v2@ds16v2:~/catkin_x/cartographer_ws$
 
 ---
 
-## 2. implementation stage
+## 2. implementation stage: ros bag
 
 ![image-20210813182407712](20210813_slam_cartographer_attempt_2.assets/image-20210813182407712.png)
 
@@ -126,6 +132,10 @@ log file: /home/ds16v2/.ros/log/6e8df6f8-fc20-11eb-a857-a0c589ac1e85/playbag-6*.
 ![image-20210813182622399](20210813_slam_cartographer_attempt_2.assets/image-20210813182622399.png)
 
 
+
+### 1. successfully run cartographer ros bag
+
+with the help of doctor Lin. 
 
 成功运行 demo_2d.bag：
 
@@ -155,11 +165,84 @@ roslaunch cartographer_ros demo_backpack_3d.launch bag_filename:=${HOME}/Downloa
 
 
 
-### reference
+#### reference
 
 1. [google激光雷达slam算法Cartographer的安装及bag包demo测试](http://community.bwbot.org/topic/136/google%E6%BF%80%E5%85%89%E9%9B%B7%E8%BE%BEslam%E7%AE%97%E6%B3%95cartographer%E7%9A%84%E5%AE%89%E8%A3%85%E5%8F%8Abag%E5%8C%85demo%E6%B5%8B%E8%AF%95)
 
 
+
+### 2. more on 2d & 3d ros bag
+
+用 clion 打开 cartographer_ros 中的 CMakeLists.txt。会出现报错：
+
+![image-20210817111116305](20210813_slam_cartographer_attempt_2.assets/image-20210817111116305.png)
+
+注释掉 51，52：
+
+![image-20210817111205242](20210813_slam_cartographer_attempt_2.assets/image-20210817111205242.png)
+
+可以构建通过，但是会有 Warning。
+
+
+
+继续进行 offline_2d_demo，建图完成时间：`3:19:01`：
+
+![image-20210817145345781](20210813_slam_cartographer_attempt_2.assets/image-20210817145345781.png)
+
+![image-20210817145407239](20210813_slam_cartographer_attempt_2.assets/image-20210817145407239.png)
+
+```
+[ INFO] [1629182948.110859934, 1432648928.455170700]: I0817 14:49:08.000000  5630 offline_node.cc:376] Peak memory usage: 2273728 KiB
+[ INFO] [1629182948.110903660, 1432648928.455170700]: I0817 14:49:08.000000  5630 offline_node.cc:386] Writing state to '/home/ds16v2/catkin_x/cartographer_ws/ros_bag/cartographer_paper_deutsches_museum.bag.pbstream'...
+[ INFO] [1629182963.438791421, 1432648928.455170700]: I0817 14:49:23.000000  5674 constraint_builder_2d.cc:290] 0 computations resulted in 0 additional constraints.
+[ INFO] [1629182963.439976532, 1432648928.455170700]: I0817 14:49:23.000000  5674 constraint_builder_2d.cc:292] Score histogram:
+Count: 23605  Min: 0.550012  Max: 0.876664  Mean: 0.63404
+[0.550012, 0.582677)	               #####	Count: 6232 (26.4012%)	Total: 6232 (26.4012%)
+[0.582677, 0.615342)	                ####	Count: 5188 (21.9784%)	Total: 11420 (48.3796%)
+[0.615342, 0.648008)	                 ###	Count: 3830 (16.2254%)	Total: 15250 (64.605%)
+[0.648008, 0.680673)	                 ###	Count: 2973 (12.5948%)	Total: 18223 (77.1997%)
+[0.680673, 0.713338)	                  ##	Count: 2136 (9.04893%)	Total: 20359 (86.2487%)
+[0.713338, 0.746003)	                   #	Count: 1507 (6.38424%)	Total: 21866 (92.6329%)
+[0.746003, 0.778668)	                   #	Count: 919 (3.89324%)	Total: 22785 (96.5262%)
+[0.778668, 0.811333)	                    	Count: 517 (2.19021%)	Total: 23302 (98.7164%)
+[0.811333, 0.843998)	                    	Count: 242 (1.02521%)	Total: 23544 (99.7416%)
+[0.843998, 0.876664]	                    	Count: 61 (0.25842%)	Total: 23605 (100%)
+Optimizing: Done.     
+[cartographer_offline_node-4] process has finished cleanly
+log file: /home/ds16v2/.ros/log/783f1bda-ff0b-11eb-aff9-a0c589ac1e85/cartographer_offline_node-4*.log
+```
+
+结束 demo：
+
+![image-20210817150530652](20210813_slam_cartographer_attempt_2.assets/image-20210817150530652.png)
+
+生成 `.pbstream`格式文件，地图文件：
+
+<img src="20210813_slam_cartographer_attempt_2.assets/image-20210817145450832.png" alt="image-20210817145450832" style="zoom:100%;float:left" />
+
+
+
+生成 `.pgm & .yaml` 文件：
+
+```
+ds16v2@ds16v2:~/catkin_x/cartographer_ws$ roslaunch cartographer_ros assets_writer_ros_map.launch bag_filenames:=/home/ds16v2/catkin_x/cartographer_ws/ros_bag/cartographer_paper_deutsches_museum.bag pose_graph_filename:=/home/ds16v2/catkin_x/cartographer_ws/ros_bag/cartographer_paper_deutsches_museum.bag.pbstream 
+```
+
+![image-20210817153833181](20210813_slam_cartographer_attempt_2.assets/image-20210817153833181.png)
+
+![image-20210817153803796](20210813_slam_cartographer_attempt_2.assets/image-20210817153803796.png)
+
+<img src="20210813_slam_cartographer_attempt_2.assets/image-20210817154001387.png" alt="image-20210817154001387" style="zoom:100%;float:left" />
+
+<img src="20210813_slam_cartographer_attempt_2.assets/image-20210817153923806.png" alt="image-20210817153923806" style="zoom:100%;float:left" />
+
+![image-20210817154042282](20210813_slam_cartographer_attempt_2.assets/image-20210817154042282.png)
+
+
+
+#### reference
+
+link: [BluewhaleRobot](https://github.com/BluewhaleRobot)/**[xq-manual](https://github.com/BluewhaleRobot/xq-manual)**
 
 
 
