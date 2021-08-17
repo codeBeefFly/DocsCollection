@@ -246,6 +246,44 @@ link: [BluewhaleRobot](https://github.com/BluewhaleRobot)/**[xq-manual](https://
 
 
 
+### 3. more on 2d rosbag, offical tutorial
+
+![image-20210817162023554](20210813_slam_cartographer_attempt_2.assets/image-20210817162023554.png)
+
+
+
+很奇怪，为什么终端没有输出（是在进行计算还是程序终止？）：
+
+可以看到 `Remaining work items in queue: 1169`，说明工作序列中还有 1169 待处理任务。
+
+```
+[ INFO] [1629190989.455616836, 1461761183.726254938]: I0817 17:03:09.000000 12074 constraint_builder_2d.cc:290] 52 computations resulted in 10 additional constraints.
+[ INFO] [1629190989.456811233, 1461761183.726254938]: I0817 17:03:09.000000 12074 constraint_builder_2d.cc:292] Score histogram:
+Count: 13956  Min: 0.550034  Max: 0.871112  Mean: 0.653867
+[0.550034, 0.582142)	                 ###	Count: 2377 (17.0321%)	Total: 2377 (17.0321%)
+[0.582142, 0.614250)	                 ###	Count: 2391 (17.1324%)	Total: 4768 (34.1645%)
+[0.614250, 0.646357)	                 ###	Count: 2254 (16.1508%)	Total: 7022 (50.3153%)
+[0.646357, 0.678465)	                 ###	Count: 2104 (15.076%)	Total: 9126 (65.3912%)
+[0.678465, 0.710573)	                 ###	Count: 1802 (12.912%)	Total: 10928 (78.3032%)
+[0.710573, 0.742681)	                  ##	Count: 1406 (10.0745%)	Total: 12334 (88.3778%)
+[0.742681, 0.774789)	                   #	Count: 833 (5.96876%)	Total: 13167 (94.3465%)
+[0.774789, 0.806897)	                   #	Count: 493 (3.53253%)	Total: 13660 (97.8791%)
+[0.806897, 0.839005)	                    	Count: 230 (1.64804%)	Total: 13890 (99.5271%)
+[0.839005, 0.871112]	                    	Count: 66 (0.472915%)	Total: 13956 (100%)
+[ INFO] [1629190989.481705394, 1461761183.726254938]: I0817 17:03:09.000000 12074 pose_graph_2d.cc:538] Remaining work items in queue: 1169
+[ INFO] [1629190989.618453478, 1461761183.726254938]: I0817 17:03:09.000000 12073 constraint_builder_2d.cc:275] Node (1, 16174) with 206 points on submap (0, 51) differs by translation 0.03 rotation 0.005 with score 58.7%.
+```
+
+![image-20210817171414753](20210813_slam_cartographer_attempt_2.assets/image-20210817171414753.png)
+
+需要了解 cartographer 的终止条件是什么？
+
+![image-20210817171520170](20210813_slam_cartographer_attempt_2.assets/image-20210817171520170.png)
+
+这个是 Pure localiztion 的处理结果。
+
+
+
 ---
 
 ## 3. vpn stuff
