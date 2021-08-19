@@ -66,7 +66,33 @@ QP: quadratic programming problem（二次規劃問題）
 
 跳過 block：`if(max_speed > 0){}`，
 
-嘗試使用 intelliJ clion 的 UML 圖生成功能。
+嘗試使用 intelliJ clion 的 UML 圖生成功能。（unlucky）
+
+
+
+2021年08月19日：今天一直感到疑惑的`ParkingMiddleGoalsStep::Forward_cpu()` 中的 參數 `m_update_goal`為什麼會變成`ture`的原因找到了，它的值其實在 yaml 中就已經被指定了：
+
+```
+      - key: ParkingMiddleGoals
+        log_level: 5
+        output: middle_goal_pose
+        output_path: expect_path
+        parking_mode: 5
+        steering_angle: 0.35
+        #parking_spot_length: 4.85
+        #parking_spot_width: 6.1
+        lane_width: 5.5
+        #perp_distance: 3
+        #para_distance: 4
+        #goal1_angle: 0.262
+        angle_tolerance: 0.262 # 15 deg
+        distance_tolerance: 0.3
+        iterations: 1
+        save_to_apa: 1
+        update_goal: 1									# 就是這裡指定的
+        apa_mode: 1
+        use_astar: 0
+```
 
 
 
@@ -79,6 +105,8 @@ QP: quadratic programming problem（二次規劃問題）
 
 
 ![image-20210818151412129](20210818_apa_code_review.assets/image-20210818151412129.png)
+
+
 
 
 
