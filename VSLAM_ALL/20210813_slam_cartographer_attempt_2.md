@@ -104,6 +104,12 @@ ds16v2@ds16v2:~/catkin_x/cartographer_ws$
 
 
 
+#### reference
+
+link: [cartographer安装报错及解决方法<这个博主的经历可以借鉴一下>](https://blog.csdn.net/qq_41314627/article/details/105606901?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_title~default-0.control&spm=1001.2101.3001.4242)
+
+
+
 ---
 
 ## 2. implementation stage: ros bag
@@ -244,6 +250,10 @@ ds16v2@ds16v2:~/catkin_x/cartographer_ws$ roslaunch cartographer_ros assets_writ
 
 link: [BluewhaleRobot](https://github.com/BluewhaleRobot)/**[xq-manual](https://github.com/BluewhaleRobot/xq-manual)**
 
+link: [3d map rendering<关于Cartographer 3D建图>](https://github.com/cartographer-project/cartographer_ros/issues/1168)
+
+
+
 
 
 ### 3. more on 2d rosbag, offical tutorial
@@ -283,6 +293,16 @@ Count: 13956  Min: 0.550034  Max: 0.871112  Mean: 0.653867
 这个是 Pure localiztion 的处理结果。
 
 
+
+#### Issue: required process cartographer_assets_writer-2 has died!
+
+在将 .pbstream 文件转化为 .pgm 与 .yaml 文件时，会出现这个问题。
+
+![image-20210817200143151](20210813_slam_cartographer_attempt_2.assets/image-20210817200143151.png)
+
+这个问题暂时没有找到解决办法，先跳过。
+
+晚上先看完 cartographer 的教程吧。（xxxx google 太 xxxx）
 
 ---
 
