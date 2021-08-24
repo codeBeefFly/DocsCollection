@@ -24,7 +24,7 @@
 
 ---
 
-**置頂：cartographer 中文資料**
+## 0. **置頂：cartographer 中文資料**
 
 參考：[【移动机器人技术】Cartographer使用流程-建图-纯定位-导航](https://blog.csdn.net/weixin_43259286/article/details/105143605?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-3.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-3.control#t12)
 
@@ -41,6 +41,12 @@
 參考：[google激光雷达slam算法Cartographer的安装及bag包demo测试](https://community.bwbot.org/topic/136/google%E6%BF%80%E5%85%89%E9%9B%B7%E8%BE%BEslam%E7%AE%97%E6%B3%95cartographer%E7%9A%84%E5%AE%89%E8%A3%85%E5%8F%8Abag%E5%8C%85demo%E6%B5%8B%E8%AF%95)
 
 参考：[cartographer经典版本快速安装](https://zhuanlan.zhihu.com/p/374669589)
+
+参考：[Cartographer编译安装 2020年12月31日亲测通过](https://blog.csdn.net/qq_41807801/article/details/112007868)
+
+参考：[1.3 ROS-找不到launch文件的解决办法](https://zhuanlan.zhihu.com/p/94971196)
+
+
 
 
 
@@ -143,6 +149,84 @@ GitHub 中查看 commit no.：
 刚才看了 commit，当前的 cartographer_ros 需要的 ceres-solver 版本是：19333b0f55c8462381038e70d42af43b52941128。
 
 也就是说要使 cartographer，cartographer_ros 编译通过的话，需要选对版本。
+
+
+
+**错误：**
+
+使用 clion 打开 cartographer_ros 项目的时候（CMakelists.txt），会出现错误：
+
+![image-20210824193539561](20210821_slam_cartographer_mapping.assets/image-20210824193539561.png)
+
+**原因：**
+
+可以从 functions.cmake 文件 `109-126` 中看出，如果使用 Debug 模式构建构建代码，需要以 force_debug 模式构建（110），否则会进入 else 中并报错；优先使用 release 模式。有两种解决方式：
+
+**解决方式1：**
+
+在 functions.cmake 文件中指定构建方式：
+
+```
+set(CMAKE_BUILD_TYPE "Release")
+```
+
+**解决方式2：**
+
+修改 clion 默认的 cmake 构建方式：
+
+> file --> settings --> build, execution, deployment --> cmake --> profiles --> enable profile --> build type --> release
+
+然后 reload cmake，没有报错：
+
+![image-20210824195523741](20210821_slam_cartographer_mapping.assets/image-20210824195523741.png)
+
+![image-20210824195416744](20210821_slam_cartographer_mapping.assets/image-20210824195416744.png)
+
+![image-20210824195444446](20210821_slam_cartographer_mapping.assets/image-20210824195444446.png)
+
+从 上面的 输出 可以看见很多的库版本信息。
+
+是否可以重复编译当前的 cartographer_ros 版本？
+
+参考：[cmake编译Debug和Release版本的注意点](https://blog.csdn.net/Felaim/article/details/72852994)
+
+
+
+
+
+**roscore error:**
+
+```
+roscore cannot run as another roscore/master is already running. 
+Please kill other roscore/master processes before relaunching.
+The ROS_MASTER_URI is http://ds16v2:11311/
+The traceback for the exception was written to the log file
+```
+
+解决：
+
+```
+killall -9 roscore
+killall -9 rosmaster
+```
+
+
+
+
+
+---
+
+完成建图：
+
+![image-20210824214416943](20210821_slam_cartographer_mapping.assets/image-20210824214416943.png)
+
+
+
+3d_pcd
+
+![image-20210824214501847](20210821_slam_cartographer_mapping.assets/image-20210824214501847.png)
+
+![image-20210824214553109](20210821_slam_cartographer_mapping.assets/image-20210824214553109.png)
 
 
 
