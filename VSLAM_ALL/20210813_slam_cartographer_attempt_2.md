@@ -4,15 +4,21 @@
 
 ---
 
-log: 2021年08月13日：
+**log: 2021年08月13日：**
 
 reference to **2021年08月11日：安装运行 ros slam cartographer**, reinstall cartographer and cartographer_ros.
 
 完成 cartographer 的 2d，3d ros bag 的运行，但是还是需要总结 cartographer 的安装部分（如果需要使用 cartographer 作为建图的初始框架，需要能重复稳定的安装流程）
 
-log: 2021年08月17日：
+**log: 2021年08月17日：**
 
 回顾 0813 的结果，查看 ros bag 的运行代码。
+
+**log: 2021年08月21日：**
+
+回顧 0817 的結果，更新 ticket：0544，思考接下來的建圖計劃。
+
+
 
 ---
 
@@ -43,7 +49,7 @@ gedit src/.rosinstall 查看内容
 
 <img src="20210813_slam_cartographer_attempt_2.assets/image-20210813133217628.png" alt="image-20210813133217628" style="zoom:100%;float:left" />
 
-如果官网安装方式不成功的话，可以尝试一下独立安装。
+**如果官网安装方式不成功的话，可以尝试一下独立安装（單獨 package 獨立下載編譯）。**
 
 
 

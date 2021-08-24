@@ -14,9 +14,11 @@ TS: [old]: 06c29c11fc66ae52154fdc5c2b7c0d0469e0dc50
 
 ---
 
+## 0. logs:
+
 2021年08月19日：繼續 0818 的任務，早上，30 分鐘。
 
-
+2021年08月20日：繼續 0819 的任務，早上，1：30 分鐘。下午 2：00 分鐘（~3：05）
 
 ---
 
@@ -70,6 +72,14 @@ QP: quadratic programming problem（二次規劃問題）
 
 
 
+
+
+
+
+---
+
+## &&. 關於：`m_update_goal = true` 的值的問題： 
+
 2021年08月19日：今天一直感到疑惑的`ParkingMiddleGoalsStep::Forward_cpu()` 中的 參數 `m_update_goal`為什麼會變成`ture`的原因找到了，它的值其實在 yaml 中就已經被指定了：
 
 ```
@@ -96,17 +106,124 @@ QP: quadratic programming problem（二次規劃問題）
 
 
 
+2021年08月20日：如果 m_update_goal = false，規劃的路徑會是什麼？
+
+TS: 0a19e
+
+|      | update_goal=0                                                | update_goal=1                                                |
+| ---- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+|      | ![image-20210820103218365](20210818_apa_code_review.assets/image-20210820103218365.png) | ![image-20210820103830425](20210818_apa_code_review.assets/image-20210820103830425.png) |
+
+規劃的路徑有所不同。
+
+相當於，`update_goal=1`時，
+
+```c++
+        } else {
+            if (m_update_goal) {
+                // check if car is finished following path
+                int8_t controller_status = m_sharedstate_holder->getUniqueVehicleState()->getControllerStatus();
+                if (controller_status == (int8_t)UniqueVehicleState::Controller_FINALIZED) {
+                    PRINT_LOG("ParkingMiddleGoals: updating goal for output_path mode");
+                    // update goal
+                    tauristar::PoseState temp;
+                    if (updateAPAGoal(temp) >= 0) {
+                        m_parking_spot->m_targetpose.set(temp.x(), temp.y(), 
+                                                         temp.theta(), temp.phi());
+                        m_sharedstate_holder->getCurrentPoseState()->setGoal(temp, 1, 0);
+                    }
+
+                    // find RS path to updated goal
+                    tauristar::PoseState cur_pose;
+                    CurrentPoseState* pose_state = m_sharedstate_holder->getCurrentPoseState();
+                    pose_state->get(cur_pose);
+                    boost::shared_ptr<tauristar::LayerWrapper> out_path_layer2
+                        = m_holder_seq->createCurrentLayer(m_out_path_name);
+
+                    m_flow_util->getPath(*m_parking_spot,
+                                         cur_pose,
+                                         out_path_layer2.get(),
+                                         0,
+                                         m_update_goal);
+
+                    m_out_path_layer = out_path_layer2;
+
+                    // save path
+                    std::string path_file_name = "computed_path2.txt";
+                    FILE * pFile;
+                    pFile = fopen(path_file_name.c_str(), "w");
+                    fprintf(pFile, "x y theta steer");
+
+                    PointsLayerPtr pts_layer = out_path_layer2->getPointsLayerPtr();
+                    FloatArray theta_array = pts_layer->getContainer().getFloatArray(PointsProp::_Theta_);
+                    FloatArray steer_array = pts_layer->getContainer().getFloatArray(PointsProp::_Steer_);
+
+                    float x, y, th, st;
+                    size_t pts_num = pts_layer->size();
+                    for (size_t id=0; id<pts_num; ++id) 
+                    {
+                        pts_layer->get2D_point(id, x, y);
+                        th = theta_array.get(id);
+                        st = steer_array.get(id);
+                        fprintf(pFile, "\n%f %f %f %f", x, y, th, st);
+                    }
+
+                    fclose(pFile);
+
+                    // set false so that path is not repeated
+                    m_update_goal = false;
+
+                    // set as final goal
+                    m_sharedstate_holder->getCurrentPoseState()->makeGoalFinal();
+
+                } else {
+                    m_holder_seq->setCurrentLayer(m_out_path_layer, m_out_path_name);
+                }
+            
+            } else {
+                // set as final goal
+                m_sharedstate_holder->getCurrentPoseState()->makeGoalFinal();
+                m_holder_seq->setCurrentLayer(m_out_path_layer, m_out_path_name);
+            }
+        }
+        return;
+    }
+```
+
+需要弄清 layer 的問題。
+
+apa 泊車包含：
+
+1. 路徑規劃
+2. 車體控制
+   1. 計算控制輸出
+   2. 控制輸出傳遞
 
 
 
+上面的代碼的摺疊版本：
+
+如果 yaml 中指定了 output_path: expect_path，就會執行這一步。執行完這一步後，路徑規劃結束：EOF：ParkingMiddleGoalsStep::Forward_cpu()。如果 yaml 中沒有指定 output_path 呢？
+
+![image-20210820110347373](20210818_apa_code_review.assets/image-20210820110347373.png)
+
+如果指定了 output_path，在 yaml 中，当运行中没有问题的时候，会在 430 行 完成 ParkingMiddleGoalsStep::Forward_cpu() 函数并跳出，进行 procedure 中的下一个 key。
 
 
 
+---
 
+## &&. 關於：apa 泊車代碼架構問題：
 
-![image-20210818151412129](20210818_apa_code_review.assets/image-20210818151412129.png)
+可以嘗試 分段開放 yaml 中 key block 的方式，進行學習。(todo)
 
+尝试步骤：
 
+1. 修改 yaml
+2. 使用 release 模式获得 log
+3. 分析 log
+4. 使用 debug 模式分析代码
+5. 修改代码
 
 
 
