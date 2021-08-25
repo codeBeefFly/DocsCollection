@@ -50,9 +50,19 @@
 
 参考：[1.3 ROS-找不到launch文件的解决办法](https://zhuanlan.zhihu.com/p/94971196)
 
+参考：[视觉SLAM方向的博士如果不选择高校搞科研这条路的话，出路在哪里？](https://www.zhihu.com/question/414468078/answer/2018787500)
+
+参考：[Melody 的 ROS 专栏《很推荐有时间照着它的博客内容学习 ros》](https://www.zhihu.com/people/PRTMelody/posts)
 
 
 
+
+
+---
+
+[视觉-惯性SLAM入门与实践教程（基于VINS-Fusion）](http://link.zhihu.com/?target=https%3A//mp.weixin.qq.com/s%3F__biz%3DMzU1MjY4MTA1MQ%3D%3D%26mid%3D2247571841%26idx%3D1%26sn%3Dd42d9e6ce6c87ba085c4e74f46e6bfe2%26chksm%3Dfbfdf2b5cc8a7ba3085dd015387d8690f53598dc915e06df4af71d805f7d3e38bc78a2889490%26token%3D165703133%26lang%3Dzh_CN%23rd)
+
+[彻底搞懂基于LOAM框架的3D激光SLAM: 源码剖析到算法优化](http://link.zhihu.com/?target=https%3A//mp.weixin.qq.com/s%3F__biz%3DMzU1MjY4MTA1MQ%3D%3D%26mid%3D2247565233%26idx%3D1%26sn%3D8df0aa53799367ec1a65b37a5b04acac%26chksm%3Dfbfdd485cc8a5d937a93f45fdcfc774f66df6b4134e71825a69ee48cc24b38b283f683b10c69%26token%3D399862697%26lang%3Dzh_CN%23rd)
 
 
 
@@ -728,6 +738,15 @@ node：cartographer_assets_writer：启动节点`cartographer_assets_writer`，�
 
 **功能**：模型文件，用来发布3d激光雷达、小车里程计、IMU、小车本体之间的tf关系。
 
+问题：STL 文件路径
+
+```xml
+      <geometry>
+        <mesh
+          filename="package://xiaoqiang_udrf/meshes/back_wheel.STL" />
+      </geometry>
+```
+
 
 
 
@@ -802,6 +821,10 @@ POSE_GRAPH.optimization_problem.odometry_rotation_weight = 1e3
 return options
 
 ```
+
+
+
+
 
 
 
