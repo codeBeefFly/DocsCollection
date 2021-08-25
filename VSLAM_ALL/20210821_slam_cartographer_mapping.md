@@ -828,7 +828,7 @@ return options
 
 ## 3. rosbag 建图：bluewhale rosbag 记录 3：执行步骤
 
-1# 启动 roscore：
+### 1# 启动 roscore：
 
 ```
 #先关闭小车的ros启动节点
@@ -840,7 +840,7 @@ roscore
 
 
 
-2# 启动 cartographer：
+### 2# 启动 cartographer：
 
 注：在 4# 后需要 ctrl + c 退出 cartographer。
 
@@ -856,7 +856,7 @@ roslaunch cartographer_ros demo_xiaoqiang_3d.launch
 
 
 
-3# 播放 rosbag：
+### 3# 播放 rosbag：
 
 播放完成后会自动结束。
 
@@ -868,7 +868,7 @@ rosbag play  --clock  2018-08-11-13-20-34.bag
 
 
 
-4# 播放完成，生成 pbstream 文件：
+### 4# 播放完成，生成 pbstream 文件：
 
 a## 需要先结束建图。
 
@@ -920,7 +920,7 @@ $
 
 
 
-5# 3d 点云文件，pbstream文件后处理：
+### 5# 3d 点云文件，pbstream文件后处理：
 
 使用 xiaoqiang 给的 writer 文件。
 
@@ -1087,9 +1087,80 @@ $
 
 
 
-6# 2d map 的 .pgm 跟 .yaml 文件，用于 amcl 导航：
+### 6# 2d map 的 .pgm 跟 .yaml 文件，用于 amcl 导航：
+
+参考：[谷歌cartographer使用速腾聚创3d激光雷达转二维数据进行2d建图](https://community.bwbot.org/topic/525/%E8%B0%B7%E6%AD%8Ccartographer%E4%BD%BF%E7%94%A8%E9%80%9F%E8%85%BE%E8%81%9A%E5%88%9B3d%E6%BF%80%E5%85%89%E9%9B%B7%E8%BE%BE%E8%BD%AC%E4%BA%8C%E7%BB%B4%E6%95%B0%E6%8D%AE%E8%BF%9B%E8%A1%8C2d%E5%BB%BA%E5%9B%BE)
+
+cartographer_pbstream_to_ros_map 节点概览：
+
+参考：[cartographer离线利用pbstream生成ros标准格式地图](https://www.codeleading.com/article/34012700085/)
+
+```xml
+<launch>
+  <node name="cartographer_pbstream_to_ros_map" pkg="cartographer_ros"
+      type="cartographer_pbstream_to_ros_map" args="
+          -pbstream_filename $(arg pbstream_filename)
+          -map_filestem $(arg map_filestem)
+          -resolution $(arg resolution)"
+      output="screen">
+  </node>
+</launch>
+```
+
+>利用cartographer的cartographer_pbstream_to_rosmap节点写了个launch文件，功能为离线将pbstream文件转换成标准ros格式地图。在早些版本曾有过类似launch文件，后被开发者删除。该node的代码位于pbstream_to_ros_map_main.cc
+>
+>launch文件的三个配置参数依次为pbstream文件路径，需要保存的ros格式map文件路径（注意不带文件后缀名），分辨率。
+>
+>```
+>roslaunch cartographer_ros offline_pbstream_to_rosmap.launch pbstream_filename:=/home/cabin/Desktop/carto_map.pbstream map_filestem:=/home/cabin/Desktop/ros_map resolution:=0.05
+>```
+>
+>运行后在桌面得到ros_map.pgm和ros_map.yaml。
+>
+>更简单的方法，利用cartographer_pbstream_to_ros_map节点：
+>
+>```
+>rosrun cartographer_ros cartographer_pbstream_to_ros_map -map_filestem=/home/cabin/Desktop/ros_map -pbstream_filename=/home/cabin/Desktop/carto_map.pbstream -resolution=0.05
+>```
+>运行后得到同样的效果。
+>
+>另在此记录先前未注意的保存cartographer地图的service用法。在建图过程中执行如下指令将在桌面生成pbstream文件而不影响建图。
+>
+>```
+>rosservice call /write_state /home/cabin/Desktop/carto_map.pbstream
+>```
+>
+>---
 
 
+
+pbstream 转 pgm + yaml 文件命令样板：
+
+```
+rosrun cartographer_ros cartographer_pbstream_to_ros_map \
+	-map_filestem=<保存地图的绝对路径>/<地图命名> \  
+	-pbstream_filename=<存放pbstream地图快照信息的绝对地址>/<filename>.pbstream \
+	-resolution=0.05
+```
+
+注：<地图名>不用写格式，会生成 <地图名>.yaml 跟 <地图名>.pgm。
+
+```
+$ rosrun cartographer_ros cartographer_pbstream_to_ros_map -map_filestem=/home/ds16v2/catkin_x/cartographer_ws/ros_bag/blue_whale_2d_map -pbstream_filename=/home/ds16v2/catkin_x/cartographer_ws/ros_bag/blue_whale_demo.bag.pbstream -resolution=0.05
+
+I0825 20:55:59.579447 23178 pbstream_to_ros_map_main.cc:43] Loading submap slices from serialized data.
+I0825 20:56:05.293452 23178 pbstream_to_ros_map_main.cc:51] Generating combined map image from submap slices.
+
+$ 
+```
+
+<img src="20210821_slam_cartographer_mapping.assets/image-20210825213716746.png" alt="image-20210825213716746" style="zoom:100%;float:left" />
+
+<img src="20210821_slam_cartographer_mapping.assets/image-20210825214246474.png" alt="image-20210825214246474" style="zoom:80%;float:left" />
+
+![image-20210825213817756](20210821_slam_cartographer_mapping.assets/image-20210825213817756.png)
+
+![image-20210825213923497](20210821_slam_cartographer_mapping.assets/image-20210825213923497.png)
 
 
 
