@@ -1022,7 +1022,7 @@ ds16v2@ds16v2:~/catkin_x/cartographer_ws$
 
 生成 .pbstrem 与一些 .png 文件：
 
-| ![2018-08-11-13-20-34.bag_xray_xy_all](../../../catkin_x/cartographer_ws/ros_bag/2018-08-11-13-20-34.bag_xray_xy_all.png) | ![2018-08-11-13-20-34.bag_xray_xy_all_color](20210821_slam_cartographer_mapping.assets/2018-08-11-13-20-34.bag_xray_xy_all_color.png) |
+| ![2018-08-11-13-20-34.bag_xray_xy_all](20210821_slam_cartographer_mapping.assets/2018-08-11-13-20-34.bag_xray_xy_all-1629894526440.png) | ![2018-08-11-13-20-34.bag_xray_xy_all_color](20210821_slam_cartographer_mapping.assets/2018-08-11-13-20-34.bag_xray_xy_all_color.png) |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 
 
