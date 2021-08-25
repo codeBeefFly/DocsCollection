@@ -8,7 +8,7 @@
 
 ---
 
-日誌：
+## 日誌索引：
 
 2021年08月23日：繼續 0821 閱讀完 cartographer doc. official。（linux 虛擬機）思考如何將 ros 無干擾地安裝到服務器上。這對以後的仿真很有用。
 
@@ -19,6 +19,10 @@
 ​	接着 看 google 的 cartographer documentation。
 
 2021年08月24日：今天建圖，離線，在線。
+
+2021年08月25日：昨天完成 bluewhale 建图 3d，今天作总结，更新 ticke：6101.
+
+
 
 
 
@@ -323,7 +327,9 @@ cartographer_ros/configuration_files/xiaoqiang_3d.lua
 
 ```
 
-**launch:** 
+功能：建图时启动的launch文件，负责启动xiaoqiang_3d.launch文件和rviz
+
+**launch:** 根标签。
 
 **param:** 定义参数 `/use_sim_time = true`<key: value> 到参数服务器。param 在 ros 中是 节点间的共享数据，将这个共享数据存放在 ros master 中，这样所有的节点都可以访问。
 
@@ -331,9 +337,7 @@ cartographer_ros/configuration_files/xiaoqiang_3d.lua
 
 **node:** 启动 rviz node（ros 中，节点《node》是最小的进程单元；一个软件包中可以有多个可执行文件，每个可执行文件在运行之后成为一个进程《process》，这个进程在 ros 中就是 节点《node》）。
 
-
-
-补充：node 中常用属性：
+**==> 补充：node 中常用属性：**
 
 | node |               |                                                              |
 | ---- | ------------- | ------------------------------------------------------------ |
@@ -347,10 +351,17 @@ cartographer_ros/configuration_files/xiaoqiang_3d.lua
 | 8    | required      | 如果节点死亡，则杀死整个roslaunch                            |
 | 9    | ns            | 如果ns=“foo”，在“ foo”名称空间中启动节点                     |
 | 10   | output        | 如果为“ screen”，则来自该节点的stdout / stderr将被发送到屏幕。如果为'log'，则stdout / stderr输出将发送到$ ROS_HOME / log中的日志文件，并且stderr将继续发送到屏幕。【默认：“ log”】 |
+| 11   | remap         | 节点重映射，用于改变节点订阅或发布的话题                     |
 
 
 
-cartographer_ros/launch/xiaoqiang_3d.launch 
+参考：[ROS入门（二）：launch文件解析](https://zhuanlan.zhihu.com/p/367357844)
+
+
+
+
+
+**cartographer_ros/launch/xiaoqiang_3d.launch** 
 
 ```xml
 <!--
@@ -394,9 +405,34 @@ cartographer_ros/launch/xiaoqiang_3d.launch
 
 ```
 
+功能：用来加载cartographer_ros主要的启动节点和参数文件，话题数据名字的remap也在这个文件设定。
+
+**launch**：根标签
+
+**param**：定义参数到参数服务器：`robot_description`这个参数的内容从 `testfile`指定路径文件中读取，并保存或指向。
+
+**==> 补充：param 标签中常用属性**：
+
+| param |          |                                                              |
+| ----- | -------- | ------------------------------------------------------------ |
+| 1     | name     | 参数名称。 命名空间可以包含在参数名称中，但应避免使用全局指定的名称 |
+| 2     | value    | 定义参数的值。 如果省略此属性，则必须指定binfile，textfile或command |
+| 3     | type     | `str |int |double |bool |yaml` (可选)。指定参数的类型。 如果未指定类型，roslaunch将尝试自动确定类型 |
+| 4     | testfile | `$(find pkg-name)/path/file.txt` (可选)。文件的内容将被读取并存储为字符串。 该文件必须是本地可访问的 |
+| 5     | binfile  | `$(find pkg-name)/path/file` (可选)。文件的内容将作为一个base64编码的XML-RPC二进制对象读取和存储。该文件必须在本地可访问 |
+| 6     | command  | `$(find pkg-name)/exe '$(find pkg-name)/arg.txt'` (可选)。命令的输出将被读取并存储为字符串。由于XML转义的要求，这里需要使用单引号对文件参数进行引用 |
+
+node：robot_state_publisher：启动 `robot_state_publisher`节点，来自软件包 cartographer_ros`robot_state_publisher`，节点类型 `robot_state_publisher`。
+
+node：cartographer_node：启动 `cartographer_node` 节点，来自软件包 `cartographer_ros`，节点类型`cartographer_ros`；参数 `-configuration_directory $(find cartographer_ros)/configuration_files -configuration_basename xiaoqiang_3d.lua`，是一个字符串，这个字符串指定了两个变量：1. configuration_directory：配置文件所在路径；2. configuration_basename：配置文件名称。这个字符串参数的解析（如何读取变量名，如何获取参数）在节点内部进行（节点就是进程，就是执行程序）。节点话题重映射：当前节点订阅话题：`/odom, /imu, /points2`，将重映射使其实际上订阅话题：`/xqserial_server/Odom, /xqserial_server/IMU, /rslidar_points`。
+
+node：cartographer_occupancy_grid_node：启动 `cartographer_occupancy_grid_node`节点，来自软件包`cartographer_ros`（一个软件包可以包含多个可执行程序），类型`cartographer_occupancy_grid_node`，参数 `-resolution 0.05`。
 
 
-cartographer_ros/launch/assets_writer_xiaoqiang_3d.launch
+
+
+
+**cartographer_ros/launch/assets_writer_xiaoqiang_3d.launch**
 
 ```xml
 <!--
@@ -429,9 +465,21 @@ cartographer_ros/launch/assets_writer_xiaoqiang_3d.launch
 
 ```
 
+功能：用来将demo_xiaoqiang_3d.launch输出的pbstreamfile转换成ply点云数据。
+
+launch：根标签。
+
+node：cartographer_assets_writer：启动节点`cartographer_assets_writer`，来自软件包`cartographer_ros`，是否在节点死亡后杀死整个 roslaunch，是；参数：一长串字符：
+
+1. `configuration_directory`: 配置文件夹路径
+2. `configuration_basename`: 配置文件名称
+3. `urdf_filename`: urdf模型文件路径
+4. `bag_filenames`: rosbag 文件名称
+5. `pose_graph_filename`: 这个是地图文件名称吗？
 
 
-cartographer_ros/urdf/rslidar_2d.urdf 
+
+**cartographer_ros/urdf/rslidar_2d.urdf** ：这个很有用，ros 中显示模型。
 
 ```xml
 <robot
@@ -678,9 +726,13 @@ cartographer_ros/urdf/rslidar_2d.urdf
 
 ```
 
+**功能**：模型文件，用来发布3d激光雷达、小车里程计、IMU、小车本体之间的tf关系。
 
 
-cartographer_ros/configuration_files/xiaoqiang_3d.lua 
+
+
+
+**cartographer_ros/configuration_files/xiaoqiang_3d.lua** 
 
 ```lua
 -- Copyright 2016 The Cartographer Authors
@@ -750,6 +802,42 @@ POSE_GRAPH.optimization_problem.odometry_rotation_weight = 1e3
 return options
 
 ```
+
+
+
+---
+
+## 3. meshlab 查看 STL (solidworks) 格式文件模型
+
+起因：xiaoqiang urdf 文件中的 STL 模型加载。
+
+
+
+安装 meshlab：
+
+```
+sudo apt install meshlab
+```
+
+
+
+下载 小强 urdf：xiaoqiang_urdf：
+
+链接：[BluewhaleRobot](https://github.com/BluewhaleRobot)/**[xiaoqiang_udrf](https://github.com/BluewhaleRobot/xiaoqiang_udrf)**
+
+<img src="20210821_slam_cartographer_mapping.assets/image-20210825160543730.png" alt="image-20210825160543730" style="zoom:100%;float:left" />
+
+
+
+使用 meshlab 查看 STL 文件：
+
+<img src="20210821_slam_cartographer_mapping.assets/image-20210825160632277.png" alt="image-20210825160632277" style="zoom:100%;float:left" />
+
+```
+meshlab base_link.STL 
+```
+
+<img src="20210821_slam_cartographer_mapping.assets/image-20210825160749529.png" alt="image-20210825160749529" style="zoom:50%;float:left" />
 
 
 
