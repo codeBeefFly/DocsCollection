@@ -1077,9 +1077,21 @@ $
 
 
 
+**pcl helper**
+
+![image-20210825201825090](20210821_slam_cartographer_mapping.assets/image-20210825201825090.png)
 
 
-6# 2d map 文件
+
+
+
+
+
+6# 2d map 的 .pgm 跟 .yaml 文件，用于 amcl 导航：
+
+
+
+
 
 
 
