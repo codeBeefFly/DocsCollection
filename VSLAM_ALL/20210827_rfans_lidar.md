@@ -15,3 +15,10 @@
       2. 延長線（幀率）
    2. mapping
 
+
+
+---
+
+done.
+
+closed.
