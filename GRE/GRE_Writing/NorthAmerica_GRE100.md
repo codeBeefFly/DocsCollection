@@ -8,41 +8,118 @@
 
 ---
 
+## Template:
+
+
+#### Title: 
+
+Card: ==========================
+
+```
+
+```
+
+Requirement: ====================
+
+```
+
+```
+
+Answer: ========================
+
+```
+
+
+
+```
+
+
+
+
+
+
+---
+
 ## ISSUE
 
 
 
 ---
 
+---
+
+
+
 ## ARGUMENT
 
 ### PART I
 
-#### A1: Argument 4: Choosing real estate firm
+#### Title: A1: Argument 4: Choosing real estate firm: <P173>
+
+
+
+---
+
+
 
 ### PART II
 
-#### E1: Argument 12: Student evaluation system at Omega University
+#### Title: E1: Argument 12: Student evaluation system at Omega University: <P218>
+
+
+
+---
+
+
 
 ### PART III
 
-#### Q1: Argument 3: Banning skateboarding in Central Plaza
+#### Title: Q1: Argument 3: Banning skateboarding in Central Plaza: <P262>
+
+Card: ==========================
+
+```
+
+```
+
+Requirement: ====================
+
+```
+
+```
+
+Answer: ========================
+
+```
+From the letter we see that there might be certain correlation between skateboarding and the recession in Central Plaza. However, 
+
+```
+
+
+
+---
+
+
 
 ### PART IV
 
-#### AE1: Argument 2: The function of cortisol
+#### Title: AE1: Argument 2: The function of cortisol: <P299>
 
-Card:
-
-```
-```
-
-Requirement:
+Card: ==========================
 
 ```
+The following appeared as part of a letter to the editor of a scientific journal.
+
+"A recent study of eighteen rhesus monkeys provides cludes as to the effects of birth order on an individual's levels of stimulation. The study showed that in stimulating situations (such as an encounter with an unfamiliar monkey), firstborn infant monkeys produce up to twice as much of the hormone cortisol, which primes the body for increased activity levels, as do their younger siblings. Firstborn humans also produce relatively high levels of cortisol in stimulating situations (such as the return of a parent after an absence). The study also found that during pregnancy, first-time mother monkeys had higher levels of cortisol than did those who had had several offspring."
 ```
 
-Answer:
+Requirement: ====================
+
+```
+Write a response in which you discuss one or more alternative explanations that could rival the proposed explanation and explain how your explanation(s) can plausibly account for the facts presented in the argument. 
+```
+
+Answer: ========================
 
 ```
 Basing on a study which showed that firstborn infant monkeys produce much more cortisol than their younger siblings do in stimulating situations, the writer therefore suggests that the birth order may affect an individual's levels of stimulation. However, there are other hypotheses that can rival the writer's explanation. Without further studies to rule out other possibilities, I cannot hastily accept the writer's claim.
