@@ -255,9 +255,7 @@ return options
 
 对比：
 
-![image-20210924144256206](C:\Z_DesayWorkSpace\CodeBeefSpace\DocsCollection\VSLAM_ALL\20210924_rfans_cartographer_rosbag_2.assets\image-20210924144256206.png)
-
-
+![image-20210924175454331](20210924_rfans_cartographer_rosbag_2.assets/image-20210924175454331.png)
 
 
 
