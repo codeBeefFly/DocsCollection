@@ -29,12 +29,14 @@
 
 ```
 1. 验证 rosbag 工具：cartographer_rosbag_validate
+
 	使用 cartographer_rosbag_validate 分析 rosbag 中的数据。
 	(It is generally a good idea to run this tool before trying to tune Cartographer for incorrect data.)
 	
 ---+---+---+---+---+---+---+---+---+---+---+
 
 2. 创建 .lua 配置
+
 	2.1. robot configuration 文件使用 .lua 格式编写。
 	2.2. 示例 configuration .lua 文件 存放 路径：
 			src/cartographer_ros/cartographer_ros/configuration_files
@@ -42,9 +44,11 @@
 			install_isolated/share/cartographer_ros/configuration_files/
 	2.4. 快速编写自己的 .lua 文件（就是抄作业啦~~~）：
     	*. 3D Slam:
-    	cp install_isolated/share/cartographer_ros/configuration_files/backpack_3d.lua install_isolated/share/cartographer_ros/configuration_files/my_robot.lua
+    	cp install_isolated/share/cartographer_ros/configuration_files/backpack_3d.lua \
+    		install_isolated/share/cartographer_ros/configuration_files/my_robot.lua
     	*. 2D slam:
-    	cp install_isolated/share/cartographer_ros/configuration_files/backpack_2d.lua install_isolated/share/cartographer_ros/configuration_files/my_robot.lua
+    	cp install_isolated/share/cartographer_ros/configuration_files/backpack_2d.lua \
+    		install_isolated/share/cartographer_ros/configuration_files/my_robot.lua
     
     2.5. 快速修改自己的 .lua 文件
     	*. 编写 my_robot.lua.
@@ -60,18 +64,74 @@
 		*. 这是一个实时工具，观察在Ros上被发布的坐标系树，可用刷新按钮来更新树的内容。与上一个工具的区别在于：上一个工具连续采样5s获得的树的内容，
 			并存成一个图片；这个工具可以连续的观察树的内容，使用起来更方便。
 	2.8. 可以使用 use_landmarks & use_nav_sat 启动 地标 + GPS。option 中其他的变量最好保留不动。 
-	2.9. 
+	2.9. 这两个变量可能需要调整：
+		*. TRAJECTORY_BUILDER_3D.num_accumulated_range_data
+		*. TRAJECTORY_BUILDER_2D.num_accumulated_range_data
+		设成 100 或 2.
 	
 ---+---+---+---+---+---+---+---+---+---+---+
 
+3. 创建 .launch 文件
 
+	*. 建议为每一个 slam robot 配置一个 .launch 文件。
+    *. .launch 文件保存路径：src/cartographer_ros/cartographer_ros/launch/
+    *. .launch 文件安装路径：install_isolated/share/cartographer_ros/launch/
 
+	拷贝 demo 文件 用作 自用 roslaunch：
 	
+	cp install_isolated/share/cartographer_ros/launch/backpack_3d.launch \  					         
+		install_isolated/share/cartographer_ros/launch/my_robot.launch
+	
+	cp install_isolated/share/cartographer_ros/launch/demo_backpack_3d.launch \
+		install_isolated/share/cartographer_ros/launch/demo_my_robot.launch
+
+	cp install_isolated/share/cartographer_ros/launch/offline_backpack_3d.launch \
+		install_isolated/share/cartographer_ros/launch/offline_my_robot.launch
+
+	cp install_isolated/share/cartographer_ros/launch/demo_backpack_3d_localization.launch \
+		install_isolated/share/cartographer_ros/launch/demo_my_robot_localization.launch
+
+	cp install_isolated/share/cartographer_ros/launch/assets_writer_backpack_3d.launch \
+		install_isolated/share/cartographer_ros/launch/assets_writer_my_robot.launch
+	
+	|--- 说明：
+	
+	(1). backpack_3d.launch <-> my_robot.launch:
+		使用情形：机器人平台（robot），执行 online slam (实时)，实时传感器数据。
+		补充：暂无。
+	
+	(2). demo_backpack_3d.launch <-> demo_my_robot.launch
+		使用情形：开发平台（development machine），rosbag 文件。
+		补充：同时开启 rviz 窗口（可以查看 cartographer 状态）。
+		需要：bag_filename
+		
+	(3). offline_backpack_3d.launch <-> offline_my_robot.launch
+		使用情形：同（2），但是速度更快，同时可以使用 多个 rosbag 文件。
+		需要：bag_filenames
+		
+	(4). demo_backpack_3d_localization.launch <-> demo_my_robot_localization.launch
+		使用情形：同（2），需要 load_state_filename 参数，这个参数 指向 .pbstream（之前的录制的 cartographer execution）; 之前的
+		录制 用作 pre-computed map，cartographer 将只会在这个 map 执行 localization。
+		需要：load_state_filename
+	
+	(5). assets_writer_backpack_3d.launch <-> assets_writer_my_robot.launch
+		使用情形：从录制的 .pbstream 提取数据。
+		需要：暂无。
+		
+---+---+---+---+---+---+---+---+---+---+---+
+
+
+---+---+---+---+---+---+---+---+---+---+---+
+
+
+---+---+---+---+---+---+---+---+---+---+---+
 ```
 
 注：关于 .lua 配置，参考：[Lua configuration reference documentation](https://google-cartographer-ros.readthedocs.io/en/latest/configuration.html#lua-configuration-reference-documentation)
 
 
+
+#### 1.1.1. 文件：`.lua`
 
 示例：2D SLAM：backpad_2d.lua 
 
@@ -196,6 +256,14 @@ return options
 对比：
 
 ![image-20210924144256206](C:\Z_DesayWorkSpace\CodeBeefSpace\DocsCollection\VSLAM_ALL\20210924_rfans_cartographer_rosbag_2.assets\image-20210924144256206.png)
+
+
+
+
+
+#### 1.1.2. 文件：`.launch`
+
+
 
 
 
