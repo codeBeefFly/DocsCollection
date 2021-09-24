@@ -118,13 +118,20 @@
 		使用情形：从录制的 .pbstream 提取数据。
 		需要：暂无。
 		
+	注1：`configuration_basename`：指向`.lua`文件。
+
+	注2：`robot_description`：如果要使用自己的 `.urdf`模型文件，将文件存放在`install_isolated/share/cartographer_ros/urdf`，
+	指向这个`.urdf`文件。
+
+	注3：如果要使用 `/tf`消息，删除参数`robot_description`，`robot_state_publisher`以及包含`-urfd`的行。
+
+	注4：使用`<remap>`重定向 topics，如果 bag 或 sensor 播放的的 topic 名称与 cartographer ROS 接收的 名称不符。	
+	
 ---+---+---+---+---+---+---+---+---+---+---+
+4. 启动 Cartographer
+	roslaunch cartographer_ros my_robot.launch bag_filename:=/path/to/your_bag.bag
 
 
----+---+---+---+---+---+---+---+---+---+---+
-
-
----+---+---+---+---+---+---+---+---+---+---+
 ```
 
 注：关于 .lua 配置，参考：[Lua configuration reference documentation](https://google-cartographer-ros.readthedocs.io/en/latest/configuration.html#lua-configuration-reference-documentation)
@@ -261,7 +268,64 @@ return options
 
 #### 1.1.2. 文件：`.launch`
 
+示例：`my_robot.launch`
 
+```xml
+<!--
+  Copyright 2016 The Cartographer Authors
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<launch>
+  <param name="robot_description"
+    textfile="$(find cartographer_ros)/urdf/backpack_3d.urdf" />
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher"
+    type="robot_state_publisher" />
+
+  <node name="cartographer_node" pkg="cartographer_ros"
+      type="cartographer_node" args="
+          -configuration_directory $(find cartographer_ros)/configuration_files
+          -configuration_basename backpack_3d.lua"
+      output="screen">
+    <remap from="points2_1" to="horizontal_laser_3d" />
+    <remap from="points2_2" to="vertical_laser_3d" />
+  </node>
+
+  <node name="cartographer_occupancy_grid_node" pkg="cartographer_ros"
+      type="cartographer_occupancy_grid_node" args="-resolution 0.05" />
+</launch>
+
+```
+
+注1：`configuration_basename`：指向`.lua`文件。
+
+注2：`robot_description`：如果要使用自己的 `.urdf`模型文件，将文件存放在`install_isolated/share/cartographer_ros/urdf`，指向这个`.urdf`文件。
+
+注3：如果要使用 `/tf`消息，删除参数`robot_description`，`robot_state_publisher`以及包含`-urfd`的行。
+
+注4：使用`<remap>`重定向 topics，如果 bag 或 sensor 播放的的 topic 名称与 cartographer ROS 接收的 名称不符。
+
+
+
+注5：`IMU` topic 命名成：`imu`。
+
+注6：`sensor_msgs/LaserScan` 一个 topic，命名成：`scan`；多个 topics，命名成：`scan_1`，`scan_2...`。
+
+注7：`sensor_msgs/MultiEchoLaserScan`仅一个 topic，命名成：`echoes`；多个 topics，命名成：`echoes_1` ，`echoes_2...`。
+
+注8：`sensor_msgs/PointCloud2` 一个 topic，命名成：`points2`；多个 topics，命名成：`points2_1`，`points2_2`。
 
 
 
@@ -282,6 +346,8 @@ rosrun tf tf_echo [reference_frame] [target_frame]
 
 
 
+### 1.3. 
+
 
 
 
@@ -298,7 +364,7 @@ link02: [ROS探索总结（十二）—— 坐标系统](https://www.guyuehome.c
 
 link03: [ROS学习记录⑤：TF工具的使用与练习](https://www.guyuehome.com/20269)
 
-
+link04: [**Google Cartographer max speed for robot**](https://answers.ros.org/question/341816/google-cartographer-max-speed-for-robot/)
 
 
 
