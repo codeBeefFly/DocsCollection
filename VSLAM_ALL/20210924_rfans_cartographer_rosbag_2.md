@@ -685,7 +685,27 @@ POSE_GRAPH = {
 
 
 
+---
 
+![image-20210925143910345](20210924_rfans_cartographer_rosbag_2.assets/image-20210925143910345.png)
+
+![image-20210925145054969](20210924_rfans_cartographer_rosbag_2.assets/image-20210925145054969.png)
+
+
+
+![image-20210925152115259](20210924_rfans_cartographer_rosbag_2.assets/image-20210925152115259.png)
+
+
+
+![image-20210925152612900](20210924_rfans_cartographer_rosbag_2.assets/image-20210925152612900.png)
+
+
+
+![image-20210925153700384](20210924_rfans_cartographer_rosbag_2.assets/image-20210925153700384.png)
+
+
+
+![image-20210925162805260](20210924_rfans_cartographer_rosbag_2.assets/image-20210925162805260.png)
 
 
 
@@ -693,5 +713,11 @@ POSE_GRAPH = {
 
 ### &&. 参考
 
+link01: [实战适配-使用cartographer和三维激光雷达-VLP16-进行三维建图](https://sunjiadai.xyz/blog/2019/01/20/%E5%AE%9E%E6%88%98%E9%80%82%E9%85%8D-%E4%BD%BF%E7%94%A8cartographer%E5%92%8C%E4%B8%89%E7%BB%B4%E6%BF%80%E5%85%89%E9%9B%B7%E8%BE%BE-VLP16-%E8%BF%9B%E8%A1%8C%E4%B8%89%E7%BB%B4%E5%BB%BA%E5%9B%BE/)
 
+link02: [基于Cartographer的3D SLAM（Lidar+IMU）3D 必须使用 IMU](https://blog.csdn.net/learning_tortosie/article/details/105158858)
+
+link03: [Why is IMU data required for 3D SLAM but not for 2D?](https://google-cartographer-ros.readthedocs.io/en/latest/faq.html#why-is-imu-data-required-for-3d-slam-but-not-for-2d)
+
+link04: [cartographer跑自己的数据包-2d建图篇（laser+Imu建图篇）-- 推荐](https://blog.csdn.net/qq_40216084/article/details/104599308)
 
