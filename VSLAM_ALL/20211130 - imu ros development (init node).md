@@ -91,9 +91,85 @@ link: [corvin_zhang](https://code.corvin.cn/corvin_zhang) / [rasp_imu_hat_6dof](
 
 <img src="20211130 - imu ros development (init node).assets/image-20211201163612910.png" alt="image-20211201163612910" style="zoom:50%;" align="left"/>
 
+这是因为`imu_1129/test_serial.h` clion 无法通过路径找到：
+
+解决办法，case vscode:
+
+<img src="20211130 - imu ros development (init node).assets/image-20211201164212617.png" alt="image-20211201164212617" style="zoom:50%;" align="left"/>
+
+解决办法，case clion:
+
+<img src="20211130 - imu ros development (init node).assets/image-20211201164306419.png" alt="image-20211201164306419" style="zoom:50%;" align="left"/>
+
+clion 有没有不改变 `CMakeLists.txt`就可以解决问题的方法？可以参考 link19 - 20，但是我觉得复杂。
 
 
 
+---
+
+
+
+### 知识点补充
+
+#### 00：cmake 常量
+
+```cmake
+set(DEVEL_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/../../devel/include)  
+# 使用间接法，.h 头引用依然有红色下划线（错误），再次验证，没有红色下划线了（:)）
+# 直接法 /home/ds18/catkin_x/IMU_ws/devel/include 就没有红色下划线问题
+
+message(STATUS "ROOT: ${ROOT}")
+message(STATUS "catkin_INCLUDE_DIRS: ${catkin_INCLUDE_DIRS}")
+message(STATUS "FileParentDir: ${FileParentDir}")
+
+MESSAGE(STATUS "CMAKE_BINARY_DIR:" ${CMAKE_BINARY_DIR})
+MESSAGE(STATUS "PROJECT_BINARY_DIR:" ${PROJECT_BINARY_DIR})
+MESSAGE(STATUS "CMAKE_SOURCE_DIR:" ${CMAKE_SOURCE_DIR})
+MESSAGE(STATUS "PROJECT_SOURCE_DIR:" ${PROJECT_SOURCE_DIR})
+MESSAGE(STATUS "CMAKE_CURRENT_SOURCE_DIR:" ${CMAKE_CURRENT_SOURCE_DIR})
+MESSAGE(STATUS "CMAKE_CURRENT_BINARY_DIR:" ${CMAKE_CURRENT_BINARY_DIR})
+MESSAGE(STATUS "CMAKE_CURRENT_LIST_FILE:" ${CMAKE_CURRENT_LIST_FILE})
+MESSAGE(STATUS "CMAKE_CURRENT_LIST_LINE:" ${CMAKE_CURRENT_LIST_LINE})
+
+SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+MESSAGE(STATUS "CMAKE_MODULE_PATH:" ${CMAKE_MODULE_PATH})
+MESSAGE(STATUS "EXECUTABLE_OUTPUT_PATH:" ${EXECUTABLE_OUTPUT_PATH})
+MESSAGE(STATUS "LIBRARY_OUTPUT_PATH:" ${LIBRARY_OUTPUT_PATH})
+
+MESSAGE(STATUS "CMAKE_ROOT: ${CMAKE_ROOT}")
+MESSAGE(STATUS "CMAKE_FIND_ROOT: ${CMAKE_FIND_ROOT_PATH}")
+MESSAGE(STATUS "PROJECT_BINARY_DIR: ${PROJECT_BINARY_DIR}")
+MESSAGE(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
+MESSAGE(STATUS "DEVEL_DIR: ${DEVEL_DIR}")
+```
+
+```
+-- ROOT: 
+-- catkin_INCLUDE_DIRS: /opt/ros/melodic/include;/opt/ros/melodic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp;/usr/include
+-- FileParentDir: 
+-- CMAKE_BINARY_DIR:/home/ds18/catkin_x/IMU_ws/src/imu_1129/cmake-build-debug
+-- PROJECT_BINARY_DIR:/home/ds18/catkin_x/IMU_ws/src/imu_1129/cmake-build-debug
+-- CMAKE_SOURCE_DIR:/home/ds18/catkin_x/IMU_ws/src/imu_1129
+-- PROJECT_SOURCE_DIR:/home/ds18/catkin_x/IMU_ws/src/imu_1129
+-- CMAKE_CURRENT_SOURCE_DIR:/home/ds18/catkin_x/IMU_ws/src/imu_1129
+-- CMAKE_CURRENT_BINARY_DIR:/home/ds18/catkin_x/IMU_ws/src/imu_1129/cmake-build-debug
+-- CMAKE_CURRENT_LIST_FILE:/home/ds18/catkin_x/IMU_ws/src/imu_1129/CMakeLists.txt
+-- CMAKE_CURRENT_LIST_LINE:153
+-- CMAKE_MODULE_PATH:/home/ds18/catkin_x/IMU_ws/src/imu_1129/cmake
+-- EXECUTABLE_OUTPUT_PATH:
+-- LIBRARY_OUTPUT_PATH:
+-- CMAKE_ROOT: /home/ds18/Software/clion-2021.2.2/bin/cmake/linux/share/cmake-3.20
+-- CMAKE_FIND_ROOT: 
+-- PROJECT_BINARY_DIR: /home/ds18/catkin_x/IMU_ws/src/imu_1129/cmake-build-debug
+-- PROJECT_SOURCE_DIR: /home/ds18/catkin_x/IMU_ws/src/imu_1129
+-- DEVEL_DIR: /home/ds18/catkin_x/IMU_ws/src/imu_1129/../../devel
+```
+
+**clion** 在 `CMakeLists.txt`文件中可以使用 缺省 显示出 cmake 的常量。可以尝试使用关键词：`PROJECT, ROOT, CMAKE, SOURCE`。
+
+
+
+---
 
 
 
@@ -134,6 +210,12 @@ link15: [3.使用串口读取IMU数据并通过话题发布 --【最最开始的
 link16: [【奥特学园】ROS机器人入门课程《ROS理论与实践》零基础教程_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1Ci4y1L7ZZ?p=56&spm_id_from=pageDriver)
 
 link17: [【奥特学园】ROS机器人入门课程《ROS理论与实践》资料 Introduction · GitBook (autolabor.com.cn)](http://www.autolabor.com.cn/book/ROSTutorials/)
+
+link18: [**Setup CLion with ROS**](https://answers.ros.org/question/284786/setup-clion-with-ros/)
+
+link19: [clion+ros开发环境的搭建 -- 【这种方式可以解决头文件报错问题】](https://blog.csdn.net/qq_40957243/article/details/118313690?spm=1001.2101.3001.6650.2&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-2.no_search_link&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-2.no_search_link)
+
+link20: [ROS setup tutorial -- 【官方的 clion + ros 环境配置】](https://www.jetbrains.com/help/clion/ros-setup-tutorial.html)
 
 
 
