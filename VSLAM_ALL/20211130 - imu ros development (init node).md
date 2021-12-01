@@ -25,11 +25,51 @@ convention: maximum logs recorded 3.
 
 ### 记录：
 
+#### Task 00：ROS IMU TOOLS（todo）
 
+ros imu_tools  订阅的topic为`imu/data_raw`，因此如果需要使用这个工具，自己编写的 imu 驱动就需要发布 `imu/data_raw`的 topic。使用 imu_tools 的前提，有 imu 驱动发布 `imu/data_raw`。（todo）
+
+
+
+#### Task 01：根据 ROS OFFICIAL 编写 ROS 驱动
+
+参考 link01，link02。link14 是一个标准的 ros driver，在完成简单的 ros driver 之后，可以参考其进行封装。
 
 
 
 ### 参考：
+
+link00: [使用imu_tools对IMU进行滤波并可视化](https://blog.csdn.net/learning_tortosie/article/details/103189118)
+
+link01: [ROS从入门到精通系列（前言）-- ROS官方教程内容概要](https://haowang.blog.csdn.net/article/details/90745221)
+
+link02: [ROS从入门到精通系列博客](https://blog.csdn.net/hhaowang/category_11131544.html)
+
+link03: [ROS自定义msg类型及使用 -- 【可以参考一下ros自建msg的流程】](https://blog.csdn.net/u013453604/article/details/72903398)
+
+link04: [ROS串口通信（2）以十六进制指令读取IMU数据 -- 【继续昨天的ROS代码进行优化】](https://blog.csdn.net/fb_941219/article/details/84486603)
+
+link05: [在ROS中与其他器件使用十六进制串口通信 -- 【可以看一下】](https://blog.csdn.net/chduan_10/article/details/76619179)
+
+link06: [ROS从入门到精通系列（十六）-- IMU in ROS -- 【最早看的文章之一，继续】](https://blog.csdn.net/hhaowang/article/details/104961725)
+
+link07: [ROS从入门到精通系列（二）ROS官方基础教程与实例笔记整理 -- 【link01同作者，一起看】](https://haowang.blog.csdn.net/article/details/102637625)
+
+link08: [ROS下IMU串口通讯接口（通用版）-- 【很简单的代码，可以尝试一下】](https://blog.csdn.net/zhuoyueljl/article/details/75453808?utm_medium=distribute.pc_feed_404.none-task-blog-2~default~BlogCommendFromBaidu~default-5.control404&depth_1-utm_source=distribute.pc_feed_404.none-task-blog-2~default~BlogCommendFromBaidu~default-5.control40)
+
+link09: [ROS学习——读取IMU数据 --【很标准的 ros imu 开发流程，稍微复杂，link08之后可以尝试一下】](https://blog.csdn.net/just_do_it567/article/details/107223025?utm_medium=distribute.pc_feed_404.none-task-blog-2~default~BlogCommendFromBaidu~default-4.control404&depth_1-utm_source=distribute.pc_feed_404.none-task-blog-2~default~BlogCommendFromBaidu~default-4.control40)
+
+link10: [ros接入IMU数据，打包发布topic -- 【很标准的 ros imu 开发流程】](https://blog.csdn.net/xinmei4275/article/details/85040164?depth_1-utm_source=distribute.pc_relevant.none-task&utm_source=distribute.pc_relevant.none-task)
+
+link11: [ROS传感器之IMU实践 -- 【讲概念文章，实用】](https://zhuanlan.zhihu.com/p/268565374)
+
+link12: [从零搭建ROS机器人平台 -- 【小白机器人的文章，yyds 之一】](https://blog.csdn.net/zhao_ke_xue/category_10285721.html?spm=1001.2014.3001.5482)
+
+link13: [ROS——下位机驱动节点：读取并发布单片机IMU、编码器速度数据（python）-- 【很标准的 ros imu 开发流程】](https://blog.csdn.net/qq_45779334/article/details/113563618)
+
+link14: [iblus](https://github.com/iblus)/**[imu4ros -- 【git 代码，需要补充很多知识后再去使用】](https://github.com/iblus/imu4ros)**
+
+link15: [3.使用串口读取IMU数据并通过话题发布 --【最最开始的 imu 资料】](https://www.corvin.cn/2274.html)
 
 
 
@@ -209,7 +249,7 @@ linux 串口权限问题，解决（参考 link04）：
 >
 >    ```bash
 >    sudo chmod 666 /dev/ttyUSB0
->    
+>       
 >    ds18@ubuntu:~$ ll /dev/ttyUSB0
 >    crwxrwxrwx 1 root dialout 188, 0 Nov 30 00:08 /dev/ttyUSB0
 >    ```
@@ -224,7 +264,7 @@ linux 串口权限问题，解决（参考 link04）：
 >
 >    ```
 >    sudo gedit /etc/udev/rules.d/70-ttyusb.rules
->    
+>       
 >    KERNEL=="ttyUSB*", MODE="0666", SYMLINK+="vibot_base"
 >    ```
 
