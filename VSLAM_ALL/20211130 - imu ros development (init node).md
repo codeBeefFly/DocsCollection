@@ -37,6 +37,66 @@ ros imu_tools  订阅的topic为`imu/data_raw`，因此如果需要使用这个�
 
 
 
+#### Task 02：阅读：link15：3.使用串口读取IMU数据并通过话题发布
+
+阅读了这篇文章，需要拿到 imu_data.h 代码。可以参考其中的 serial_imu_node.cpp 中。
+
+找到了这篇文章代码的下载路径，粗略阅读了源码，发现目前没有办法理解这套代码，需要理解 ros service。
+
+代码下载路径：
+
+```
+git clone https://code.corvin.cn:3000/corvin_zhang/rasp_imu_hat_6dof.git
+```
+
+代码地址：
+
+link: [corvin_zhang](https://code.corvin.cn/corvin_zhang) / [rasp_imu_hat_6dof](https://code.corvin.cn/corvin_zhang/rasp_imu_hat_6dof)
+
+
+
+部分 serial_imu_node.cpp 代码：
+
+```c++
+#include <ros/ros.h>
+#include <tf/tf.h>
+#include <imu_data.h>
+#include <sensor_msgs/Imu.h>
+#include <std_msgs/Float32.h>
+#include <std_msgs/Empty.h>
+
+#include "serial_imu_hat_6dof/setYawZero.h"    // ros service
+#include "serial_imu_hat_6dof/setBaudRate.h"   // ros service
+#include "serial_imu_hat_6dof/setPinOutHL.h"   // ros service
+#include "serial_imu_hat_6dof/getYawData.h"    // ros service
+```
+
+
+
+#### Task 03：阅读：link04：ROS串口通信（2）以十六进制指令读取IMU数据
+
+这篇文章的代码已经在 `test_imu_serial.cpp` 中验证可行，可以基于这套代码继续优化。
+
+<img src="20211130 - imu ros development (init node).assets/image-20211201142305840.png" alt="image-20211201142305840" style="zoom:50%;" align="left"/>
+
+
+
+注：在 package 下创建 message，并在代码引用 message，需要连续 catkin_make 两次，第一次是 编译 message，第二次是源代码引用 message.h。如果只编译一次的话，会报错 `package/message.h` 文件没找到。
+
+编译的`message.h` 在`devel/include/package`下面。
+
+不过依然会看到头文件会有红色下划线，同时 IDE 的 run 无法运行的情况：
+
+> typora 图像左对齐 `<img src = "./images/python/logo.png" align="center">`
+
+<img src="20211130 - imu ros development (init node).assets/image-20211201163612910.png" alt="image-20211201163612910" style="zoom:50%;" align="left"/>
+
+
+
+
+
+
+
 ### 参考：
 
 link00: [使用imu_tools对IMU进行滤波并可视化](https://blog.csdn.net/learning_tortosie/article/details/103189118)
@@ -70,6 +130,10 @@ link13: [ROS——下位机驱动节点：读取并发布单片机IMU、编码�
 link14: [iblus](https://github.com/iblus)/**[imu4ros -- 【git 代码，需要补充很多知识后再去使用】](https://github.com/iblus/imu4ros)**
 
 link15: [3.使用串口读取IMU数据并通过话题发布 --【最最开始的 imu 资料】](https://www.corvin.cn/2274.html)
+
+link16: [【奥特学园】ROS机器人入门课程《ROS理论与实践》零基础教程_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1Ci4y1L7ZZ?p=56&spm_id_from=pageDriver)
+
+link17: [【奥特学园】ROS机器人入门课程《ROS理论与实践》资料 Introduction · GitBook (autolabor.com.cn)](http://www.autolabor.com.cn/book/ROSTutorials/)
 
 
 
