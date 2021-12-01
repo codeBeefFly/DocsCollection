@@ -73,7 +73,7 @@ link: [corvin_zhang](https://code.corvin.cn/corvin_zhang) / [rasp_imu_hat_6dof](
 
 
 
-#### Task 03：阅读：link04：ROS串口通信（2）以十六进制指令读取IMU数据
+#### Task 03：解决 ros 自定义 msg 头红色下划线问题
 
 这篇文章的代码已经在 `test_imu_serial.cpp` 中验证可行，可以基于这套代码继续优化。
 
@@ -102,6 +102,81 @@ link: [corvin_zhang](https://code.corvin.cn/corvin_zhang) / [rasp_imu_hat_6dof](
 <img src="20211130 - imu ros development (init node).assets/image-20211201164306419.png" alt="image-20211201164306419" style="zoom:50%;" align="left"/>
 
 clion 有没有不改变 `CMakeLists.txt`就可以解决问题的方法？可以参考 link19 - 20，但是我觉得复杂。
+
+
+
+#### Task 04：阅读：link18：解决 clion ros 编译问题
+
+没有修改之前，没有发现什么问题。
+
+修改之后的截图。（mark point 1）
+
+<img src="20211130 - imu ros development (init node).assets/image-20211201195253219.png" alt="image-20211201195253219" style="zoom:50%;" aligh="left"/>
+
+```cmake
+# clion 有什么方法不添加这一行吗？
+set(DEVEL_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/../../devel/include)
+
+## Specify additional locations of header files
+## Your package locations should be listed before other locations
+include_directories(
+        include
+        ${catkin_INCLUDE_DIRS}
+#        /home/ds18/catkin_x/IMU_ws/devel/include
+        ${DEVEL_INCLUDE_DIR}
+)
+```
+
+现在 catkin_make，与 clion cmake 都可以编译程序。步骤：
+
+使用 clion 打开 `toplevel` 的 `CMakeLists.txt`，在`/home/ds18/catkin_x/IMU_ws/src/CMakeLists.txt`。
+
+子`CMakeLists.txt`分别在`/home/ds18/catkin_x/IMU_ws/src/package1/src/, ../package2/src`中。
+
+需要编译两次，因为 message head 问题。然后就可以使用 clion 运行程序了。
+
+
+
+刚才又仔细分析了一下问题细节。clion 编译 ros 代码动态头文件找不到的情况。
+
+成功的解决办法是：将 mark point 1 配置一遍，然后在 terminal 使用 `catkin_make` 编译整个 ros 空间。这里需要 `catkin_make` 两次：第一次会在 `xxx_ws/devel/include` 生成 `msg_name.h`，但是在编译引用这个头文件的源文件时会报错；第二次编译就可以正常结束了。
+
+编译正常结束之后，使用 clion 的 运行按钮运行包含这个头文件的源代码，clion 会再次编译一遍（如何解决重复编译问题？），编译成功后，不会出现头文件找不到的报错问题。
+
+以这种方式配置的 clion 可以不用在此 `package/src/CMakeLists.txt` 中的 `include_directories` 中指明 `msg_name.h` 所在的路径：`xxx_ws/devel/include`。如图：
+
+<img src="20211130 - imu ros development (init node).assets/image-20211201212850401.png" alt="image-20211201212850401" style="zoom:50%;" align="left"/>
+
+现在的问题就是重复编译问题，可以暂时不考虑。
+
+暂时使用如下方式进行编译：先使用命令行编译两遍，在使用 ide 运行，运行时会再编译一遍。
+
+
+
+#### Task 05：阅读：link04：ROS串口通信（2）以十六进制指令读取IMU数据
+
+```
+0
+0
+print ACC data!
+0
+0
+0
+数据帧头错误
+[ INFO] [1638361646.384576485]: OUTPUT_Q4
+数据帧头错误
+[ INFO] [1638361646.384655929]: OUTPUT_GYR
+数据帧头错误
+[ INFO] [1638361646.384700285]: OUTPUT_ACC
+print Q4 data!
+0
+0
+0
+0
+print GRY data!
+0
+0
+```
 
 
 
@@ -166,6 +241,12 @@ MESSAGE(STATUS "DEVEL_DIR: ${DEVEL_DIR}")
 ```
 
 **clion** 在 `CMakeLists.txt`文件中可以使用 缺省 显示出 cmake 的常量。可以尝试使用关键词：`PROJECT, ROOT, CMAKE, SOURCE`。
+
+
+
+#### 01：clion namespace 不缩进
+
+<img src="20211130 - imu ros development (init node).assets/image-20211201215400496.png" alt="image-20211201215400496" style="zoom:40%;" align="left"/>
 
 
 
