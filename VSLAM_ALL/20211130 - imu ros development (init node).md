@@ -348,6 +348,27 @@ print GRY data!
 0
 ```
 
+最新进展：
+
+删除了不必要的代码，发现两个问题：1. 丢包率高，2. ros imu_tools 订阅消息出问题。
+
+| <img src="20211130 - imu ros development (init node).assets/image-20211202190107906.png" alt="image-20211202190107906" style="zoom:50%;" align="left"/> |
+| ------------------------------------------------------------ |
+| <img src="20211130 - imu ros development (init node).assets/image-20211202190221053.png" alt="image-20211202190221053" style="zoom:50%;" align="left"/> |
+
+
+
+### Task 06：阅读：link21：ROS中发布IMU传感器消息
+
+Task 05 架构很不错，但是问题暂时解决不了。先通过 Task 06 完成 imu_tools 的操作。
+
+完成 Task04 遗留问题 2：ros imu_tools rviz 显示。
+
+![image-20211202193301493](20211130 - imu ros development (init node).assets/image-20211202193301493.png)
+
+| <img src="20211130 - imu ros development (init node).assets/image-20211202221215364.png" alt="image-20211202221215364" style="zoom:65%;" /> | ![image-20211202193301493](20211130 - imu ros development (init node).assets/image-20211202193301493.png) |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+
 
 
 ---
@@ -467,6 +488,8 @@ link18: [**Setup CLion with ROS**](https://answers.ros.org/question/284786/setup
 link19: [clion+ros开发环境的搭建 -- 【这种方式可以解决头文件报错问题】](https://blog.csdn.net/qq_40957243/article/details/118313690?spm=1001.2101.3001.6650.2&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-2.no_search_link&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-2.no_search_link)
 
 link20: [ROS setup tutorial -- 【官方的 clion + ros 环境配置】](https://www.jetbrains.com/help/clion/ros-setup-tutorial.html)
+
+link21: [ROS中发布IMU传感器消息 --【包含了 ros imu_tools 的使用】](https://www.cnblogs.com/21207-iHome/p/7832355.html)
 
 
 
@@ -874,7 +897,7 @@ typedef unsigned __int64 uint64_t;			// 未知 __int64
 
 
 
-#### 01: c99 中的 uxxx_t 类型：
+#### 01：c99 中的 uxxx_t 类型：
 
 `uint8_t，uint_16_t，uint32_t，uint64_t` 类型
 
@@ -917,6 +940,16 @@ typedef unsigned long long int  uint64_t;
 
 
 
+#### 02：link12：typeid 的使用
+
+<img src="20211130 - imu ros development (init node).assets/image-20211202154336721.png" alt="image-20211202154336721" style="zoom:35%;" align="left"/>
+
+
+
+
+
+
+
 
 
 ---
@@ -948,6 +981,10 @@ link09: [浅析C语言之uint8_t / uint16_t / uint32_t /uint64_t](https://blog.c
 link10: [std::cout 输出 unsigned char类型数据](https://blog.csdn.net/weixin_43851636/article/details/110552887)
 
 link11: [C++中二进制、字符串、十六进制、十进制之间的转换 --【这文章太有用了】](https://blog.csdn.net/MOU_IT/article/details/89060249)
+
+link12: [[C++] 使用 typeid() 確認變數資料型態](https://clay-atlas.com/blog/2021/05/11/cpp-cn-typeid-check-variable-data-type/)
+
+link13: [std::dec, std::hex, std::oct](https://en.cppreference.com/w/cpp/io/manip/hex)
 
 
 
