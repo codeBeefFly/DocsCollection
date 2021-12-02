@@ -13,9 +13,179 @@
 
 2021年12月01日：imu 数据解析。
 
+2021年12月02日：imu 数据解析，conti。
+
 ---
 
 convention: maximum logs recorded 3.
+
+---
+
+
+
+## 2021年12月02日
+
+### 记录
+
+今天将继续 2021-12-01 的工作。
+
+
+
+#### Task 00：阅读：link00：Linux下使用CMake编译C++
+
+项目架构：
+
+```shell
+ds18@ubuntu:~/catkin_x/CPP_WS/test_cpp_cmake$ tree .
+.
+├── bin
+│   └── hello_world
+├── build
+├── CMakeLists.txt
+├── include
+│   └── a.h
+├── lib
+└── src
+    ├── a.cpp
+    └── main.cpp
+
+5 directories, 5 files
+```
+
+>1. **bin -> 放置c++可执行文件**
+>2. **build -> 放置编译生成文件**
+>3. **src -> 放置 源文件，通俗点就是.cpp文件**
+>4. **include -> 放置头文件，通俗点就是.h文件**
+>5. **lib -> 放置 库文件，就是.so .a文件**
+
+
+
+CmakeList.txt 内容详细：
+
+```cmake
+# 1、首先开头给出要求cmake最低版本以及工程名称
+cmake_minimum_required(VERSION 2.8)
+project(test)
+
+# 2、设置编译模式
+set(CMAKE_BUILD_TYPE Release)
+
+# 3、设置可执行文件与链接库保存的路径
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
+set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+
+# 4、设置头文件目录
+include_directories(
+    ${PROJECT_SOURCE_DIR}/include
+)
+
+# 5、添加编译文件
+add_executable(
+    hello_world 
+    src/main.cpp src/a.cpp
+)
+```
+
+编译过程 + 结果：
+
+```shell
+ds18@ubuntu:~/catkin_x/CPP_WS/test_cpp_cmake/build$ cmake ..
+-- The C compiler identification is GNU 7.5.0
+-- The CXX compiler identification is GNU 7.5.0
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+b-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/ds18/catkin_x/CPP_WS/test_cpp_cmake/build
+
+ds18@ubuntu:~/catkin_x/CPP_WS/test_cpp_cmake/build$ make
+Scanning dependencies of target hello_world
+[ 33%] Building CXX object CMakeFiles/hello_world.dir/src/main.cpp.o
+[ 66%] Building CXX object CMakeFiles/hello_world.dir/src/a.cpp.o
+[100%] Linking CXX executable ../bin/hello_world
+[100%] Built target hello_world
+
+ds18@ubuntu:~/catkin_x/CPP_WS/test_cpp_cmake$ tree
+.
+├── bin
+│   └── hello_world
+├── build
+│   ├── CMakeCache.txt
+│   ├── CMakeFiles
+│   │   ├── 3.10.2
+│   │   │   ├── CMakeCCompiler.cmake
+│   │   │   ├── CMakeCXXCompiler.cmake
+│   │   │   ├── CMakeDetermineCompilerABI_C.bin
+│   │   │   ├── CMakeDetermineCompilerABI_CXX.bin
+│   │   │   ├── CMakeSystem.cmake
+│   │   │   ├── CompilerIdC
+│   │   │   │   ├── a.out
+│   │   │   │   ├── CMakeCCompilerId.c
+│   │   │   │   └── tmp
+│   │   │   └── CompilerIdCXX
+│   │   │       ├── a.out
+│   │   │       ├── CMakeCXXCompilerId.cpp
+│   │   │       └── tmp
+│   │   ├── cmake.check_cache
+│   │   ├── CMakeDirectoryInformation.cmake
+│   │   ├── CMakeOutput.log
+│   │   ├── CMakeTmp
+│   │   ├── feature_tests.bin
+│   │   ├── feature_tests.c
+│   │   ├── feature_tests.cxx
+│   │   ├── hello_world.dir
+│   │   │   ├── build.make
+│   │   │   ├── cmake_clean.cmake
+│   │   │   ├── CXX.includecache
+│   │   │   ├── DependInfo.cmake
+│   │   │   ├── depend.internal
+│   │   │   ├── depend.make
+│   │   │   ├── flags.make
+│   │   │   ├── link.txt
+│   │   │   ├── progress.make
+│   │   │   └── src
+│   │   │       ├── a.cpp.o
+│   │   │       └── main.cpp.o
+│   │   ├── Makefile2
+│   │   ├── Makefile.cmake
+│   │   ├── progress.marks
+│   │   └── TargetDirectories.txt
+│   ├── cmake_install.cmake
+│   └── Makefile
+├── CMakeLists.txt
+├── include
+│   └── a.h
+├── lib
+└── src
+    ├── a.cpp
+    └── main.cpp
+
+14 directories, 38 files
+
+
+ds18@ubuntu:~/catkin_x/CPP_WS/test_cpp_cmake/bin$ ./hello_world 
+Ready
+```
+
+
+
+
+
+### 参考
+
+link00: [Linux下使用CMake编译C++](https://zhuanlan.zhihu.com/p/373256365)
+
+
 
 ---
 
@@ -476,7 +646,7 @@ linux 串口权限问题，解决（参考 link04）：
 >
 >    ```bash
 >    sudo chmod 666 /dev/ttyUSB0
->       
+>          
 >    ds18@ubuntu:~$ ll /dev/ttyUSB0
 >    crwxrwxrwx 1 root dialout 188, 0 Nov 30 00:08 /dev/ttyUSB0
 >    ```
@@ -491,7 +661,7 @@ linux 串口权限问题，解决（参考 link04）：
 >
 >    ```
 >    sudo gedit /etc/udev/rules.d/70-ttyusb.rules
->       
+>          
 >    KERNEL=="ttyUSB*", MODE="0666", SYMLINK+="vibot_base"
 >    ```
 
@@ -704,6 +874,51 @@ typedef unsigned __int64 uint64_t;			// 未知 __int64
 
 
 
+#### 01: c99 中的 uxxx_t 类型：
+
+`uint8_t，uint_16_t，uint32_t，uint64_t` 类型
+
+> 1、这些类型的来源：这些数据类型中都带有`_t`, `_t` 表示这些数据类型是通过`typedef`定义的，而不是新的数据类型。也就是说，它们其实是我们已知的类型的别名。
+>
+> 2、使用这些类型的原因：方便代码的维护。比如，在C中没有`bool`型，于是在一个软件中，一个程序员使用`int`，一个程序员使用`short`，会比较混乱。最好用一个`typedef`来定义一个统一的`bool`：`typedef char bool;`。
+>
+> 3、在涉及到跨平台时，不同的平台会有不同的字长，所以利用预编译和typedef可以方便的维护代码。
+>
+> 4、在C99标准中定义了这些数据类型，具体定义在：`/usr/include/stdint.h`
+
+```c++
+# ifndef __int8_t_defined  
+# define __int8_t_defined  
+typedef signed char             int8_t;   
+typedef short int               int16_t;  
+typedef int                     int32_t;  
+# if __WORDSIZE == 64  
+typedef long int                int64_t;  
+# else  
+__extension__  
+typedef long long int           int64_t;  
+# endif  
+# endif  
+  
+  
+typedef unsigned char           uint8_t;  
+typedef unsigned short int      uint16_t;  
+# ifndef __uint32_t_defined  
+typedef unsigned int            uint32_t;  
+# define __uint32_t_defined  
+#endif  
+# if __WORDSIZE == 64  
+typedef unsigned long int       uint64_t;  
+#else  
+__extension__  
+typedef unsigned long long int  uint64_t;  
+# endif  
+```
+
+
+
+
+
 ---
 
 
@@ -728,7 +943,11 @@ link07: [Linux查看端口占用情况,并强制释放占用的端口 -- (验证
 
 link08: [解决Linux非root用户读写串口权限问题](https://blog.csdn.net/itas109/article/details/83027431)
 
+link09: [浅析C语言之uint8_t / uint16_t / uint32_t /uint64_t](https://blog.csdn.net/Mary19920410/article/details/71518130)
 
+link10: [std::cout 输出 unsigned char类型数据](https://blog.csdn.net/weixin_43851636/article/details/110552887)
+
+link11: [C++中二进制、字符串、十六进制、十进制之间的转换 --【这文章太有用了】](https://blog.csdn.net/MOU_IT/article/details/89060249)
 
 
 
