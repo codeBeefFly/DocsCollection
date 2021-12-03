@@ -13,11 +13,74 @@
 
 2021年12月01日：imu 数据解析。
 
-2021年12月02日：imu 数据解析，conti。
+2021年12月02日：imu 数据解析，conti。解决：imu_raw 丢包，ros imu_tools 问题。cmake 编译 c++ 问题。
+
+2021年12月03日：解析 imu raw 数据。
 
 ---
 
-convention: maximum logs recorded 3.
+convention: maximum logs recorded 3 - 4.
+
+---
+
+
+
+## 2021年12月03日
+
+### 记录：
+
+#### Task 00：阅读：link00：ubuntu 添加 swap 空间
+
+```shell
+# 1. 查看剩余空间
+ds18@ubuntu:~$ free -m
+
+total        used        free      shared  buff/cache   available
+Mem:           9937        7943         679         169        1314        1518
+Swap:          2047         831        1216
+
+# 2. 创建 swap 空间
+ds18@ubuntu:~$ sudo mkdir /swap
+
+# 3. 为 swap 空间分配内存
+ds18@ubuntu:~$ sudo dd if=/dev/zero of=swapfile bs=1024 count=8000000
+
+8000000+0 records in
+8000000+0 records out
+8192000000 bytes (8.2 GB, 7.6 GiB) copied, 18.8047 s, 436 MB/s
+
+# 4. 把生成的文件转化为 swap 文件
+ds18@ubuntu:~$ sudo mkswap -f swapfile
+
+mkswap: swapfile: insecure permissions 0644, 0600 suggested.
+Setting up swapspace version 1, size = 7.6 GiB (8191995904 bytes)
+no label, UUID=91502adc-145e-41f9-9685-f6c38d3d1b4a
+
+
+# 5. 激活 swap 文件
+ds18@ubuntu:~$ sudo swapon swapfile
+
+swapon: /home/ds18/swapfile: insecure permissions 0644, 0600 suggested.
+
+# 6. 再次查看空间
+ds18@ubuntu:~$ free -m
+
+total        used        free      shared  buff/cache   available
+Mem:           9937        7937         125         169        1874        1527
+Swap:          9860         834        9025
+ds18@ubuntu:~$ 
+
+```
+
+<img src="20211130 - imu ros development (init node).assets/image-20211203164211591.png" alt="image-20211203164211591" style="zoom:80%;" align="left"/>
+
+
+
+### 参考：
+
+link00: [Ubuntu增加Swap空间大小](https://blog.csdn.net/yc461515457/article/details/53610412)
+
+
 
 ---
 
