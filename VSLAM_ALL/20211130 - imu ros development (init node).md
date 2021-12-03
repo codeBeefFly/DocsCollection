@@ -364,10 +364,14 @@ Task 05 架构很不错，但是问题暂时解决不了。先通过 Task 06 完
 
 完成 Task04 遗留问题 2：ros imu_tools rviz 显示。
 
-![image-20211202193301493](20211130 - imu ros development (init node).assets/image-20211202193301493.png)
-
 | <img src="20211130 - imu ros development (init node).assets/image-20211202221215364.png" alt="image-20211202221215364" style="zoom:65%;" /> | ![image-20211202193301493](20211130 - imu ros development (init node).assets/image-20211202193301493.png) |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
+
+
+
+2021年12月3日：到目前为止，已经解决了：1. 丢包问题，2. rviz 显示问题。还需要解决解码问题。
+
+<img src="20211130 - imu ros development (init node).assets/image-20211203122255241.png" alt="image-20211203122255241" style="zoom:30%;" align="left"/>
 
 
 
