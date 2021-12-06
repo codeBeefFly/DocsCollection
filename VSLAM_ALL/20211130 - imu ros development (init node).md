@@ -76,6 +76,14 @@ ds18@ubuntu:~$
 
 
 
+### Task 01: 完成 imu ros 驱动的解码与 imu_tools 的使用
+
+todo: 代码整理。
+
+<img src="20211130 - imu ros development (init node).assets/image-20211206093957711.png" alt="image-20211206093957711" style="zoom:80%;" align="left" />
+
+<img src="20211130 - imu ros development (init node).assets/image-20211206094045314.png" alt="image-20211206094045314" style="zoom:80%;" align="left"/>
+
 ### 参考：
 
 link00: [Ubuntu增加Swap空间大小](https://blog.csdn.net/yc461515457/article/details/53610412)
@@ -736,7 +744,7 @@ linux 串口权限问题，解决（参考 link04）：
 >
 >    ```bash
 >    sudo chmod 666 /dev/ttyUSB0
->          
+>             
 >    ds18@ubuntu:~$ ll /dev/ttyUSB0
 >    crwxrwxrwx 1 root dialout 188, 0 Nov 30 00:08 /dev/ttyUSB0
 >    ```
@@ -751,7 +759,7 @@ linux 串口权限问题，解决（参考 link04）：
 >
 >    ```
 >    sudo gedit /etc/udev/rules.d/70-ttyusb.rules
->          
+>             
 >    KERNEL=="ttyUSB*", MODE="0666", SYMLINK+="vibot_base"
 >    ```
 
