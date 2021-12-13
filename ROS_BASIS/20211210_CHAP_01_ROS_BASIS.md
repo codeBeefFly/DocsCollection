@@ -123,7 +123,7 @@ LOGS:
 
 
 
-#### 2. HelloROS(C++版)
+#### 2. HelloROS(C++版) ★
 
 **步骤01**：进入 `package_name/src`，创建 `helloROS.cpp`
 
@@ -449,7 +449,7 @@ ROS 三层自身结构：
 
 
 
-##### 重要文件：`CMakelists.txt`
+##### 重要文件：`CMakelists.txt` ★
 
 >**CMakeLists.txt **是 CMake 构建系统的输入，用于构建软件包。这些文件描述了如何构建代码以及将代码安装到何处。
 
@@ -873,7 +873,6 @@ apt search package_name						   # apt 搜索功能包
 ## 查 ---+---+---+---+---+---+---+---+---+---+---+---+---+---+
 
 rosed package_name file_name				   # 编辑包中文件
-
 ```
 
 
@@ -901,8 +900,6 @@ rosrun package_name binary_file_name（节点可执行文件） # 运行指定 r
 ## roslaunch   ---+---+---+---+---+---+---+---+---+---+---+---+
 
 roslaunch package_name launch_file_name       # 执行包中launch文件
-
-
 ```
 
 
