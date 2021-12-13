@@ -831,20 +831,72 @@ rospack find package_name   				   # 找到目标功能包
 
 roscd package_name							   # 进入功能包
 
-rosls package_name							   # 
+rosls package_name							   # 列出包下所有
 
-apt search package_name
+apt search package_name						   # apt 搜索功能包
 
 
 ## 查 ---+---+---+---+---+---+---+---+---+---+---+---+---+---+
 
-rosed package_name
+rosed package_name file_name				   # 编辑包中文件
 
 ```
 
 
 
 ##### 执行命令
+
+```shell
+## roscore ---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+roscore
+
+roscore 将启动:
+	ros master
+	ros 参数服务器
+	rosout 日志节点
+
+roscore -p xxxx  							   # 指定端口号启动
+
+
+## rosrun  ---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+rosrun package_name binary_file_name（节点可执行文件） # 运行指定 ros 节点
+
+
+## roslaunch   ---+---+---+---+---+---+---+---+---+---+---+---+
+
+roslaunch package_name launch_file_name       # 执行包中launch文件
+
+
+```
+
+
+
+----
+
+#### 4. ROS COMPUTATION GRAPH（ros 计算图） 
+
+>ROS 文件结构（ROS文件在磁盘上的存储结构），静态的。
+>
+>ROS 计算图，ROS 运行之后节点的网络形式的数据交互过程。网络拓扑图。
+>
+>查看计算图的工具：rqt_graph
+
+```shell
+## 安装 ——-+——-+——-+——-+——-+——-+——-+——-+——-+——-+——-+——-+——-+
+
+sudo apt install ros-<distro>-rqt
+sudo apt install ros-<distro>-rqt-common-plugins
+
+
+## 运行 ——-+——-+——-+——-+——-+——-+——-+——-+——-+——-+——-+——-+——-+
+
+rqt_graph
+rosrun rqt_graph rqt_graph
+```
+
+
 
 
 
