@@ -192,7 +192,9 @@ target_link_libraries(<target> ... <item>... ...)
 ```
 >Specify libraries or flags to use when linking a given target and/or its dependents.
 >
->指定连接给定目标和/或其依赖项时要使用的库或标志。  
+>指定 连接给定目标和/或其依赖项时 要使用的库或标志。  
+>
+>目标可以是可执行文件，或者是动态库文件；即 指定目标可执行文件或动态库文件要使用的库或标志。
 >
 >The named `<target>` must have been created by a command such as [`add_executable()`](https://cmake.org/cmake/help/v3.16/command/add_executable.html#command:add_executable) or [`add_library()`](https://cmake.org/cmake/help/v3.16/command/add_library.html#command:add_library) and must not be an [ALIAS target](https://cmake.org/cmake/help/v3.16/manual/cmake-buildsystem.7.html#alias-targets).
 >
@@ -742,6 +744,38 @@ include_directories([AFTER|BEFORE] [SYSTEM] dir1 [dir2 ...])
 >Prefer the [`target_include_directories()`](https://cmake.org/cmake/help/v3.16/command/target_include_directories.html#command:target_include_directories) command to add include directories to individual targets and optionally propagate/export them to dependents.
 >
 >最好使用 target_include_directories() 命令将包含目录添加到单个目标，并可选择将它们传播/导出到从属目录。  
+
+
+
+```cmake
+add_library(<name> [STATIC | SHARED | MODULE]
+            [EXCLUDE_FROM_ALL]
+            [source1] [source2 ...])
+```
+
+>Adds a library target called `<name>` to be built from the source files listed in the command invocation. (The source files can be omitted here if they are added later using [`target_sources()`](https://cmake.org/cmake/help/v3.16/command/target_sources.html#command:target_sources).) 
+>
+>添加一个名为<name>的库目标，用从命令调用中列出的源文件构建。 (如果稍后使用target_sources() 添加源文件，这里可以省略它们。)  
+>
+>The `<name>` corresponds to the logical target name and must be globally unique within a project. The actual file name of the library built is constructed based on conventions of the native platform (such as `lib<name>.a` or `<name>.lib`).
+>
+><name>对应于逻辑目标名称，并且在项目中必须是全局唯一的。 所构建的库的实际文件名是根据本机平台的约定构造的(例如`lib<name>`。 或 `<名称> . lib`)。  
+>
+>`STATIC`, `SHARED`, or `MODULE` may be given to specify the type of library to be created. 
+>
+>`STATIC 、 SHARED 或 MODULE`可以用来指定要创建的库的类型。  
+>
+>`STATIC` libraries are archives of object files for use when linking other targets. 
+>
+>`STATIC`库是用于连接其他目标的目标文件存档。  
+>
+>`SHARED` libraries are linked dynamically and loaded at runtime. 
+>
+>`SHARED`库在运行时动态链接并加载。  
+>
+>`MODULE` libraries are plugins that are not linked into other targets but may be loaded dynamically at runtime using dlopen-like functionality. 
+>
+>`MODULE`库是不链接到其他目标的插件，但可以在运行时使用类似dlopen的功能动态加载。  
 
 
 
