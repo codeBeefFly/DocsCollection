@@ -369,7 +369,7 @@ target_link_libraries(<target> ... <item>... ...)
 
 
 
-#### 7. 运行结果：★
+#### 7. 运行结果：
 
 使用命令：
 
@@ -769,27 +769,325 @@ ds18@ubuntu:~/catkin_x/IMU_ws_mk2/LINES354_ws/src/test_pkg$ tree
 
 #### 2. 分析：
 
-
+> 在模型实现中，需要关注的关键点有三个:
+>
+> 1. 发布方
+> 2. 接收方
+> 3. 数据(此处为自定义消息)
 
 #### 3. 流程：
 
+>1. 编写发布方实现；
+>2. 编写订阅方实现；
+>3. 编辑配置文件；
+>4. 编译并执行。
+
+#### 4. 代码实现（发布方，talker）：★
+
+流程：
+
+> 1. 初始化 ROS 节点：`ros::init(argc, argv, "节点名称")`
+> 2. 创建 ROS 节点句柄：`ros::nodeHandle nh`
+> 3. 创建发布者对象：`ros::Publisher pub = nh.advertise<消息类型>("话题名称"，消息队列大小)`
+> 4. 编辑消息内容：`消息类型 消息对象`，`消息对象.消息对象成员`
+> 5. 循环发布消息：`pub.publish(消息对象)`
+
+```cpp
+/*
+    需求: 循环发布人的信息
+*/
+
+#include "ros/ros.h"
+//#include "demo_02_talker_listener/Person.h"
+#include "test_pkg/Person.h"    // package_name/msg_name.h
+
+int main(int argc, char *argv[]) {
+    setlocale(LC_ALL, "");
+
+    //1.初始化 ROS 节点
+    ros::init(argc, argv, "talker_person");
+
+    //2.创建 ROS 句柄
+    ros::NodeHandle nh;
+
+    //3.创建发布者对象
+    ros::Publisher pub = nh.advertise<test_pkg::Person>("chatter_person", 1000);
+
+    //4.组织被发布的消息，编写发布逻辑并发布消息
+    test_pkg::Person p;
+    p.name = "sunwukong";
+    p.age = 2000;
+    p.height = 1.45;
+
+    ros::Rate r(1);
+    while (ros::ok()) {
+        pub.publish(p);
+        p.age += 1;
+        ROS_INFO("我叫:%s,今年%d岁,高%.2f米", p.name.c_str(), p.age, p.height);
+
+        r.sleep();
+        ros::spinOnce();	// process a single round of callbacks
+    }
 
 
-#### 4. 代码实现（发布方，talker）：
+    return 0;
+}
+```
+
+**代码解释：**
+
+包含的消息头文件：`test_pkg/Person.h`，这个文件的路径查找可以通过以下方式：
+
+```shell
+# 这个是生成的 .h 文件所在包
+ds18@ubuntu:~/catkin_x/IMU_ws_mk2/LINES354_ws/devel/include/test_pkg$ pwd
+/home/ds18/catkin_x/IMU_ws_mk2/LINES354_ws/devel/include/test_pkg
+
+# 这个是 .h 文件名
+ds18@ubuntu:~/catkin_x/IMU_ws_mk2/LINES354_ws/devel/include/test_pkg$ ls
+Person.h
+```
+
+如何使用自定义消息：
+
+```cpp
+    test_pkg::Person p;				// 创建自定义消息对象
+    p.name = "sunwukong";			// 根据消息结构体进行赋值
+    p.age = 2000;					// 根据消息结构体进行赋值
+    p.height = 1.45;				// 根据消息结构体进行赋值
+
+
+// 消息结构体
+namespace test_pkg
+{
+template <class ContainerAllocator>
+struct Person_
+{
+  typedef Person_<ContainerAllocator> Type;
+
+  Person_()
+    : name()
+    , age(0)
+    , height(0.0)  {
+    }
+  Person_(const ContainerAllocator& _alloc)
+    : name(_alloc)
+    , age(0)
+    , height(0.0)  {
+  (void)_alloc;
+    }
+    
+    ...
+        
+}	// end of namespace test_pkg
+```
+
+如何发布自定义消息：
+
+```cpp
+pub.publish(p);			// talker 发布消息
+```
 
 
 
-#### 5. 代码实现（接收方，listener）：
+#### 5. 代码实现（接收方，listener）：★
+
+流程：
+
+> 1. 初始化 ROS 节点：`ros::init(argc, argv, "节点名称")`
+> 2. 创建 ROS 节点句柄：`ros::nodeHandle nh`
+> 3. 创建订阅者对象：`ros::subscriber sub = nh.subscribe<消息类型>(话题名称，消息队列长度，消息处理回调函数)`
+> 4. 同时在订阅者对象订阅函数中使用回调函数处理消息：`回调函数`
+
+```cpp
+/*
+    需求: 订阅人的信息
+*/
+
+#include "ros/ros.h"
+//#include "demo02_talker_listener/Person.h"
+#include "test_pkg/Person.h"
+
+// 回调函数
+void doPerson(const test_pkg::Person::ConstPtr &person_p) {
+    ROS_INFO("订阅的人信息:%s, %d, %.2f", person_p->name.c_str(), person_p->age, person_p->height);
+}
+
+int main(int argc, char *argv[]) {
+    setlocale(LC_ALL, "");
+
+    //1.初始化 ROS 节点
+    ros::init(argc, argv, "listener_person");
+    
+    //2.创建 ROS 句柄
+    ros::NodeHandle nh;
+    
+    //3.创建订阅对象
+    //4.回调函数中处理 person
+    ros::Subscriber sub = nh.subscribe<test_pkg::Person>("chatter_person", 10, doPerson);
+
+    //5.ros::spin();
+    ros::spin();
+    return 0;
+}
+```
+
+**代码解释：**
+
+订阅者订阅自定义消息话题：
+
+```cpp
+// 订阅函数：节点句柄对象.subscribe
+// 消息类型：test_pkg::Person
+// 话题名称：chatter_persion
+// 消息处理函数：doPerson
+
+ros::Subscriber sub = nh.subscribe<test_pkg::Person>("chatter_person", 10, doPerson);
+
+// ---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+    
+// 回调函数
+// 参数：消息指针：test_pkg::Person::ConstPtr
+void doPerson(const test_pkg::Person::ConstPtr &person_p) {
+    ROS_INFO("订阅的人信息:%s, %d, %.2f", person_p->name.c_str(), person_p->age, person_p->height);
+}
+
+```
 
 
 
-#### 6. 修改 `CMakeLists.txt`：
+
+
+#### 6. 修改 `CMakeLists.txt`：★
+
+注：只显示需要修改的地方。
+
+```cmake
+## Generate added messages and services with any dependencies listed here
+# 生成的文件在哪儿？
+generate_messages(
+    DEPENDENCIES
+    std_msgs  # 生成消息时依赖于 std_msgs
+)
+
+# 添加一个 demo_02_topic_talker_node 的可执行目标
+# 使用的 src/demo_02_topic_talker_node.cpp 源文件
+add_executable(demo_02_topic_talker_node
+        src/demo_02_topic_talker_node.cpp
+        )
+
+add_executable(demo_02_topic_listener_node
+        src/demo_02_topic_listener_node.cpp
+        )
+        
+
+# 使顶级 <目标：demo_02_topic_talker_node> 依赖于其他顶级目标
+# 这里的依赖目标为 test_pkg_generate_messages_cpp
+# 以确保这些依赖目标在 <目标：demo_02_topic_talker_node> 之前构建。
+# 对于 ${PROJECT_NAME}_generate_messages_cpp
+# 他是由 generate_messages() 生成
+add_dependencies(demo_02_topic_talker_node
+        ${PROJECT_NAME}_generate_messages_cpp
+        )
+
+add_dependencies(demo_02_topic_listener_node
+        ${PROJECT_NAME}_generate_messages_cpp
+        )
+        
+
+# 指定 连接给定目标和/或其依赖项时 要使用的库或标志。 
+target_link_libraries(demo_02_topic_talker_node
+        ${catkin_LIBRARIES}
+        )
+
+target_link_libraries(demo_02_topic_listener_node
+        ${catkin_LIBRARIES}
+        )
+```
+
+##### cmake 讲解
+
+
+
+```cmake
+project(<PROJECT-NAME> [<language-name>...])
+```
+
+>Sets the name of the project, and stores it in the variable [`PROJECT_NAME`](https://cmake.org/cmake/help/v3.16/variable/PROJECT_NAME.html#variable:PROJECT_NAME). When called from the top-level `CMakeLists.txt` also stores the project name in the variable [`CMAKE_PROJECT_NAME`](https://cmake.org/cmake/help/v3.16/variable/CMAKE_PROJECT_NAME.html#variable:CMAKE_PROJECT_NAME).
+>
+>设置项目的名称，并将其存储在变量 PROJECT_NAME 中。 当从顶级 CMakeLists.txt 中调用时，它还将项目名称存储在变量 CMAKE_PROJECT_NAME中。  
+
+
+
+```cmake
+add_executable(<name> [WIN32] [MACOSX_BUNDLE]
+               [EXCLUDE_FROM_ALL]
+               [source1] [source2 ...])
+```
+
+>Adds an executable target called `<name>` to be built from the source files listed in the command invocation.
+>
+>添加一个名为<name>的可执行目标，从命令调用中列出的源文件构建。
+
+
+
+```cmake
+add_dependencies(<target> [<target-dependency>]...)
+```
+
+>Makes a top-level `<target>` depend on other top-level targets to ensure that they build before `<target>` does. 
+>
+>使顶级<目标>依赖于其他顶级目标，以确保它们（其他顶级目标）在<目标>之前构建。  
+>
+>A top-level target is one created by one of the [`add_executable()`](https://cmake.org/cmake/help/v3.16/command/add_executable.html#command:add_executable), [`add_library()`](https://cmake.org/cmake/help/v3.16/command/add_library.html#command:add_library), or [`add_custom_target()`](https://cmake.org/cmake/help/v3.16/command/add_custom_target.html#command:add_custom_target) commands (but not targets generated by CMake like `install`).
+>
+>顶级目标是由 `add_executable()`、`add_library()` 或 `add_custom_target()` 命令创建的（但不是由CMake生成的目标，比如`install`）。  
+
+
+
+```cmake
+target_link_libraries(<target> ... <item>... ...)
+```
+
+>Specify libraries or flags to use when linking a given target and/or its dependents.
+>
+>指定连接给定目标和/或其依赖项时要使用的库或标志。 
 
 
 
 #### 7. 运行结果：
 
+```shell
+ds18@ubuntu:~/catkin_x/IMU_ws_mk2/LINES354_ws$ rosrun test_pkg demo_02_topic_talker_node 
+[ INFO] [1639447619.331090132]: 我叫:sunwukong,今年2001岁,高1.45米
+[ INFO] [1639447620.331968961]: 我叫:sunwukong,今年2002岁,高1.45米
+[ INFO] [1639447621.332200680]: 我叫:sunwukong,今年2003岁,高1.45米
+[ INFO] [1639447622.332160216]: 我叫:sunwukong,今年2004岁,高1.45米
+[ INFO] [1639447623.332250742]: 我叫:sunwukong,今年2005岁,高1.45米
+[ INFO] [1639447624.332129285]: 我叫:sunwukong,今年2006岁,高1.45米
+[ INFO] [1639447625.331337186]: 我叫:sunwukong,今年2007岁,高1.45米
+[ INFO] [1639447626.331314026]: 我叫:sunwukong,今年2008岁,高1.45米
+[ INFO] [1639447627.331524543]: 我叫:sunwukong,今年2009岁,高1.45米
 
+
+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+
+ds18@ubuntu:~/catkin_x/IMU_ws_mk2/LINES354_ws$ rosrun test_pkg demo_02_topic_listener_node 
+[ INFO] [1639447627.331833388]: 订阅的人信息:sunwukong, 2008, 1.45
+[ INFO] [1639447628.332839181]: 订阅的人信息:sunwukong, 2009, 1.45
+[ INFO] [1639447629.332686048]: 订阅的人信息:sunwukong, 2010, 1.45
+[ INFO] [1639447630.331821972]: 订阅的人信息:sunwukong, 2011, 1.45
+[ INFO] [1639447631.332084299]: 订阅的人信息:sunwukong, 2012, 1.45
+[ INFO] [1639447632.332213198]: 订阅的人信息:sunwukong, 2013, 1.45
+[ INFO] [1639447633.332183324]: 订阅的人信息:sunwukong, 2014, 1.45
+[ INFO] [1639447634.331879931]: 订阅的人信息:sunwukong, 2015, 1.45
+```
+
+使用 clion-ide 的调试运行也可以：
+
+| ![image-20211214112402316](20211213_CHAP_02_ROS_COMMU.assets/image-20211214112402316.png) | ![image-20211214112420062](20211213_CHAP_02_ROS_COMMU.assets/image-20211214112420062.png) |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
 
 
 
@@ -829,11 +1127,11 @@ link02: [在ROS中处理yaml文件](https://blog.csdn.net/u014610460/article/det
 
 link03: [ROS下的CMakeList.txt编写](https://blog.csdn.net/TurboIan/article/details/74604052)
 
-link04: []()
+link04: [**{PKG_NAME}_generate_messages_cpp vs {PKG_NAME}_gencpp**](https://answers.ros.org/question/60994/pkg_name_generate_messages_cpp-vs-pkg_name_gencpp/)
 
-link05: []()
+link05: [Creating a ROS msg and srv](https://wiki.ros.org/ROS/Tutorials/CreatingMsgAndSrv#Using_srv)
 
-link06: []()
+link06: [CMakeLists.txt  -- for ROS](http://wiki.ros.org/action/fullsearch/catkin/CMakeLists.txt?action=fullsearch&context=180&value=linkto%3A"catkin%2FCMakeLists.txt")
 
 link07: []()
 
