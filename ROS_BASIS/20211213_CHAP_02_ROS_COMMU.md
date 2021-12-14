@@ -1250,13 +1250,17 @@ catkin_package(
 
 #### 1. 需求：
 
-
-
-#### 2. 分析：
+>服务通信中，客户端提交两个整数至服务端，服务端求和并响应结果到客户端，请创建服务器与客户端通信的数据载体。
 
 
 
-#### 3. 流程：
+#### 2. 分析 + 流程：
+
+> srv 实现流程与自定义 msg 实现流程类似:
+>
+> 1. 按照固定格式创建srv文件
+> 2. 编辑配置文件
+> 3. 编译生成中间文件
 
 
 
@@ -1515,6 +1519,402 @@ $ rosrun test_pkg demo_03_service_client_node 7 3
 
 ## 03. PARAMETER SERVER (参数服务器)
 
+### 00. Some Points
+
+>参数服务器在ROS中主要用于实现不同节点之间的数据共享。
+>
+>参数服务器（相当于）是独立于所有节点的一个公共容器，可以将数据存储在该容器中，被不同的节点调用，当然不同的节点也可以往其中存储数据。
+
+>**举例**：
+>
+>全局路径规划，设计一个从出发点到目标点的大致路径。
+>
+>本地路径规划，会根据当前路况生成时时的行进路径。
+>
+>全局路径规划和本地路径规划时，就会使用到参数服务器：
+>
+>1. 小车的尺寸信息存储到参数服务器
+>
+>全局路径规划节点与本地路径规划节点都可以从参数服务器中调用这些参数。
+>
+>参数服务器，一般适用于存在数据共享的一些应用场景。
+
+> **概念：**以共享的方式实现不同节点之间数据交互的通信模式。
+>
+> **作用：**存储一些多节点共享的数据，类似于全局变量。
+>
+> **操作：**实现参数增删改查操作。
+
+
+
+---
+
+### 01. 理论模型
+
+> 该模型中涉及到三个角色:
+>
+> - ROS Master (管理者)
+> - Talker (参数设置者)
+> - Listener (参数调用者)
+>
+> ROS Master 作为一个公共容器保存参数，Talker 可以向容器中设置参数，Listener 可以获取参数。
+
+<img src="http://www.autolabor.com.cn/book/ROSTutorials/assets/03ROS%E9%80%9A%E4%BF%A1%E6%9C%BA%E5%88%B603_%E5%8F%82%E6%95%B0%E6%9C%8D%E5%8A%A1%E5%99%A8.jpg" alt="img" style="zoom:80%;" align="left" />
+
+---
+
+### 02.  参数操作
+
+#### 1. 增、改
+
+```cpp
+/*
+    参数服务器操作之新增与修改(二者API一样)_C++实现:
+    在 roscpp 中提供了两套 API 实现参数操作
+    ros::NodeHandle
+        setParam("键",值)
+
+    *********** 首选这种复制赋值方法 ***********
+    ros::param
+        set("键","值")
+
+    示例:分别设置整形、浮点、字符串、bool、列表、字典等类型参数
+        修改(相同的键，不同的值)
+*/
+
+
+#include "ros/ros.h"
+
+int main(int argc, char *argv[]) {
+
+    // 1. 初始化 ROS 节点，节点名称唯一
+    ros::init(argc, argv, "set_update_param");
+
+    std::vector<std::string> stus;
+    stus.push_back("zhangsan");
+    stus.push_back("李四");
+    stus.push_back("王五");
+    stus.push_back("孙大脑袋");
+
+    std::map<std::string, std::string> friends;
+    friends["guo"] = "huang";
+    friends["yuang"] = "xiao";
+
+    //NodeHandle--------------------------------------------------------
+    ros::NodeHandle nh;
+    nh.setParam("nh_int", 10);                        // 整型
+    nh.setParam("nh_double", 3.14);                   // 浮点型
+    nh.setParam("nh_bool", true);                     // bool
+    nh.setParam("nh_string", "hello NodeHandle");     // 字符串
+    nh.setParam("nh_vector", stus);                   // vector
+    nh.setParam("nh_map", friends);                   // map
+
+    //修改演示(相同的键，不同的值)
+    nh.setParam("nh_int", 10000);
+
+    //首选这种方式 ！！！
+    //param--------------------------------------------------------
+    ros::param::set("param_int", 20);
+    ros::param::set("param_double", 3.14);
+    ros::param::set("param_string", "Hello Param");
+    ros::param::set("param_bool", false);
+    ros::param::set("param_vector", stus);
+    ros::param::set("param_map", friends);
+
+    //修改演示(相同的键，不同的值)
+    ros::param::set("param_int", 20000);
+
+    return 0;
+}
+```
+
+代码理解：
+
+以字典的方式向参数服务器设置参数：<参数名：参数值> 或 <键：值>
+
+```cpp
+// set a value on the parameter server
+// value type: 浮点、字符串、bool、列表、字典等类型参数
+ros::param::set("参数名", 值);		// set(“键”, 值) 
+```
+
+
+
+#### 2. 查
+
+```cpp
+/*
+    参数服务器操作之查询_C++实现:
+    在 roscpp 中提供了两套 API 实现参数操作
+    ros::NodeHandle
+
+        param(键,默认值)
+            存在，返回对应结果，否则返回默认值
+
+        getParam(键,存储结果的变量)
+            存在,返回 true,且将值赋值给参数2
+            若果键不存在，那么返回值为 false，且不为参数2赋值
+
+        getParamCached键,存储结果的变量)--提高变量获取效率
+            存在,返回 true,且将值赋值给参数2
+            若果键不存在，那么返回值为 false，且不为参数2赋值
+
+        getParamNames(std::vector<std::string>)
+            获取所有的键,并存储在参数 vector 中
+
+        hasParam(键)
+            是否包含某个键，存在返回 true，否则返回 false
+
+        searchParam(参数1，参数2)
+            搜索键，参数1是被搜索的键，参数2存储搜索结果的变量
+
+    ros::param ----- 与 NodeHandle 类似
+*/
+
+#include "ros/ros.h"
+
+int main(int argc, char *argv[]) {
+
+    setlocale(LC_ALL, "");
+
+    ros::init(argc, argv, "get_param");
+
+    //NodeHandle--------------------------------------------------------
+    /*
+    ros::NodeHandle nh;
+    // param 函数
+    int res1 = nh.param("nh_int",100); // 键存在
+    int res2 = nh.param("nh_int2",100); // 键不存在
+    ROS_INFO("param获取结果:%d,%d",res1,res2);
+
+    // getParam 函数
+    int nh_int_value;
+    double nh_double_value;
+    bool nh_bool_value;
+    std::string nh_string_value;
+    std::vector<std::string> stus;
+    std::map<std::string, std::string> friends;
+
+    nh.getParam("nh_int",nh_int_value);
+    nh.getParam("nh_double",nh_double_value);
+    nh.getParam("nh_bool",nh_bool_value);
+    nh.getParam("nh_string",nh_string_value);
+    nh.getParam("nh_vector",stus);
+    nh.getParam("nh_map",friends);
+
+    ROS_INFO("getParam获取的结果:%d,%.2f,%s,%d",
+            nh_int_value,
+            nh_double_value,
+            nh_string_value.c_str(),
+            nh_bool_value
+            );
+    for (auto &&stu : stus)
+    {
+        ROS_INFO("stus 元素:%s",stu.c_str());
+    }
+
+    for (auto &&f : friends)
+    {
+        ROS_INFO("map 元素:%s = %s",f.first.c_str(), f.second.c_str());
+    }
+
+    // getParamCached()
+    nh.getParamCached("nh_int",nh_int_value);
+    ROS_INFO("通过缓存获取数据:%d",nh_int_value);
+
+    //getParamNames()
+    std::vector<std::string> param_names1;
+    nh.getParamNames(param_names1);
+    for (auto &&name : param_names1)
+    {
+        ROS_INFO("名称解析name = %s",name.c_str());
+    }
+    ROS_INFO("----------------------------");
+
+    ROS_INFO("存在 nh_int 吗? %d",nh.hasParam("nh_int"));
+    ROS_INFO("存在 nh_intttt 吗? %d",nh.hasParam("nh_intttt"));
+
+    std::string key;
+    nh.searchParam("nh_int",key);
+    ROS_INFO("搜索键:%s",key.c_str());
+    */
+
+    // 推荐使用 ros::param 的方式
+    // param--------------------------------------------------------
+    ROS_INFO("++++++++++++++++++++++++++++++++++++++++");
+    int res3 = ros::param::param("param_int", 20); //存在
+    int res4 = ros::param::param("param_int2", 30); // 不存在返回默认
+    ROS_INFO("param获取结果:%d,%d", res3, res4);
+
+    // getParam 函数									   // 参数服务器可以存放的变量类型
+    int param_int_value;								// 整型
+    double param_double_value;							// 双精度型
+    bool param_bool_value;								// 布尔型
+    std::string param_string_value;						// 字符串行
+    std::vector<std::string> param_stus;				// 向量
+    std::map<std::string, std::string> param_friends;	// 字典
+
+    ros::param::get("param_int", param_int_value);
+    ros::param::get("param_double", param_double_value);
+    ros::param::get("param_bool", param_bool_value);
+    ros::param::get("param_string", param_string_value);
+    ros::param::get("param_vector", param_stus);
+    ros::param::get("param_map", param_friends);
+
+    ROS_INFO("getParam获取的结果:%d,%.2f,%s,%d",
+             param_int_value,
+             param_double_value,
+             param_string_value.c_str(),
+             param_bool_value
+    );
+    for (auto &&stu: param_stus) {
+        ROS_INFO("stus 元素:%s", stu.c_str());
+    }
+
+    for (auto &&f: param_friends) {
+        ROS_INFO("map 元素:%s = %s", f.first.c_str(), f.second.c_str());
+    }
+
+    // getParamCached()
+    ros::param::getCached("param_int", param_int_value);
+    ROS_INFO("通过缓存获取数据:%d", param_int_value);
+
+    // getParamNames()
+    std::vector<std::string> param_names2;
+    ros::param::getParamNames(param_names2);
+    for (auto &&name: param_names2) {
+        ROS_INFO("名称解析name = %s", name.c_str());
+    }
+    ROS_INFO("----------------------------");
+
+    ROS_INFO("存在 param_int 吗? %d", ros::param::has("param_int"));
+    ROS_INFO("存在 param_intttt 吗? %d", ros::param::has("param_intttt"));
+
+    std::string key;
+    ros::param::search("param_int", key);
+    ROS_INFO("搜索键:%s", key.c_str());
+
+    return 0;
+}
+```
+
+代码理解：
+
+```cpp
+// return value from parameter server, or default if unavailable.
+res3 = ros::param::param("param_int", 20);
+
+// get a value of a type from the parameter server
+// return true: value retrieved, false otherwise
+ros::param::get("param_int", param_int_value);
+
+// get a value of a type from the parameter server, with local caching
+// return true: value retrieved, false otherwise
+ros::param::getCached("param_int", param_int_value);
+
+// get the list of all parameters in the server
+// return true: list of parameter names, false otherwise
+ros::param::getParamNames(param_names2);
+
+// search up the tree for a parameter with a given key. 
+// return true: parameter found, false otherwise
+ros::param::search("param_int", key);
+```
+
+
+
+#### 3. 删
+
+```cpp
+/*
+    参数服务器操作之删除_C++实现:
+
+    ros::NodeHandle
+        deleteParam("键")
+        根据键删除参数，删除成功，返回 true，否则(参数不存在)，返回 false
+
+    ros::param
+        del("键")
+        根据键删除参数，删除成功，返回 true，否则(参数不存在)，返回 false
+*/
+
+
+#include "ros/ros.h"
+
+
+int main(int argc, char *argv[]) {
+    
+    setlocale(LC_ALL, "");
+    
+    ros::init(argc, argv, "delete_param");
+
+    ros::NodeHandle nh;
+    bool r1 = nh.deleteParam("nh_int");
+    ROS_INFO("nh 删除结果:%d", r1);
+
+    // 推荐使用这个语法 ros::param
+    bool r2 = ros::param::del("param_int");
+    ROS_INFO("param 删除结果:%d", r2);
+
+    return 0;
+}
+```
+
+代码理解：
+
+```cpp
+// delete a parameter from the parameter server
+// return true: deletion succeeded, false otherwise
+bool r2 = ros::param::del("param_int");
+```
+
+
+
+#### 运行结果：
+
+```shell
+$ rosrun test_pkg demo_04_parameterServer_add_edit_node 
+
+$ rosrun test_pkg demo_04_parameterServer_find_node 
+[ INFO] [1639479465.655686436]: ++++++++++++++++++++++++++++++++++++++++
+[ INFO] [1639479465.657520571]: param获取结果:20000,20
+[ INFO] [1639479465.662262940]: getParam获取的结果:20000,3.14,Hello Param,0
+[ INFO] [1639479465.662288648]: stus 元素:zhangsan
+[ INFO] [1639479465.662294173]: stus 元素:李四
+[ INFO] [1639479465.662297680]: stus 元素:王五
+[ INFO] [1639479465.662314976]: stus 元素:孙大脑袋
+[ INFO] [1639479465.662321543]: map 元素:guo = huang
+[ INFO] [1639479465.662326799]: map 元素:yuang = xiao
+[ INFO] [1639479465.663057656]: 通过缓存获取数据:20000
+[ INFO] [1639479465.663411017]: 名称解析name = /roslaunch/uris/host_ubuntu__36429
+[ INFO] [1639479465.663434587]: 名称解析name = /param_double
+[ INFO] [1639479465.663439932]: 名称解析name = /param_int
+[ INFO] [1639479465.663443400]: 名称解析name = /rosversion
+[ INFO] [1639479465.663446882]: 名称解析name = /run_id
+[ INFO] [1639479465.663450168]: 名称解析name = /param_bool
+[ INFO] [1639479465.663453427]: 名称解析name = /nh_int
+[ INFO] [1639479465.663456699]: 名称解析name = /param_vector
+[ INFO] [1639479465.663460015]: 名称解析name = /nh_map/guo
+[ INFO] [1639479465.663463277]: 名称解析name = /nh_map/yuang
+[ INFO] [1639479465.663466563]: 名称解析name = /nh_vector
+[ INFO] [1639479465.663470027]: 名称解析name = /nh_bool
+[ INFO] [1639479465.663495145]: 名称解析name = /nh_string
+[ INFO] [1639479465.663511121]: 名称解析name = /param_map/guo
+[ INFO] [1639479465.663526766]: 名称解析name = /param_map/yuang
+[ INFO] [1639479465.663542323]: 名称解析name = /rosdistro
+[ INFO] [1639479465.663557773]: 名称解析name = /nh_double
+[ INFO] [1639479465.663573142]: 名称解析name = /param_string
+[ INFO] [1639479465.663589383]: ----------------------------
+[ INFO] [1639479465.663916243]: 存在 param_int 吗? 1
+[ INFO] [1639479465.664248872]: 存在 param_intttt 吗? 0
+[ INFO] [1639479465.664605635]: 搜索键:/param_int
+
+
+$ rosrun test_pkg demo_04_parameterServer_delete_node 
+[ INFO] [1639480356.875872258]: nh 删除结果:1
+[ INFO] [1639480356.877019018]: param 删除结果:1
+```
+
 
 
 
@@ -1548,4 +1948,6 @@ link06: [CMakeLists.txt  -- for ROS](http://wiki.ros.org/action/fullsearch/catki
 link07: [Services -- for ROS](http://wiki.ros.org/action/fullsearch/roscpp/Overview/Services?action=fullsearch&context=180&value=linkto%3A"roscpp%2FOverview%2FServices")
 
 link08: [WritingServiceClient(c++)](http://wiki.ros.org/action/fullsearch/cn/ROS/Tutorials/WritingServiceClient(c%2B%2B)?action=fullsearch&context=180&value=linkto%3A"cn%2FROS%2FTutorials%2FWritingServiceClient(c%2B%2B)")
+
+link09: [《ROS理论与实践》第8、9章--ROS机器人操作系统 -- 给力哦]([【赵虚左】《ROS理论与实践》第8、9章--ROS机器人操作系统_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1Ub4y1a7PH/?spm_id_from=333.788.video.desc.click))
 
