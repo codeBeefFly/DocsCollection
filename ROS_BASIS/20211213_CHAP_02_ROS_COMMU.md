@@ -1563,9 +1563,9 @@ $ rosrun test_pkg demo_03_service_client_node 7 3
 
 ---
 
-### 02.  参数操作
+### 02.  参数操作 ★
 
-#### 1. 增、改
+#### 1. 增、改（add, edit）★
 
 ```cpp
 /*
@@ -1640,7 +1640,7 @@ ros::param::set("参数名", 值);		// set(“键”, 值)
 
 
 
-#### 2. 查
+#### 2. 查（find）★
 
 ```cpp
 /*
@@ -1823,7 +1823,7 @@ ros::param::search("param_int", key);
 
 
 
-#### 3. 删
+#### 3. 删（delete）★
 
 ```cpp
 /*
@@ -1921,11 +1921,193 @@ $ rosrun test_pkg demo_04_parameterServer_delete_node
 
 ---
 
-## 04.  
+## 04.  COMMON COMMANDS
+
+### 01: rosnode（操作节点）
+
+```shell
+rosnode ping    	测试到节点的连接状态
+rosnode list    	列出活动节点
+rosnode info    	打印节点信息
+rosnode machine     列出指定设备上节点
+rosnode kill    	杀死某个节点
+rosnode cleanup     清除不可连接的节点
+```
 
 
 
+### 02: rostopic（操作话题）
 
+```shell
+rostopic bw     	显示主题使用的带宽
+rostopic delay  	显示带有 header 的主题延迟
+rostopic echo   	打印消息到屏幕
+rostopic find   	根据类型查找主题
+rostopic hz     	显示主题的发布频率
+rostopic info   	显示主题相关信息
+rostopic list   	显示所有活动状态下的主题
+rostopic pub    	将数据发布到主题
+rostopic type   	打印主题类型
+```
+
+
+
+### 03: rosservice（操作服务）
+
+```shell
+rosmsg show    		显示消息描述
+rosmsg info    		显示消息信息
+rosmsg list    		列出所有消息
+rosmsg md5    		显示 md5 加密后的消息
+rosmsg package    	显示某个功能包下的所有消息
+rosmsg packages     列出包含消息的功能包
+```
+
+
+
+### 04: rosmsg（操作msg消息）
+
+```shell
+rosservice args 	打印服务参数
+rosservice call     使用提供的参数调用服务
+rosservice find     按照服务类型查找服务
+rosservice info     打印有关服务的信息
+rosservice list     列出所有活动的服务
+rosservice type     打印服务类型
+rosservice uri      打印服务的 ROSRPC uri
+```
+
+
+
+### 05: rossrv（操作srv消息）
+
+```shell
+rossrv show    		显示服务消息详情
+rossrv info    		显示服务消息相关信息
+rossrv list    		列出所有服务信息
+rossrv md5    		显示 md5 加密后的服务消息
+rossrv package    	显示某个包下所有服务消息
+rossrv packages     显示包含服务消息的所有包
+```
+
+
+
+### 06: rosparam（操作参数）
+
+```shell
+rosparam set    	设置参数
+rosparam get    	获取参数
+rosparam load    	从外部文件加载参数
+rosparam dump    	将参数写出到外部文件
+rosparam delete     删除参数
+rosparam list    	列出所有参数
+```
+
+
+
+---
+
+
+
+## 05. ROS COMMU. PRACTICE（略）★
+
+### 01. TOPIC ADVERTISE（话题发布）
+
+**流程：**
+
+```
+1.话题与消息获取
+	1.1 话题获取
+		
+		通过计算图查看话题，启动计算图:
+		rqt_graph
+		
+		或者通过 rostopic 列出话题:
+		rostopic list
+	
+	1.2 消息获取
+		
+		获取消息类型:
+		rostopic type /turtle1/cmd_vel
+		
+		获取消息格式:
+		rosmsg info geometry_msgs/Twist
+		
+2.实现发布节点
+```
+
+
+
+### 02. TOPIC SUBSCRIBE（话题订阅）
+
+**流程：**
+
+```
+同上
+```
+
+
+
+### 03. SERVICE CALL（服务调用）
+
+**流程：**
+
+```
+1.服务名称与服务消息获取
+	1.1 获取话题
+		rosservice list
+	
+	1.2 获取消息类型
+		rosservice type /spawn
+	
+	1.3 获取消息格式
+		rossrv info turtlesim/Spawn
+		
+2.服务客户端实现
+```
+
+
+
+### 04. PARAMETER SETTING（参数设置）
+
+**流程：**
+
+```
+1.参数名获取
+	1.1 获取参数列表
+		rosparam list
+		
+2.参数修改
+```
+
+
+
+---
+
+
+
+## 06. 通信机制比较
+
+> **三种通信机制，是ROS中最基础也是应用最为广泛的通信机制：**
+>
+> 1. 话题通信：在不同的节点之间传递数据。
+> 2. 服务通信：在不同的节点之间传递数据。
+> 3. 参数服务器：数据共享机制，可以在不同的节点之间共享数据。
+>
+> ---
+>
+> **话题通信 vs 服务通信**
+>
+> |       |                     | TOPIC      | SERVICE |
+> | ----- | ------------------- | ---------- | ------- |
+> | 要素1 | 消息的发布方/客户端 | Publisher  | Client  |
+> | 要素2 | 消息的订阅方/服务端 | Subscriber | Server  |
+> | 要素3 | 话题名称            | Topic      | Service |
+> | 要素4 | 数据载体            | .msg       | .srv    |
+
+
+
+<img src="20211213_CHAP_02_ROS_COMMU.assets/image-20211214211226832.png" alt="image-20211214211226832" style="zoom:80%;" align="left"/>
 
 
 
