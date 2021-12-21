@@ -32,6 +32,8 @@
 
 
 
+---
+
 
 
 ### 01. geometry_msgs（坐标msg消息）
@@ -89,6 +91,10 @@ geometry_msgs/Point point                    #点坐标
   float64 y
   float64 z
 ```
+
+
+
+---
 
 
 
@@ -736,7 +742,13 @@ Subscribers:
 
 
 
+#### 4. 补充
 
+<img src="20211220_CHAP_05_COMMON_TOOLS.assets/image-20211221170339221.png" alt="image-20211221170339221" style="zoom:120%;" align="left"/>
+
+
+
+---
 
 
 
@@ -746,11 +758,21 @@ Subscribers:
 
 
 
+
+
+---
+
+
+
 ### 04. Multi-cord. TF（多坐标变换）
 
 
 
 
+
+
+
+---
 
 
 
