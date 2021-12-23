@@ -754,7 +754,432 @@ Subscribers:
 
 ### 03. Dynamic TF（动态坐标转换）
 
+#### 0. Some Ponts Noted
 
+> ---
+>
+> **动态坐标变换，是指两个坐标系之间的相对位置是变化的。**
+>
+> ---
+
+
+
+#### 1. 需求与流程
+
+> ---
+>
+> **需求描述:**
+>
+> 启动 turtlesim_node，该节点中窗体有一个世界坐标系（world）（左下角为坐标系原点），乌龟是另一个坐标系（turtle1），键盘控制乌龟运动，将两个坐标系的相对位置动态发布。
+>
+> ---
+>
+> **实现分析:**
+>
+> 1. 乌龟本身不但可以看作坐标系，也是世界坐标系中的一个坐标点
+>
+>    乌龟自身是坐标系，也是世界坐标系的点。
+>
+> 2. 订阅 turtle1/pose,可以获取乌龟在**世界坐标系**的 x坐标、y坐标、偏移量以及线速度和角速度
+>
+> 3. 将 pose 信息转换成 坐标系相对信息并发布（怎么转，转出的数据代表什么？）
+>
+> ---
+>
+> **实现流程：**C++ 与 Python 实现流程一致
+>
+> 1. 新建功能包，添加依赖
+> 2. 创建**坐标相对关系发布方**(同时需要订阅乌龟位姿信息)
+> 3. 创建**坐标相对关系订阅方**
+> 4. 执行
+>
+> ---
+
+
+
+#### 2. C++ 实现 ★
+
+##### 1. 发布方（talker）
+
+**`demo_07_tf_dynamic_talker_node.cpp`**
+
+````cpp
+//
+// Created by ds18 on 12/21/21.
+//
+
+/*
+    动态的坐标系相对姿态发布(一个坐标系相对于另一个坐标系的相对姿态是不断变动的)
+
+    需求: 启动 turtlesim_node,该节点中窗体有一个世界坐标系(左下角为坐标系原点)，乌龟是另一个坐标系，键盘
+    控制乌龟运动，将两个坐标系的相对位置动态发布
+
+    实现分析:
+        1.乌龟本身不但可以看作坐标系，也是世界坐标系中的一个坐标点
+        2.订阅 turtle1/pose,可以获取乌龟在世界坐标系的 x坐标、y坐标、偏移量以及线速度和角速度
+        3.将 pose 信息转换成 坐标系相对信息并发布
+
+    实现流程:
+        1.包含头文件
+        2.初始化 ROS 节点
+        3.创建 ROS 句柄
+        4.创建订阅对象
+        5.回调函数处理订阅到的数据(实现TF广播)
+            5-1.创建 TF 广播器
+            5-2.创建 广播的数据(通过 pose 设置)
+            5-3.广播器发布数据
+        6.spin
+*/
+
+// 1.包含头文件
+#include "ros/ros.h"
+#include "turtlesim/Pose.h"
+#include "tf2_ros/transform_broadcaster.h"
+#include "geometry_msgs/TransformStamped.h"
+#include "tf2/LinearMath/Quaternion.h"
+
+void doPose(const turtlesim::Pose::ConstPtr &pose) {
+    //  5-1.创建 TF 广播器
+    static tf2_ros::TransformBroadcaster broadcaster;
+
+    //  5-2.创建 广播的数据(通过 pose 设置)
+    geometry_msgs::TransformStamped tfs;
+
+    //  |----头设置
+    tfs.header.frame_id = "world";
+    tfs.header.stamp = ros::Time::now();
+
+    //  |----坐标系 ID
+    tfs.child_frame_id = "turtle1";
+
+    //  |----坐标系相对信息设置
+    tfs.transform.translation.x = pose->x;
+    tfs.transform.translation.y = pose->y;
+    tfs.transform.translation.z = 0.0; // 二维实现，pose 中没有z，z 是 0
+
+    //  |--------- 四元数设置
+    tf2::Quaternion qtn;
+    qtn.setRPY(0, 0, pose->theta);
+    tfs.transform.rotation.x = qtn.getX();
+    tfs.transform.rotation.y = qtn.getY();
+    tfs.transform.rotation.z = qtn.getZ();
+    tfs.transform.rotation.w = qtn.getW();
+
+    //  5-3.广播器发布数据
+    broadcaster.sendTransform(tfs);
+}
+
+int main(int argc, char *argv[]) {
+    setlocale(LC_ALL, "");
+
+    // 2.初始化 ROS 节点
+    ros::init(argc, argv, "demo_07_dynamic_tf_pub");
+
+    // 3.创建 ROS 句柄
+    ros::NodeHandle nh;
+
+    // 4.创建订阅对象
+    // 5.回调函数处理订阅到的数据(实现TF广播)
+    // 订阅的 topic：/turtle1/pose 是由 /turtlesim 发布的（龟龟模拟器）
+    ros::Subscriber sub = nh.subscribe<turtlesim::Pose>("/turtle1/pose", 1000, doPose);
+
+    // 6.spin
+    ros::spin();
+    return 0;
+}
+
+````
+
+###### 代码解释
+
+```cpp
+/* 1. 这个是发布方源码
+		
+*/
+```
+
+
+
+
+
+##### 2. 订阅方（listener）
+
+**`demo_07_tf_dynamic_listener_node.cpp`**
+
+````cpp
+//
+// Created by ds18 on 12/21/21.
+//
+
+//1.包含头文件
+#include "ros/ros.h"
+#include "tf2_ros/transform_listener.h"
+#include "tf2_ros/buffer.h"
+#include "geometry_msgs/PointStamped.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.h" //注意: 调用 transform 必须包含该头文件
+
+int main(int argc, char *argv[]) {
+    setlocale(LC_ALL, "");
+
+    // 2.初始化 ROS 节点
+    ros::init(argc, argv, "demo_07_dynamic_tf_sub");
+    ros::NodeHandle nh;
+
+    // 3.创建 TF 订阅节点
+    tf2_ros::Buffer buffer;
+    tf2_ros::TransformListener listener(buffer);
+
+    ros::Rate r(1);
+    while (ros::ok()) {
+        // 4.生成一个坐标点(相对于子级坐标系)
+        geometry_msgs::PointStamped point_laser;
+        point_laser.header.frame_id = "turtle1";
+        point_laser.header.stamp = ros::Time();
+        point_laser.point.x = 1;
+        point_laser.point.y = 1;
+        point_laser.point.z = 0;
+
+        // 5.转换坐标点(相对于父级坐标系)
+        //新建一个坐标点，用于接收转换结果
+        //--使用 try 语句或休眠，否则可能由于缓存接收延迟而导致坐标转换失败--
+        try {
+            geometry_msgs::PointStamped point_base;
+            point_base = buffer.transform(point_laser, "world");
+            ROS_INFO("坐标点相对于 world 的坐标为:(%.2f,%.2f,%.2f)", point_base.point.x, point_base.point.y, point_base.point.z);
+        }
+        catch (const std::exception &e) {
+            // std::cerr << e.what() << '\n';
+            ROS_INFO("程序异常:%s", e.what());
+        }
+
+        r.sleep();
+        ros::spinOnce();
+    }
+
+    return 0;
+}
+
+````
+
+###### 代码解释
+
+
+
+##### 3. 配置文件 ★
+
+只记录修改项。
+
+`CMakeLists.txt`
+
+```cmake
+## Find catkin macros and libraries
+## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
+## is used, also find other catkin packages
+find_package(catkin REQUIRED COMPONENTS
+        roscpp
+        rospy
+        std_msgs
+        message_generation  # 需要加入 message_generation,必须有 std_msgs
+
+        geometry_msgs       # demo_06 tf static
+        tf2                 # demo_06 tf static
+        tf2_ros             # demo_06 tf static
+        tf2_geometry_msgs   # demo_06 tf static
+
+        turtlesim           # demo_07 tf dynamic
+        )
+
+
+######################################################################
+
+
+## demo_07: tf dynamic talker
+add_executable(demo_07_tf_dynamic_talker
+        src/demo_07_tf_dynamic_talker_node.cpp
+        )
+
+## demo_07: tf dynamic listener
+add_executable(demo_07_tf_dynamic_listener
+        src/demo_07_tf_dynamic_listener_node.cpp
+        )
+
+
+######################################################################
+
+
+## demo_07: tf dynamic talker
+target_link_libraries(demo_07_tf_dynamic_talker
+        ${catkin_LIBRARIES}
+        )
+
+## demo_07: tf dynamic listener
+target_link_libraries(demo_07_tf_dynamic_listener
+        ${catkin_LIBRARIES}
+        )
+```
+
+###### cmake 讲解
+
+
+
+##### 4. launch 文件
+
+```xml
+<launch>
+
+    <!-- run turtlesim_node node: turtlesim_node -->
+    <node pkg="turtlesim" type="turtlesim_node" 
+          name="demo_07_tutlesim_node" required="true"/>
+
+    <!-- run turtle_teleop_key node: turtle_teleop_key ? -->
+    <node pkg="turtlesim" type="turtle_teleop_key" 
+          name="demo_07_turtle_teleop_key"/>
+
+    <!-- run talker node: demo_07_dynamic_tf_pub -->
+    <node pkg="test_pkg" type="demo_07_tf_dynamic_talker" 
+          name="demo_07_dynamic_tf_pub" />
+
+    <!-- run listener node: demo_07_dynamic_tf_sub -->
+    <node pkg="test_pkg" type="demo_07_tf_dynamic_listener" 
+          name="demo_07_dynamic_tf_sub" />
+
+    <!-- run rviz -->
+    <node pkg="rviz" type="rviz" 
+          name="rviz" 
+          args="-d $(find test_pkg)/rviz/demo_07_tf_dynamic.rviz"/>
+
+</launch>
+
+<!-- ----------------------------------
+	node  --- 包含的某个节点
+		pkg ----- 功能包: 使用 rospack find 查找到的 pkg_name
+		type ---- 被运行的节点文件: add_executable 中的二进制名称
+		name   -- 为节点命名: 使用 rosnode list 得到的 node 名称
+		output  - 设置日志的输出目标
+----------------------------------- -->
+```
+
+###### 代码解释：
+
+> ---
+>
+> 通过 launch 文件设置参数的方式前面已经介绍过了。
+>
+> 可以在 node 标签外，或 node 标签中通过 param 或 rosparam 来设置参数。
+>
+> 在 node 标签外设置的参数是全局性质的，参考的是 `/` 。
+>
+> 在 node 标签中设置的参数是私有性质的，参考的是 `/命名空间/节点名称`。
+>
+> ---
+>
+> 
+>
+> ```xml
+> <launch>
+> 
+>     <param name="p1" value="100" />
+>     <node pkg="turtlesim" type="turtlesim_node" name="t1">
+>         <param name="p2" value="100" />
+>     </node>
+> 
+> </launch>
+> ```
+>
+> ---
+
+
+
+#### 3. 实现结果与调试：
+
+**`rosrun rqt_tf_tree rqt_tf_tree`**
+
+<img src="20211220_CHAP_05_COMMON_TOOLS.assets/image-20211223105330199.png" alt="image-20211223105330199" style="zoom:80%;" align="left"/>
+
+**`rqt_graph`**
+
+<img src="20211220_CHAP_05_COMMON_TOOLS.assets/image-20211223105414980.png" alt="image-20211223105414980" style="zoom:80%;" align="left"/>
+
+<img src="20211220_CHAP_05_COMMON_TOOLS.assets/image-20211223105450487.png" alt="image-20211223105450487" style="zoom:80%;" align="left"/>
+
+
+
+```shell
+$ rosnode list
+
+/demo_07_dynamic_tf_pub
+/demo_07_dynamic_tf_sub
+/rosout
+/teleop_turtle
+/turtlesim
+
+
+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+
+ds18@ubuntu:~/catkin_x2/IMU_ws_mk2/IMU_ws_mk2/LINES354_ws$ rosnode info /demo_07_dynamic_tf_pub 
+--------------------------------------------------------------------------------
+Node [/demo_07_dynamic_tf_pub]
+Publications: 
+ * /rosout [rosgraph_msgs/Log]
+ * /tf [tf2_msgs/TFMessage]
+
+Subscriptions: 
+ * /turtle1/pose [turtlesim/Pose]
+
+Services: 
+ * /demo_07_dynamic_tf_pub/get_loggers
+ * /demo_07_dynamic_tf_pub/set_logger_level
+
+
+contacting node http://ubuntu:42885/ ...
+Pid: 121306
+Connections:
+ * topic: /rosout
+    * to: /rosout
+    * direction: outbound (50609 - 127.0.0.1:59432) [13]
+    * transport: TCPROS
+ * topic: /tf
+    * to: /demo_07_dynamic_tf_sub
+    * direction: outbound (50609 - 127.0.0.1:59442) [11]
+    * transport: TCPROS
+ * topic: /turtle1/pose
+    * to: /turtlesim (http://ubuntu:38797/)
+    * direction: inbound (38568 - ubuntu:51303) [12]
+    * transport: TCPROS
+
+
+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+    
+ds18@ubuntu:~/catkin_x2/IMU_ws_mk2/IMU_ws_mk2/LINES354_ws$ rosnode info /demo_07_dynamic_tf_sub 
+--------------------------------------------------------------------------------
+Node [/demo_07_dynamic_tf_sub]
+Publications: 
+ * /rosout [rosgraph_msgs/Log]
+
+Subscriptions: 
+ * /tf [tf2_msgs/TFMessage]
+ * /tf_static [unknown type]
+
+Services: 
+ * /demo_07_dynamic_tf_sub/get_loggers
+ * /demo_07_dynamic_tf_sub/set_logger_level
+
+
+contacting node http://ubuntu:44661/ ...
+Pid: 121409
+Connections:
+ * topic: /rosout
+    * to: /rosout
+    * direction: outbound (55439 - 127.0.0.1:44052) [13]
+    * transport: TCPROS
+ * topic: /tf
+    * to: /demo_07_dynamic_tf_pub (http://ubuntu:42885/)
+    * direction: inbound (59442 - ubuntu:50609) [12]
+    * transport: TCPROS
+
+```
 
 
 

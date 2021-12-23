@@ -247,18 +247,20 @@ rosrun package_name rosnode_name
 
 3. 编辑 launch 文件内容
 
-   ```
+   ```xml
    <launch>
        <node pkg="helloworld" type="demo_hello" name="hello" output="screen" />
        <node pkg="turtlesim" type="turtlesim_node" name="t1"/>
        <node pkg="turtlesim" type="turtle_teleop_key" name="key1" />
    </launch>
    
-   node  ---> 包含的某个节点
-   pkg -----> 功能包
-   type ----> 被运行的节点文件
-   name   --> 为节点命名
-   output  -> 设置日志的输出目标
+   <!--
+   	node  ---> 包含的某个节点
+   	pkg -----> 功能包
+   	type ----> 被运行的节点文件
+   	name   --> 为节点命名
+   	output  -> 设置日志的输出目标
+   -->
    ```
 
 4. 运行 launch 文件：`roslaunch package_name file.launch`
