@@ -1157,8 +1157,12 @@ int main(int argc, char *argv[]) {
 /**************************************************
 	
 	* 先提一个问题，如果使用 roslaunch，那么如果每一个 node 程序都有 log 输出，那么这些 log 将会如何在一个窗口中排版？可以从下面的截图中看出，talker 与 listener 都有 log 输出，那么当使用一个窗口时，是如何显示的呢？
+	* 答：所有的 log 会输出到同一个命令行窗口下。
+[ INFO] [1640268338.875076518]: Processing Pose values...					# talker
+[ INFO] [1640268338.891580859]: Processing Pose values...					# talker
+[ INFO] [1640268338.893761165]: 坐标点相对于 world 的坐标为:(6.54,7.54,0.00)	 # listener
+
 	
-	2. 
 	
 **************************************************/
 
@@ -1166,9 +1170,11 @@ int main(int argc, char *argv[]) {
 
 <img src="20211220_CHAP_05_COMMON_TOOLS.assets/image-20211223215428826.png" alt="image-20211223215428826" style="zoom:80%;" align="left"/>
 
-> 从截图中可以看见，Pose 的 x=5.54，y=5.54，那么使用这个 Pose 的值进行 **world 坐标系** 到 **turtle 坐标系** 的转换（这里不考虑旋转），如果以 world 为 fixed frame，即 world (x=0, y=0 , z=0)，那么 转换后的 turtle 为 turtle (x=5.54, y=5.54, z=0)，龟龟头的方向是 x 正向，左侧为 y 正向。
+> 从截图中可以看见，Pose 的 x=5.54，y=5.54，那么使用这个 Pose 的值进行 **world 坐标系** 到 **turtle 坐标系** 的转换（**这里不考虑旋转**），如果以 world 为 fixed frame，即 world (x=0, y=0 , z=0)，那么 转换后的 turtle 为 turtle (x=5.54, y=5.54, z=0)，龟龟头的方向是 x 正向，左侧为 y 正向。
 >
 > 在 listener 代码中 创建了 一个 点 laser，这个点 laser 相对于 turtle 坐标系的 坐标的为 point|t (x=1, y=2, z=0)。经过转换，点 laser 相对于 world 坐标系的 坐标为 point|w (x=6.54, y=7.54, z=0)。
+>
+> 因为 turtle 坐标系是可以相对于 world 坐标系进行旋转的，所以 点 laser 主要映射到 world 坐标系下，需要进行 **平移+旋转**。
 
 
 
