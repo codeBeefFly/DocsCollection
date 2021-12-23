@@ -1028,6 +1028,8 @@ void setRPY(const tf2Scalar& roll, const tf2Scalar& pitch, const tf2Scalar& yaw)
 这个是 topic：`/turtle1/pose` 与 `/tf`的关系截图：
 
 > 通过上面的代码详解，可以知道 /turtle1/Pose 消息中的 x, y, theta 值会被 doPose() 函数处理，这三个值分别用来计算 /tf 中的 x, y, 以及四元数的 rotation（这个四元数rotation 是通过 /turtle1/Pose 中的 theta 计算的）。
+>
+> 也就是说 world 坐标系 与 turtle1 坐标系的相对位置关系是 Pose 值。
 
 <img src="20211220_CHAP_05_COMMON_TOOLS.assets/image-20211223200056925.png" alt="image-20211223200056925" style="zoom:80%;" align="left"/>
 
@@ -1076,8 +1078,6 @@ geometry_msgs/TransformStamped[] transforms
       float64 w
 
 ```
-
-
 
 
 
@@ -1141,6 +1141,34 @@ int main(int argc, char *argv[]) {
 ````
 
 ###### 代码解释
+
+```cpp
+/**************************************************
+**************************************************/
+
+/**************************************************
+
+	1. 之前 发布者 已经确定了 world 坐标系 与 turtle1 坐标系的关系。
+	   现在 在 turtle1 坐标系下创建一个点，要求出 此点在 world 坐标系下的位置
+
+**************************************************/
+
+
+/**************************************************
+	
+	* 先提一个问题，如果使用 roslaunch，那么如果每一个 node 程序都有 log 输出，那么这些 log 将会如何在一个窗口中排版？可以从下面的截图中看出，talker 与 listener 都有 log 输出，那么当使用一个窗口时，是如何显示的呢？
+	
+	2. 
+	
+**************************************************/
+
+```
+
+<img src="20211220_CHAP_05_COMMON_TOOLS.assets/image-20211223215428826.png" alt="image-20211223215428826" style="zoom:80%;" align="left"/>
+
+> 从截图中可以看见，Pose 的 x=5.54，y=5.54，那么使用这个 Pose 的值进行 **world 坐标系** 到 **turtle 坐标系** 的转换（这里不考虑旋转），如果以 world 为 fixed frame，即 world (x=0, y=0 , z=0)，那么 转换后的 turtle 为 turtle (x=5.54, y=5.54, z=0)，龟龟头的方向是 x 正向，左侧为 y 正向。
+>
+> 在 listener 代码中 创建了 一个 点 laser，这个点 laser 相对于 turtle 坐标系的 坐标的为 point|t (x=1, y=2, z=0)。经过转换，点 laser 相对于 world 坐标系的 坐标为 point|w (x=6.54, y=7.54, z=0)。
 
 
 
