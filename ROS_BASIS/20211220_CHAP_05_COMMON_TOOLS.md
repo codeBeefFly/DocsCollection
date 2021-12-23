@@ -855,11 +855,11 @@ void doPose(const turtlesim::Pose::ConstPtr &pose) {
     //  |----坐标系相对信息设置
     tfs.transform.translation.x = pose->x;
     tfs.transform.translation.y = pose->y;
-    tfs.transform.translation.z = 0.0; // 二维实现，pose 中没有z，z 是 0
+    tfs.transform.translation.z = 0.0; 	// 二维实现，pose 中没有z，z 是 0
 
     //  |--------- 四元数设置
     tf2::Quaternion qtn;
-    qtn.setRPY(0, 0, pose->theta);
+    qtn.setRPY(0, 0, pose->theta);		// r, p, y 值可以计算 x, y, z, w
     tfs.transform.rotation.x = qtn.getX();
     tfs.transform.rotation.y = qtn.getY();
     tfs.transform.rotation.z = qtn.getZ();
@@ -893,9 +893,188 @@ int main(int argc, char *argv[]) {
 ###### 代码解释
 
 ```cpp
-/* 1. 这个是发布方源码
-		
-*/
+/**************************************************
+	1. 这个是发布方源码，他有两个功能
+		1. 订阅 节点 /turtlesim_node 发布的 话题 /turtle1/pose
+		2. 进行一个 tf 转换，从 header 坐标系到 child 坐标系，并发布这个 tf 转换	
+**************************************************/
+
+
+/**************************************************
+	2. 创建了一个订阅对象，这个订阅对象订阅一个话题。
+	This method connects to the master to register interest in a given topic. The node will automatically be connected with publishers on this topic.
+    包含此订阅对象的节点自动的连接到这个话题的发布者上。
+	On each message receipt, callback is invoked and passed a shared pointer to the message received. 
+	对于每一个接收到的信息，会调用一个回调函数，这个回调函数会给接收到的消息传递一个共享指针。
+	This message should not be changed in place, as it is shared with any other subscriptions to this topic.
+    这个消息不应该在适当的位置更改，因为他与其他订阅此话题的订阅者共享。
+	This version of subscribe allows anything bindable to a boost::function object
+**************************************************/
+    // 4.创建订阅对象
+    // 5.回调函数处理订阅到的数据(实现TF广播)
+    // 订阅的 topic：/turtle1/pose 是由 /turtlesim 发布的（龟龟模拟器）
+    ros::Subscriber sub = nh.subscribe<turtlesim::Pose>("/turtle1/pose", 1000, doPose);  // 订阅者 订阅 一个话题，并接收消息。并给接收到的消息传递一个共享指针函数。
+
+
+/**************************************************
+	3. 在回调函数中处理接收到的消息
+	
+	第一步：创建广播器对象（静态）：tf2_ros::TransformBroadcaster。
+	This class provides an easy way to publish coordinate frame transform information.
+    一个简单的发布 坐标系转换信息的 方式。
+	It will handle all the messaging and stuffing of messages. And the function prototypes lay out all the necessary data needed for each message.
+	
+	第二步：创建 坐标系转换信息的消息 对象：geometry_msgs::TransformStamped
+	# This expresses a transform from coordinate frame header.frame_id
+	# to the coordinate frame child_frame_id
+	# This message is mostly used by the 
+	# tf package. 
+	这个消息会被 广播器对象发布。
+	这个消息 表示了一个 从 header.frame_id 坐标系 到 child_frame_id 坐标系的一个转换。
+	也就是 header.frame_id 坐标系 ---（tf msgs）---》 child_frame_id 坐标系。
+	
+	$ rosnode info /demo_07_dynamic_tf_pub 
+	-----------------------------------------
+	Node [/demo_07_dynamic_tf_pub]
+	Publications: 
+ 	* /rosout [rosgraph_msgs/Log]
+ 	* /tf [tf2_msgs/TFMessage] # 可以看出发布者发布了这个消息：/tf
+
+	Subscriptions: 
+ 	* /turtle1/pose [turtlesim/Pose]  # 发布者订阅了这个消息：/turtle1/pose
+ 	
+ 	void doPose(const turtlesim::Pose::ConstPtr &pose) {
+    //  5-1.创建 TF 广播器
+    static tf2_ros::TransformBroadcaster broadcaster;
+
+    //  5-2.创建 广播的数据(通过 pose 设置)
+    geometry_msgs::TransformStamped tfs;
+
+    //  |----头设置
+    tfs.header.frame_id = "world";
+    tfs.header.stamp = ros::Time::now();
+
+    //  |----坐标系 ID
+    tfs.child_frame_id = "turtle1";
+
+    //  |----坐标系相对信息设置
+    tfs.transform.translation.x = pose->x;
+    tfs.transform.translation.y = pose->y;
+    tfs.transform.translation.z = 0.0; // 二维实现，pose 中没有z，z 是 0
+
+    //  |--------- 四元数设置，这个不太懂
+    tf2::Quaternion qtn;
+    qtn.setRPY(0, 0, pose->theta);
+    tfs.transform.rotation.x = qtn.getX();
+    tfs.transform.rotation.y = qtn.getY();
+    tfs.transform.rotation.z = qtn.getZ();
+    tfs.transform.rotation.w = qtn.getW();
+
+    //  5-3.广播器发布数据
+    broadcaster.sendTransform(tfs);
+}
+
+**************************************************/
+
+
+/**************************************************
+
+	4. 四元数的设置
+	通过 
+	
+    //  |--------- 四元数设置，这个不太懂
+    tf2::Quaternion qtn;
+    qtn.setRPY(0, 0, pose->theta);
+
+   * @brief Set the quaternion using fixed axis RPY
+   * @param roll Angle around X 
+   * @param pitch Angle around Y
+   * @param yaw Angle around Z
+  
+void setRPY(const tf2Scalar& roll, const tf2Scalar& pitch, const tf2Scalar& yaw)
+{
+	tf2Scalar halfYaw = tf2Scalar(yaw) * tf2Scalar(0.5);  
+	tf2Scalar halfPitch = tf2Scalar(pitch) * tf2Scalar(0.5);  	
+	tf2Scalar halfRoll = tf2Scalar(roll) * tf2Scalar(0.5);  
+	tf2Scalar cosYaw = tf2Cos(halfYaw);
+	tf2Scalar sinYaw = tf2Sin(halfYaw);
+	tf2Scalar cosPitch = tf2Cos(halfPitch);
+	tf2Scalar sinPitch = tf2Sin(halfPitch);
+	tf2Scalar cosRoll = tf2Cos(halfRoll);
+	tf2Scalar sinRoll = tf2Sin(halfRoll);
+	setValue(
+		sinRoll * cosPitch * cosYaw - cosRoll * sinPitch * sinYaw, // x
+        cosRoll * sinPitch * cosYaw + sinRoll * cosPitch * sinYaw, // y
+        cosRoll * cosPitch * sinYaw - sinRoll * sinPitch * cosYaw, // z
+        cosRoll * cosPitch * cosYaw + sinRoll * sinPitch * sinYaw  // w
+        ); //formerly yzx
+	}
+	
+	
+	//  |--------- 四元数设置，这个不太懂
+    tf2::Quaternion qtn;
+    qtn.setRPY(0, 0, pose->theta);
+    tfs.transform.rotation.x = qtn.getX();
+    tfs.transform.rotation.y = qtn.getY();
+    tfs.transform.rotation.z = qtn.getZ();
+    tfs.transform.rotation.w = qtn.getW();
+	
+**************************************************/
+
+```
+
+
+
+这个是 topic：`/turtle1/pose` 与 `/tf`的关系截图：
+
+> 通过上面的代码详解，可以知道 /turtle1/Pose 消息中的 x, y, theta 值会被 doPose() 函数处理，这三个值分别用来计算 /tf 中的 x, y, 以及四元数的 rotation（这个四元数rotation 是通过 /turtle1/Pose 中的 theta 计算的）。
+
+<img src="20211220_CHAP_05_COMMON_TOOLS.assets/image-20211223200056925.png" alt="image-20211223200056925" style="zoom:80%;" align="left"/>
+
+```shell
+# 关于如何查阅 topic 中的消息信息
+# 此发布者节点中 它将订阅的 /turtle1/pose -- turtlesim/Pose 消息数据进行处理 doPOse()
+# 在 doPose() 回调函数中，geometry_msgs::TransformStamped 对象使用 turtlesim/Pose 
+# 消息数据，进行 header坐标系 到 child坐标系的转换，并将这个动态的 tf 进行发布。
+
+# ----- /turtle1/pose ----- turtlesim/Pose
+
+$ rostopic type /turtle1/pose 
+turtlesim/Pose
+
+$ rosmsg 
+list      md5       package   packages  show      
+
+$ rosmsg show turtlesim/Pose 
+float32 x
+float32 y
+float32 theta
+float32 linear_velocity
+float32 angular_velocity
+
+
+# ----- /tf ----- tf2_msgs/TFMessage
+
+ds18@ubuntu:~$ rostopic type /tf
+tf2_msgs/TFMessage
+ds18@ubuntu:~$ rosmsg show tf2_msgs/TFMessage 
+geometry_msgs/TransformStamped[] transforms
+  std_msgs/Header header
+    uint32 seq
+    time stamp
+    string frame_id
+  string child_frame_id
+  geometry_msgs/Transform transform
+    geometry_msgs/Vector3 translation
+      float64 x
+      float64 y
+      float64 z
+    geometry_msgs/Quaternion rotation
+      float64 x
+      float64 y
+      float64 z
+      float64 w
+
 ```
 
 
