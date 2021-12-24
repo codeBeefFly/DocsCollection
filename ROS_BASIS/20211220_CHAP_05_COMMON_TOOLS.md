@@ -1166,6 +1166,68 @@ int main(int argc, char *argv[]) {
 	
 **************************************************/
 
+
+/**************************************************
+
+	// 3.创建 TF 订阅节点
+	// 存储坐标系，并提供服务，响应客户端请求。
+	// 接收坐标系转换信息
+	
+	Standard implementation of the tf2_ros::BufferInterface abstract data type.
+Inherits tf2_ros::BufferInterface and tf2::BufferCore. 
+	Stores known frames and offers a ROS service, "tf_frames", which responds to client requests with a response containing a tf2_msgs::FrameGraph representing the relationship of known
+	创建一个 Buffer 对象 存储已知坐标系并提供一个ROS服务“tf_frames”，该服务（srv）响应客户端请求（request），其中包含一个代表已知关系的tf2_msgs::FrameGraph  
+	
+    tf2_ros::Buffer buffer;
+    
+   	This class provides an easy way to request and receive coordinate frame transform information.
+   	此类提供了一个便捷的方法请求与接收 坐标系转换信息。
+    
+    tf2_ros::TransformListener listener(buffer);
+
+**************************************************/
+
+
+/**************************************************
+
+	// 4.生成一个坐标点(相对于子级坐标系)
+	// 就是在 turtle1 坐标系下创建一个 点
+    geometry_msgs::PointStamped point_laser;
+    point_laser.header.frame_id = "turtle1";
+    
+            
+
+**************************************************/
+
+
+/**************************************************
+
+    // 5.转换坐标点(相对于父级坐标系)
+    //新建一个坐标点，用于接收转换结果
+    //--使用 try 语句或休眠，否则可能由于缓存接收延迟而导致坐标转换失败--
+    // 创建一个 坐标点。
+    // 这个坐标点的值是通过 transfrom 函数计算出来的。
+        
+    buffer.transform() 
+    template <class T>
+    T transform(
+    	const T& in,
+		const std::string& target_frame, 
+		ros::Duration timeout=ros::Duration(0.0)) const
+	
+	Transform an input into the target frame. This function is templated and can take as input any valid mathematical object that tf knows how to apply a transform to, by way of the templated math conversions interface.
+    将 input 转换到 目标 坐标系中，即，将 point_laser 转换到 world 坐标系中，结果就是 point_base。这个转换应该是 旋转 + 平移。
+	For example, the template type could be a Transform, Pose, Vector, or Quaternion message type (as defined in geometry_msgs).
+    
+    try {
+        geometry_msgs::PointStamped point_base;
+        point_base = buffer.transform(point_laser, "world");
+		...
+	}
+	
+	
+	
+**************************************************/
 ```
 
 <img src="20211220_CHAP_05_COMMON_TOOLS.assets/image-20211223215428826.png" alt="image-20211223215428826" style="zoom:80%;" align="left"/>
@@ -1175,6 +1237,10 @@ int main(int argc, char *argv[]) {
 > 在 listener 代码中 创建了 一个 点 laser，这个点 laser 相对于 turtle 坐标系的 坐标的为 point|t (x=1, y=2, z=0)。经过转换，点 laser 相对于 world 坐标系的 坐标为 point|w (x=6.54, y=7.54, z=0)。
 >
 > 因为 turtle 坐标系是可以相对于 world 坐标系进行旋转的，所以 点 laser 主要映射到 world 坐标系下，需要进行 **平移+旋转**。
+
+
+
+**如何自己实现这种变换函数**（需要看视觉14讲）。
 
 
 
@@ -1231,7 +1297,7 @@ target_link_libraries(demo_07_tf_dynamic_listener
         )
 ```
 
-###### cmake 讲解
+###### cmake 讲解（略）
 
 
 
@@ -1405,6 +1471,320 @@ Connections:
 ### 04. Multi-cord. TF（多坐标变换）
 
 
+
+#### 0. Some Points Noted（略）
+
+
+
+#### 1. 需求与流程
+
+>现有坐标系统，父级坐标系统 world,下有两子级系统 son1，son2。
+>
+>son1 相对于 world，以及 son2 相对于 world 的关系是已知的。
+>
+>求 son1原点在 son2中的坐标。
+>
+>又已知在 son1中一点的坐标，要求求出该点在 son2 中的坐标
+
+> **实现分析:**
+>
+> 1. 首先，需要发布 son1 相对于 world，以及 son2 相对于 world 的坐标消息
+> 2. 然后，需要订阅坐标发布消息，并取出订阅的消息，借助于 tf2 实现 son1 和 son2 的转换
+> 3. 最后，还要实现坐标点的转换
+>
+> **实现流程:**C++ 与 Python 实现流程一致
+>
+> 1. 新建功能包，添加依赖
+> 2. 创建坐标相对关系发布方(需要发布两个坐标相对关系)
+> 3. 创建坐标相对关系订阅方
+> 4. 执行
+
+
+
+#### 2. C++ 实现
+
+##### 1. 发布方（talker）
+
+`demo_08_tf_multi.launch`
+
+```xml
+    <!-- talker/publisher -->
+
+    <!--x, y, z, r, p, y-->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="demo_08_son1"
+          args="0.2 0.8 0.3 0 0 0 /world /son1"
+          output="screen"/>
+
+    <node pkg="tf2_ros" type="static_transform_publisher" name="demo_08_son2"
+          args="0.5 0 0 0 0 0 /world /son2"
+          output="screen"/>
+```
+
+
+
+##### 2. 订阅方（listener）
+
+`demo_08_tf_multi_sub.cpp`
+
+```cpp
+//
+// Created by ds18 on 12/23/21.
+//
+
+/*
+
+需求:
+    现有坐标系统，父级坐标系统 world,下有两子级系统 son1，son2，
+    son1 相对于 world，以及 son2 相对于 world 的关系是已知的，
+    求 son1 与 son2中的坐标关系，又已知在 son1中一点的坐标，要求求出该点在 son2 中的坐标
+实现流程:
+    1.包含头文件
+    2.初始化 ros 节点
+    3.创建 ros 句柄
+    4.创建 TF 订阅对象
+    5.解析订阅信息中获取 son1 坐标系原点在 son2 中的坐标
+      解析 son1 中的点相对于 son2 的坐标
+    6.spin
+
+*/
+
+// 1.包含头文件
+#include "ros/ros.h"
+#include "tf2_ros/transform_listener.h"
+#include "tf2/LinearMath/Quaternion.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+#include "geometry_msgs/TransformStamped.h"
+#include "geometry_msgs/PointStamped.h"
+
+
+int main(int argc, char *argv[]) {
+
+    setlocale(LC_ALL, "");
+
+    // 2.初始化 ros 节点
+    ros::init(argc, argv, "demo_08_listener_sub_frames_node");
+
+    // 3.创建 ros 句柄
+    ros::NodeHandle nh;
+
+    // 4.创建 TF 订阅对象
+    tf2_ros::Buffer buffer;
+    tf2_ros::TransformListener listener(buffer);
+
+    // 5.解析订阅信息中获取 son1 坐标系原点在 son2 中的坐标
+    ros::Rate r(1);
+    while (ros::ok()) {
+        try {
+            // 解析 son1 中的点相对于 son2 的坐标
+            geometry_msgs::TransformStamped tfs = buffer.lookupTransform("son2", "son1", ros::Time(0));
+            ROS_INFO("Son1 相对于 Son2 的坐标关系:父坐标系ID=%s", tfs.header.frame_id.c_str());
+            ROS_INFO("Son1 相对于 Son2 的坐标关系:子坐标系ID=%s", tfs.child_frame_id.c_str());
+            ROS_INFO("Son1 相对于 Son2 的坐标关系:x=%.2f,y=%.2f,z=%.2f",
+                     tfs.transform.translation.x,
+                     tfs.transform.translation.y,
+                     tfs.transform.translation.z
+            );
+
+            // 坐标点解析
+            // 在 son1 坐标系下定义一个点 ps
+            geometry_msgs::PointStamped ps;
+            ps.header.frame_id = "son1";
+            ps.header.stamp = ros::Time::now();
+            ps.point.x = 1.0;
+            ps.point.y = 2.0;
+            ps.point.z = 3.0;
+
+            // 
+            geometry_msgs::PointStamped psAtSon2;
+            psAtSon2 = buffer.transform(ps, "son2");
+            ROS_INFO("在 Son2 中的坐标:x=%.2f,y=%.2f,z=%.2f",
+                     psAtSon2.point.x,
+                     psAtSon2.point.y,
+                     psAtSon2.point.z
+            );
+        }
+        catch (const std::exception &e) {
+            // std::cerr << e.what() << '\n';
+            ROS_INFO("异常信息:%s", e.what());
+        }
+
+        r.sleep();
+        // 6.spin
+        ros::spinOnce();
+    }
+    return 0;
+}
+
+```
+
+代码解释：
+
+> 这个代码实现了几个功能。
+>
+> 1. 确定了 son1 坐标系原点 在 son2 坐标系下的位置。
+>
+> 2. 在 son1 坐标系下定义了一个点 ps。
+>
+>    [ INFO] [1640332328.852339810]: Son1 相对于 Son2 的坐标关系:父坐标系ID=son2
+>    [ INFO] [1640332328.852908173]: Son1 相对于 Son2 的坐标关系:子坐标系ID=son1
+>    [ INFO] [1640332328.853316122]: Son1 相对于 Son2 的坐标关系:x=-0.30,y=0.80,z=0.30
+>
+> 3. 将 son1 坐标系下的点 ps 转换到 son2 坐标系下的 psAtSon2
+>
+>    [ INFO] [1640332327.854015209]: 在 Son2 中的坐标:x=0.70,y=2.80,z=3.30
+
+```cpp
+// 解析 son1 中的点相对于 son2 的坐标
+/*
+	这个代码的功能实现了：
+	确定了 son1 坐标系原点 在 son2 坐标系下的位置。
+	
+	Get the transform between two frames by frame ID.
+	
+	Parameters
+
+	target_frame
+		The frame to which data should be transformed
+
+	source_frame
+		The frame where the data originated
+
+	time
+		The time at which the value of the transform is desired. (0 will get the latest)
+	
+	Returns
+
+		The transform between the frames
+	
+	Possible exceptions tf2::LookupException, tf2::ConnectivityException, 		tf2::ExtrapolationException, tf2::InvalidArgumentException
+	
+*/
+geometry_msgs::TransformStamped tfs = buffer.lookupTransform(
+    "son2", "son1", ros::Time(0));
+```
+
+```cpp
+/*
+这个代码的功能实现了：
+在 son1 坐标系下定义了一个点 ps。
+*/
+
+// 坐标点解析
+// 在 son1 坐标系下定义一个点 ps
+geometry_msgs::PointStamped ps;
+ps.header.frame_id = "son1";
+ps.header.stamp = ros::Time::now();
+ps.point.x = 1.0;
+ps.point.y = 2.0;
+ps.point.z = 3.0;
+```
+
+```cpp
+/*
+	这段代码实现了:
+	将 son1 坐标系下的点 ps 转换到 son2 坐标系下的 psAtSon2
+	
+	Transform an input into the target frame.
+    将 input 转换到 target 坐标系
+	This function is templated and can take as input any valid mathematical object that tf knows how to apply a transform to, by way of the templated math conversions interface. For example, the template type could be a Transform, Pose, Vector, or Quaternion message type (as defined in geometry_msgs).
+Template Parameters
+
+T
+The type of the object to transform.
+Parameters
+
+in
+The object to transform.
+
+target_frame
+The string identifer for the frame to transform into.
+
+timeout
+How long to wait for the target frame. Default value is zero (no blocking).
+Returns
+
+The transformed output.
+*/
+geometry_msgs::PointStamped psAtSon2;
+psAtSon2 = buffer.transform(ps, "son2");
+ROS_INFO("在 Son2 中的坐标:x=%.2f,y=%.2f,z=%.2f",
+	psAtSon2.point.x,
+	psAtSon2.point.y,
+	psAtSon2.point.z
+```
+
+
+
+
+
+##### 3. 配置文件
+
+只对修改的部分进行记录。
+
+配置文件只修改了`CMakeLists.txt`。
+
+`CMakeLists.txt`
+
+```cmake
+## demo_08: tf multi listener
+add_executable(demo_08_tf_multi_listener
+        src/demo_08_tf_multi_sub.cpp
+        )
+        
+        
+## demo_08: tf multi listener
+target_link_libraries(demo_08_tf_multi_listener
+        ${catkin_LIBRARIES}
+        )
+```
+
+
+
+##### 4. launch 文件
+
+`demo_08_tf_multi.launch`
+
+```xml
+<launch>
+
+    <!-- talker/publisher -->
+
+    <!--x, y, z, r, p, y-->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="demo_08_son1"
+          args="0.2 0.8 0.3 0 0 0 /world /son1"
+          output="screen"/>
+
+    <node pkg="tf2_ros" type="static_transform_publisher" name="demo_08_son2"
+          args="0.5 0 0 0 0 0 /world /son2"
+          output="screen"/>
+
+    <!-- listener/subscriber -->
+    <node pkg="test_pkg" type="demo_08_tf_multi_listener" name="demo_08_listener_sub_frames_node"
+          output="screen"/>
+
+</launch>
+
+```
+
+
+
+#### 3. 实现结果与调试
+
+<img src="20211220_CHAP_05_COMMON_TOOLS.assets/image-20211224161046096.png" alt="image-20211224161046096" style="zoom:80%;" align="left"/>
+
+```
+[ INFO] [1640332326.852381489]: Son1 相对于 Son2 的坐标关系:父坐标系ID=son2
+[ INFO] [1640332326.852849971]: Son1 相对于 Son2 的坐标关系:子坐标系ID=son1
+[ INFO] [1640332326.853126984]: Son1 相对于 Son2 的坐标关系:x=-0.30,y=0.80,z=0.30
+[ INFO] [1640332326.853487339]: 在 Son2 中的坐标:x=0.70,y=2.80,z=3.30
+[ INFO] [1640332327.852615377]: Son1 相对于 Son2 的坐标关系:父坐标系ID=son2
+[ INFO] [1640332327.853071496]: Son1 相对于 Son2 的坐标关系:子坐标系ID=son1
+[ INFO] [1640332327.853414112]: Son1 相对于 Son2 的坐标关系:x=-0.30,y=0.80,z=0.30
+[ INFO] [1640332327.854015209]: 在 Son2 中的坐标:x=0.70,y=2.80,z=3.30
+[ INFO] [1640332328.852339810]: Son1 相对于 Son2 的坐标关系:父坐标系ID=son2
+[ INFO] [1640332328.852908173]: Son1 相对于 Son2 的坐标关系:子坐标系ID=son1
+[ INFO] [1640332328.853316122]: Son1 相对于 Son2 的坐标关系:x=-0.30,y=0.80,z=0.30
+```
 
 
 
