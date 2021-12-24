@@ -1788,6 +1788,84 @@ target_link_libraries(demo_08_tf_multi_listener
 
 
 
+---
+
+
+
+### 05. 坐标系关系查看
+
+**Some Points Noted**
+
+> 在机器人系统中，涉及的坐标系有多个。
+>
+> 为了方便查看，ros 提供了专门的工具，可以用于生成显示坐标系关系的 pdf 文件，该文件包含树形结构的坐标系图谱。
+>
+> ---
+>
+> 安装 tf2_tools
+>
+> ```shell
+> sudo apt install ros-noetic-tf2-tools
+> ```
+>
+> ---
+>
+> 使用：
+>
+> 确定坐标系广播程序启动：
+>
+> ```cpp
+> static tf2_ros::TransformBroadcaster broadcaster;
+> broadcaster.sendTransform(tfs);
+> ```
+>
+> ---
+>
+> 生成 坐标系转换关系 pdf 文件：
+>
+> 选择或创建一个目录用来存放生成的 坐标系关系 pdf。
+>
+> ```shell
+> rosrun tf2_tools view_frames.py
+> 
+> # ---+ 输出 ---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+：
+> 
+> [INFO] [1592920556.827549]: Listening to tf data during 5 seconds...
+> [INFO] [1592920561.841536]: Generating graph in frames.pdf file...
+> ```
+>
+> ---
+>
+> 生成的文件：
+>
+> <img src="20211220_CHAP_05_COMMON_TOOLS.assets/image-20211224194417982.png" alt="image-20211224194417982" style="zoom:80%;" align="left"/>
+>
+> <img src="20211220_CHAP_05_COMMON_TOOLS.assets/image-20211224194449849.png" alt="image-20211224194449849" style="zoom:80%;" align="left"/>
+>
+> ---
+
+
+
+---
+
+
+
+### 06. TF 坐标系变换 Practice ★
+
+
+
+
+
+---
+
+
+
+### 07. TF2 and TF
+
+
+
+
+
 
 
 ---
