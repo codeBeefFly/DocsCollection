@@ -1852,9 +1852,568 @@ target_link_libraries(demo_08_tf_multi_listener
 
 ### 06. TF 坐标系变换 Practice ★
 
+#### 0. Some Points Noted
 
 
 
+
+
+#### 1. 需求与流程
+
+> **实现分析:**
+>
+> 乌龟跟随实现的核心，是乌龟A和B都要发布相对世界坐标系的坐标信息，然后，订阅到该信息需要转换获取A相对于B坐标系的信息，最后，再生成速度信息，并控制B运动。
+>
+> 1. 启动乌龟显示节点
+> 2. 在乌龟显示窗体中生成一只新的乌龟(需要使用服务)
+> 3. 编写两只乌龟发布坐标信息的节点
+> 4. 编写订阅节点订阅坐标信息并生成新的相对关系生成速度信息
+
+
+
+> **实现流程:**C++ 与 Python 实现流程一致
+>
+> 1. 新建功能包，添加依赖
+> 2. 编写服务客户端，用于生成一只新的乌龟
+> 3. 编写发布方，发布两只乌龟的坐标信息
+> 4. 编写订阅方，订阅两只乌龟信息，生成速度信息并发布
+> 5. 运行
+
+
+
+#### 2. C++ 实现 ★
+
+##### 0. 服务客户端 ★
+
+`demo_09_tf_practice_turtleSpawn.cpp`
+
+```cpp
+//
+// Created by ds18 on 12/25/21.
+//
+
+/*
+ * 创建第二只小乌龟
+ */
+#include "ros/ros.h"
+#include "turtlesim/Spawn.h"
+
+int main(int argc, char *argv[]) {
+
+    setlocale(LC_ALL, "");
+
+    //执行初始化
+    ros::init(argc, argv, "demo_09_create_turtle_node");
+    //创建节点
+    ros::NodeHandle nh;
+
+    // 1. 创建服务客户端
+    ros::ServiceClient client = nh.serviceClient<turtlesim::Spawn>("/spawn");
+
+    // 2. 等待
+    ros::service::waitForService("/spawn");
+    turtlesim::Spawn spawn;
+    spawn.request.name = "turtle2";
+    spawn.request.x = 1.0;
+    spawn.request.y = 2.0;
+    spawn.request.theta = 3.12415926;
+    
+    // 3. 客户端发送请求
+    bool flag = client.call(spawn);
+    if (flag) {
+        ROS_INFO("乌龟 %s 创建成功!", spawn.response.name.c_str());
+    } else {
+        ROS_INFO("乌龟 %s 创建失败!", spawn.response.name.c_str());
+    }
+
+    ros::spin();
+
+    return 0;
+}
+
+```
+
+###### 代码解释：
+
+```cpp
+// 创建服务的客户端，客户端 发送请求，服务端 响应 请求。
+// 等待服务端 启动。
+// 这个服务的名称是 /spawn
+// 发送请求,返回 bool 值，标记是否成功
+
+/*
+
+$ rosservice 
+args  call  find  info  list  type  uri 
+
+$ rosservice list
+
+$ rosservice info /spawn
+
+Node: /demo_09_turtle_1
+URI: rosrpc://ubuntu:33169
+Type: turtlesim/Spawn
+Args: x y theta name
+
+*/
+    
+    // 1. 创建服务客户端
+    ros::ServiceClient client = nh.serviceClient<turtlesim::Spawn>("/spawn");
+
+	// 2. 等待服务启动
+    ros::service::waitForService("/spawn");
+    
+    // 3. 客户端发送请求
+    bool flag = client.call(spawn);
+```
+
+
+
+
+
+##### 1. 发布方 ★
+
+`demo_09_tf_practice_talker.cpp`
+
+```cpp
+//
+// Created by ds18 on 12/25/21.
+//
+
+/*
+    该文件实现:需要订阅 turtle1 和 turtle2 的 pose，然后广播相对 world 的坐标系信息
+
+    注意: 订阅的两只 turtle,除了命名空间(turtle1 和 turtle2)不同外,
+          其他的话题名称和实现逻辑都是一样的，
+          所以我们可以将所需的命名空间通过 args 动态传入
+
+    实现流程:
+        1.包含头文件
+        2.初始化 ros 节点
+        3.解析传入的命名空间
+        4.创建 ros 句柄
+        5.创建订阅对象
+        6.回调函数处理订阅的 pose 信息
+            6-1.创建 TF 广播器
+            6-2.将 pose 信息转换成 TransFormStamped
+            6-3.发布
+        7.spin
+
+*/
+
+//1.包含头文件
+#include "ros/ros.h"
+#include "turtlesim/Pose.h"
+#include "tf2_ros/transform_broadcaster.h"
+#include "tf2/LinearMath/Quaternion.h"
+#include "geometry_msgs/TransformStamped.h"
+
+//保存乌龟名称
+std::string turtle_name;
+
+
+void doPose(const turtlesim::Pose::ConstPtr &pose) {
+
+    ROS_DEBUG("**** in doPose...");
+//    ROS_INFO("**** in doPose...");
+
+    //  6-1.创建 TF 广播器 ---------------注意 static
+    static tf2_ros::TransformBroadcaster broadcaster;
+    //  6-2.将 pose 信息转换成 TransFormStamped
+    geometry_msgs::TransformStamped tfs;
+
+    tfs.header.frame_id = "world";
+    tfs.header.stamp = ros::Time::now();
+    tfs.child_frame_id = turtle_name;
+    tfs.transform.translation.x = pose->x;
+    tfs.transform.translation.y = pose->y;
+    tfs.transform.translation.z = 0.0;
+    tf2::Quaternion qtn;
+    qtn.setRPY(0, 0, pose->theta);
+    tfs.transform.rotation.x = qtn.getX();
+    tfs.transform.rotation.y = qtn.getY();
+    tfs.transform.rotation.z = qtn.getZ();
+    tfs.transform.rotation.w = qtn.getW();
+
+    //  6-3.发布
+    broadcaster.sendTransform(tfs);
+}
+
+int main(int argc, char *argv[]) {
+    setlocale(LC_ALL, "");
+
+    // 2.初始化 ros 节点
+    ros::init(argc, argv, "demo_09_pub_tf");
+
+    // 3.解析传入的命名空间
+    if (argc != 2) {
+        ROS_ERROR("请传入正确的参数");
+    } else {
+        turtle_name = argv[1];
+        ROS_INFO("乌龟 %s 坐标发送启动", turtle_name.c_str());
+    }
+
+    // 4.创建 ros 句柄
+    ros::NodeHandle nh;
+
+    // 5.创建订阅对象
+//    std::cout << "**** " << turtle_name + "/pose" << std::endl;
+    ROS_INFO("topic name: %s: ", (turtle_name + "/pose").c_str());
+    ros::Subscriber sub = nh.subscribe<turtlesim::Pose>(turtle_name + "/pose", 1000, doPose);
+
+    ros::spin();
+    return 0;
+}
+
+```
+
+##### 代码解释：
+
+```cpp
+// 在解析传入的命名空间代码中，与之适配的 launch 文件代码是：
+/*
+    <!-- run double times talker node -->
+    <node pkg="test_pkg" type="demo_09_tf_practice_pub_tf" 
+    	  name="demo_09_pub_tf_turtle_1"
+          output="screen" args="turtle1"/>
+
+    <node pkg="test_pkg" type="demo_09_tf_practice_pub_tf"
+    	  name="demo_09_pub_tf_turtle_2"
+          output="screen" args="turtle2"/>
+*/
+// 这段命令相当于：
+// executable_name param_1
+// demo_09_tf_practice_pub_tf turtle2
+/*
+    ROS_INFO("argc: %d ", argc);
+    ROS_INFO("argv[0]: %s", argv[0]);
+    ROS_INFO("argv[1]: %s", argv[1]);
+
+[ INFO] [1640525516.630568739]: argc: 2 
+[ INFO] [1640525516.630579171]: argv[0]: /home/ds18/catkin_x2/IMU_ws_mk2/IMU_ws_mk2/LINES354_ws/devel/lib/test_pkg/demo_09_tf_practice_pub_tf
+[ INFO] [1640525516.630589191]: argv[1]: turtle2
+
+*/
+
+	// 3.解析传入的命名空间
+    if (argc != 2) {
+        ROS_ERROR("请传入正确的参数");
+    } else {
+        turtle_name = argv[1];
+        ROS_INFO("乌龟 %s 坐标发送启动", turtle_name.c_str());
+    }
+```
+
+```cpp
+// 订阅 turtlesim/pose 消息  
+// 并将这个消息转换成 TransformStamped
+// 将转换后的 TransformStamped 广播发布
+// turtle1/pose --> tf
+
+/*
+
+$ rosnode info /demo_09_pub_tf_turtle_1
+--------------------------------------------------------------------------------
+Node [/demo_09_pub_tf_turtle_1]
+Publications: 
+ * /rosout [rosgraph_msgs/Log]
+ * /tf [tf2_msgs/TFMessage]
+
+Subscriptions: 
+ * /turtle1/pose [turtlesim/Pose]
+
+Services: 
+ * /demo_09_pub_tf_turtle_1/get_loggers
+ * /demo_09_pub_tf_turtle_1/set_logger_level
+
+*/
+
+    // 5.创建订阅对象
+    ROS_INFO("topic name: %s: ", (turtle_name + "/pose").c_str());
+    ros::Subscriber sub = nh.subscribe<turtlesim::Pose>(turtle_name + "/pose", 1000, doPose);
+
+
+void doPose(const turtlesim::Pose::ConstPtr &pose) {
+
+    ROS_DEBUG("**** in doPose...");
+//    ROS_INFO("**** in doPose...");
+
+    //  6-1.创建 TF 广播器 ---------------注意 static
+    static tf2_ros::TransformBroadcaster broadcaster;
+    //  6-2.将 pose 信息转换成 TransFormStamped, pose --> tf
+    geometry_msgs::TransformStamped tfs;
+
+    //  6-3.发布
+    broadcaster.sendTransform(tfs);
+}
+```
+
+
+
+##### 2. 订阅方 ★
+
+`demo_09_tf_practice_listener.cpp`
+
+```cpp
+//
+// Created by ds18 on 12/25/21.
+//
+
+/*
+    订阅 turtle1 和 turtle2 的 TF 广播信息，查找并转换时间最近的 TF 信息
+    将 turtle1 转换成相对 turtle2 的坐标，在计算线速度和角速度并发布
+
+    实现流程:
+        1.包含头文件
+        2.初始化 ros 节点
+        3.创建 ros 句柄
+        4.创建 TF 订阅对象
+        5.处理订阅到的 TF
+        6.spin
+
+*/
+
+// 1.包含头文件
+#include "ros/ros.h"
+#include "tf2_ros/transform_listener.h"
+#include "geometry_msgs/TransformStamped.h"
+#include "geometry_msgs/Twist.h"
+
+int main(int argc, char *argv[]) {
+
+    setlocale(LC_ALL, "");
+
+    // 2.初始化 ros 节点
+    ros::init(argc, argv, "demo_09_sub_TF");
+
+    // 3.创建 ros 句柄
+    ros::NodeHandle nh;
+
+    // 4.创建 TF 订阅对象
+    tf2_ros::Buffer buffer;
+    tf2_ros::TransformListener listener(buffer);
+
+    // 5.处理订阅到的 TF
+    // 需要创建发布 /turtle2/cmd_vel 的 publisher 对象
+    ros::Publisher pub = nh.advertise<geometry_msgs::Twist>("/turtle2/cmd_vel", 1000);
+
+    ros::Rate rate(10);
+    while (ros::ok()) {
+        try {
+            // 5-1.先获取 turtle1 相对 turtle2 的坐标信息
+            geometry_msgs::TransformStamped tfs = buffer.lookupTransform("turtle2", "turtle1", ros::Time(0));
+
+            // 5-2.根据坐标信息生成速度信息 -- geometry_msgs/Twist.h
+            geometry_msgs::Twist twist;
+            twist.linear.x = 0.5 * sqrt(pow(tfs.transform.translation.x, 2) + pow(tfs.transform.translation.y, 2));
+            twist.angular.z = 4 * atan2(tfs.transform.translation.y, tfs.transform.translation.x);
+
+            // 5-3.发布速度信息 -- 需要提前创建 publish 对象
+            pub.publish(twist);
+        }
+        catch (const std::exception &e) {
+            // std::cerr << e.what() << '\n';
+            ROS_INFO("错误提示: %s", e.what());
+        }
+
+
+        rate.sleep();
+        // 6.spin
+        ros::spinOnce();
+    }
+
+    return 0;
+}
+
+```
+
+###### 代码解释：
+
+```cpp
+// Buffer: 存储已知的 坐标系，并提供 ros 服务 tf_frames
+// TransformListener: 提供坐标系转换信息的请求与接收方式
+// 4.创建 TF 订阅对象
+    tf2_ros::Buffer buffer;
+    tf2_ros::TransformListener listener(buffer);
+
+
+/*
+	通过 turtle1/pose --> tf 信息，计算需要发布的 turtle2/cmd_vel 消息值
+	创建 发布 话题 turtle2/cmd_vel 的对象
+*/
+    // 5.处理订阅到的 TF
+    // 需要创建发布 /turtle2/cmd_vel 的 publisher 对象
+    ros::Publisher pub = nh.advertise<geometry_msgs::Twist>("/turtle2/cmd_vel", 1000);
+	
+	// 发布话题，发布对象为 message Template
+	pub.publish(twist);
+
+
+/*
+
+	buffer.lookupTransform: 查询坐标系转换信息，target=turtle2，source=turtle1
+	
+	创建 geometry_msgs::Twist 消息，这里通过计算 linear.x 与 angular.z （合起来是向量值？）来计算cmd_vel
+	$ rosmsg show geometry_msgs/Twist
+	geometry_msgs/Vector3 linear
+  		float64 x
+  		float64 y
+  		float64 z
+	geometry_msgs/Vector3 angular
+  		float64 x
+  		float64 y
+  		float64 z
+  		
+  		
+$ rostopic info /turtle2/cmd_vel 
+Type: geometry_msgs/Twist
+
+Publishers: 
+ * /demo_09_listener (http://ubuntu:46251/)
+
+Subscribers: 
+ * /demo_09_turtle_1 (http://ubuntu:35893/)
+
+
+$ rostopic info /turtle1/cmd_vel 
+Type: geometry_msgs/Twist
+
+Publishers: 
+ * /demo_09_turtle_1_key (http://ubuntu:46209/)
+
+Subscribers: 
+ * /demo_09_turtle_1 (http://ubuntu:35893/)
+
+
+
+*/
+            // 5-1.先获取 turtle1 相对 turtle2 的坐标信息
+            geometry_msgs::TransformStamped tfs = buffer.lookupTransform("turtle2", "turtle1", ros::Time(0));
+
+            // 5-2.根据坐标信息生成速度信息 -- geometry_msgs/Twist.h
+            geometry_msgs::Twist twist;
+            twist.linear.x = 0.5 * sqrt(pow(tfs.transform.translation.x, 2) + pow(tfs.transform.translation.y, 2));
+            twist.angular.z = 4 * atan2(tfs.transform.translation.y, tfs.transform.translation.x);
+```
+
+
+
+##### 3. 配置文件
+
+只改动了`CMakeListes.txt`。
+
+```cmake
+## demo_09: tf practice listener
+add_executable(demo_09_tf_practice_listener
+        src/demo_09_tf_practice_listener.cpp
+        )
+        
+        
+## demo_09: tf practice listener
+target_link_libraries(demo_09_tf_practice_listener
+        ${catkin_LIBRARIES}
+        )
+```
+
+
+
+##### 4. launch 文件
+
+`demo_09_tf_practice.launch`
+
+```xml
+<launch>
+
+    <!-- run turtlesim_node 1 and key control node -->
+    <node pkg="turtlesim" type="turtlesim_node" name="demo_09_turtle_1"/>
+
+    <node pkg="turtlesim" type="turtle_teleop_key" name="demo_09_turtle_1_key"/>
+
+    <!-- run demo_09_create_turtle_node -->
+    <node pkg="test_pkg" type="demo_09_tf_practice_turtleSpawn" 		
+          name="demo_09_turtle_2" 
+          output="screen"/>
+
+    <!-- run double times talker node -->
+    <node pkg="test_pkg" type="demo_09_tf_practice_pub_tf" 
+          name="demo_09_pub_tf_turtle_1"
+          output="screen" args="turtle1"/>
+
+    <node pkg="test_pkg" type="demo_09_tf_practice_pub_tf" 
+          name="demo_09_pub_tf_turtle_2"
+          output="screen" args="turtle2"/>
+
+    <!-- run listener node -->
+    <node pkg="test_pkg" type="demo_09_tf_practice_listener" 
+          name="demo_09_listener" output="screen"/>
+
+</launch>
+```
+
+
+
+#### 3. 实现结果与调试
+
+```shell
+ds18@ubuntu:~/catkin_x2/IMU_ws_mk2/IMU_ws_mk2/LINES354_ws$ roslaunch test_pkg demo_09_tf_practice.launch 
+... logging to /home/ds18/.ros/log/e7e7e374-639f-11ec-90e2-000c29bd4b3b/roslaunch-ubuntu-45301.log
+Checking log directory for disk usage. This may take a while.
+Press Ctrl-C to interrupt
+Done checking log file disk usage. Usage is <1GB.
+
+started roslaunch server http://ubuntu:34897/
+
+SUMMARY
+========
+
+PARAMETERS
+ * /rosdistro: melodic
+ * /rosversion: 1.14.11
+
+NODES
+  /
+    demo_09_listener (test_pkg/demo_09_tf_practice_listener)
+    demo_09_pub_tf_turtle_1 (test_pkg/demo_09_tf_practice_pub_tf)
+    demo_09_pub_tf_turtle_2 (test_pkg/demo_09_tf_practice_pub_tf)
+    demo_09_turtle_1 (turtlesim/turtlesim_node)
+    demo_09_turtle_1_key (turtlesim/turtle_teleop_key)
+    demo_09_turtle_2 (test_pkg/demo_09_tf_practice_turtleSpawn)
+
+ROS_MASTER_URI=http://localhost:11311
+
+process[demo_09_turtle_1-1]: started with pid [45316]
+process[demo_09_turtle_1_key-2]: started with pid [45317]
+process[demo_09_turtle_2-3]: started with pid [45318]
+process[demo_09_pub_tf_turtle_1-4]: started with pid [45324]
+[ INFO] [1640522274.386934336]: waitForService: Service [/spawn] could not connect to host [ubuntu:36803], waiting...
+process[demo_09_pub_tf_turtle_2-5]: started with pid [45330]
+[ INFO] [1640522274.391568178]: 乌龟 turtle1 坐标发送启动
+[ INFO] [1640522274.395249601]: topic name: turtle1/pose: 
+process[demo_09_listener-6]: started with pid [45333]
+[ INFO] [1640522274.398699379]: 乌龟 turtle2 坐标发送启动
+[ INFO] [1640522274.401537706]: topic name: turtle2/pose: 
+[ INFO] [1640522274.412442247]: 错误提示: "turtle2" passed to lookupTransform argument target_frame does not exist. 
+[ INFO] [1640522274.494086271]: waitForService: Service [/spawn] is now available.
+[ INFO] [1640522274.512734390]: 错误提示: "turtle2" passed to lookupTransform argument target_frame does not exist. 
+[ INFO] [1640522274.612655381]: 错误提示: "turtle2" passed to lookupTransform argument target_frame does not exist. 
+[ INFO] [1640522274.712868290]: 错误提示: "turtle2" passed to lookupTransform argument target_frame does not exist. 
+[ INFO] [1640522274.812769395]: 错误提示: "turtle2" passed to lookupTransform argument target_frame does not exist. 
+[ INFO] [1640522274.913601571]: 错误提示: "turtle2" passed to lookupTransform argument target_frame does not exist. 
+[ INFO] [1640522275.013248582]: 错误提示: "turtle2" passed to lookupTransform argument target_frame does not exist. 
+[ INFO] [1640522275.113203787]: 错误提示: "turtle2" passed to lookupTransform argument target_frame does not exist. 
+[ INFO] [1640522275.212777146]: 错误提示: "turtle2" passed to lookupTransform argument target_frame does not exist. 
+[ INFO] [1640522275.229157772]: 乌龟 turtle2 创建成功!
+[ INFO] [1640522275.312663865]: 错误提示: "turtle2" passed to lookupTransform argument target_frame does not exist. 
+[ INFO] [1640522275.412641974]: 错误提示: "turtle2" passed to lookupTransform argument target_frame does not exist. 
+[ INFO] [1640522275.512515566]: 错误提示: "turtle2" passed to lookupTransform argument target_frame does not exist. 
+[ INFO] [1640522275.613537395]: 错误提示: "turtle2" passed to lookupTransform argument target_frame does not exist. 
+```
+
+<img src="20211220_CHAP_05_COMMON_TOOLS.assets/image-20211226205651148.png" alt="image-20211226205651148" style="zoom:50%;" align="left"/>
+
+<img src="20211220_CHAP_05_COMMON_TOOLS.assets/image-20211226215213100.png" alt="image-20211226215213100" style="zoom:80%;" align="left"/>
+
+<img src="20211220_CHAP_05_COMMON_TOOLS.assets/image-20211226215355914.png" alt="image-20211226215355914" style="zoom:80%;" align="left"/>
 
 ---
 
