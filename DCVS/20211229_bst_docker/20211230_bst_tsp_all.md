@@ -217,11 +217,13 @@ index 9a0ec248..27788b63 100644
 
 
 
-### 1. 尝试 ubuntu 18.04 下 stand alone 编译 `tauristar_avm`
+### 1. 尝试 ubuntu 18.04 下 stand alone 编译 `tauristar_avm`（完成）
 
 路径：`src/tauristar_platform/tauristar_perception/tauristar_avm`
 
-编译操作：
+
+
+**编译操作：**
 
 | ![image-20211230194548946](20211230_bst_tsp_all.assets/image-20211230194548946.png) | ![image-20211230194624300](20211230_bst_tsp_all.assets/image-20211230194624300.png) |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
@@ -229,8 +231,10 @@ index 9a0ec248..27788b63 100644
 
 
 
+**编译命令：**
+
 ```cmake
-# cmake 命令
+# cmake 命令示例
 
 cmake -DOpenCV_DIR=/root/usr/local/share/OpenCV -DBUILD_WITH_ROS=OFF -DBUILD_WITH_ROSBRIDGECPP=OFF ..
 
@@ -253,7 +257,7 @@ cmake -DOpenCV_DIR=/root/usr/local/share/OpenCV -DBUILD_WITH_ROS=OFF -DBUILD_WIT
 
 
 
-编译实操：
+**编译实操：**
 
 ```shell
 # 在 /src/tauristar_platform/tauristar_perception/tauristar_avm 目录下
@@ -304,4 +308,186 @@ src/tauristar_platform/tauristar_perception/tauristar_avm/install$ tree
 ```
 
 
+
+**所需要的头文件：**
+
+```shell
+ds18@ubuntu:~/Work/TSP_BST_DOC$ tree library/
+library/
+├── avm_algo_base
+│   └── point2D.h
+├── avm_bvclib
+│   ├── avm_bvc_engine.h
+│   └── bright_alg.h
+├── avm_calib_lib
+│   ├── bvsCalibAlg.h
+│   ├── deavm_edgelet.h
+│   └── preprocessing.h
+├── avm_lib
+│   ├── camerainit.h
+│   ├── gl3DModel.h
+│   ├── lut_fixedgrid_2d.h
+│   ├── ResidueImageStitch.h
+│   ├── rv3dmodel.h
+│   ├── single3dmodel.h
+│   └── singleudis.h
+└── avm_util
+    ├── bv3d_xml.h
+    ├── lens.h
+    └── xmlResolve.h
+
+5 directories, 16 files
+
+```
+
+
+
+### 2. 尝试在 bst docker 下 standalone 编译 `tauristar_avm`
+
+```shell
+root@77da538bab4a:/home/work_3/TauristarPlatform/src/tauristar_platform/tauristar_perception/tauristar_avm/build# /opt/bstos/1.1.2.1/environment-setup-aarch64-bst-linux root@77da538bab4a:/home/work_3/TauristarPlatform/src/tauristar_platform/tauristar_perception/tauristar_avm/build# cmake .. -DAVM_STANDALONE=ON -DOpenCV_DIR=/usr/local/share/OpenCV
+-- Toolchain file defaulted to '/opt/bstos/1.1.2.1/sysroots/x86_64-bstsdk-linux/usr/share/cmake/OEToolchainConfig.cmake'
+-- The C compiler identification is GNU 8.3.0
+-- The CXX compiler identification is GNU 8.3.0
+-- Check for working C compiler: /opt/bstos/1.1.2.1/sysroots/x86_64-bstsdk-linux/usr/bin/aarch64-bst-linux/aarch64-bst-linux-gcc
+-- Check for working C compiler: /opt/bstos/1.1.2.1/sysroots/x86_64-bstsdk-linux/usr/bin/aarch64-bst-linux/aarch64-bst-linux-gcc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /opt/bstos/1.1.2.1/sysroots/x86_64-bstsdk-linux/usr/bin/aarch64-bst-linux/aarch64-bst-linux-g++
+-- Check for working CXX compiler: /opt/bstos/1.1.2.1/sysroots/x86_64-bstsdk-linux/usr/bin/aarch64-bst-linux/aarch64-bst-linux-g++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- CMAKE_BINARY_DIR:  /home/work_3/TauristarPlatform/src/tauristar_platform/tauristar_perception/tauristar_avm/build
+-- PROJECT_SOURCE_DIR /home/work_3/TauristarPlatform/src/tauristar_platform/tauristar_perception/tauristar_avm
+-- Found OpenCV: /usr/local (found version "3.4.4") 
+-- Boost version: 1.68.0
+-- Found the following Boost libraries:
+--   filesystem
+--   system
+CMake Deprecation Warning at /home/work_3/TauristarPlatform/src/tauristar_platform/third_party/yaml-cpp/CMakeLists.txt:10 (cmake_policy):
+  The OLD behavior for policy CMP0012 will be removed from a future version
+  of CMake.
+
+  The cmake-policies(7) manual explains that the OLD behaviors of all
+  policies are deprecated and that a policy should be set to OLD only under
+  specific short-term circumstances.  Projects should be ported to the NEW
+  behavior and not rely on setting a policy to OLD.
+
+
+CMake Deprecation Warning at /home/work_3/TauristarPlatform/src/tauristar_platform/third_party/yaml-cpp/CMakeLists.txt:14 (cmake_policy):
+  The OLD behavior for policy CMP0015 will be removed from a future version
+  of CMake.
+
+  The cmake-policies(7) manual explains that the OLD behaviors of all
+  policies are deprecated and that a policy should be set to OLD only under
+  specific short-term circumstances.  Projects should be ported to the NEW
+  behavior and not rely on setting a policy to OLD.
+
+
+-- Performing Test FLAG_WEXTRA
+-- Performing Test FLAG_WEXTRA - Success
+-- a--- Build type: 
+-- b--- Build type: 
+-- Build spdlog: 1.4.2
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Looking for pthread_create
+-- Looking for pthread_create - not found
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - found
+-- Found Threads: TRUE  
+-- Build type: Release
+-- CMAKE_INSTALL_PREFIX: /home/work_3/TauristarPlatform/src/tauristar_platform/tauristar_perception/tauristar_avm/install
+AVM UTIL: STANDALONE
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/work_3/TauristarPlatform/src/tauristar_platform/tauristar_perception/tauristar_avm/build
+
+```
+
+
+
+#### 遇到的问题：
+
+##### 1. 报错：optimizer，（已解决）
+
+```
+[ 11%] Linking CXX shared library liboptimizer.so
+[ 12%] Building CXX object yaml-cpp/CMakeFiles/yaml-cpp.dir/src/convert.cpp.o
+/opt/bstos/1.1.2.1/sysroots/x86_64-bstsdk-linux/usr/libexec/aarch64-bst-linux/gcc/aarch64-bst-linux/8.3.0/real-ld: skipping incompatible /home/work_3/TauristarPlatform/src/tauristar_platform/tauristar_perception/tauristar_avm/../../third_party/nl2sol/install_x86/libnl2sol.so when searching for -lnl2sol
+/opt/bstos/1.1.2.1/sysroots/x86_64-bstsdk-linux/usr/libexec/aarch64-bst-linux/gcc/aarch64-bst-linux/8.3.0/real-ld: cannot find -lnl2sol
+collect2: error: ld returned 1 exit status
+optimizers/CMakeFiles/optimizer.dir/build.make:83: recipe for target 'optimizers/liboptimizer.so' failed
+make[2]: *** [optimizers/liboptimizer.so] Error 1
+CMakeFiles/Makefile2:299: recipe for target 'optimizers/CMakeFiles/optimizer.dir/all' failed
+make[1]: *** [optimizers/CMakeFiles/optimizer.dir/all] Error 2
+make[1]: *** Waiting for unfinished jobs....
+[ 12%] Building CXX object library/avm_dcal_lib/CMakeFiles/lib_avm_dcal.dir/DynamicCalibEngine.cc.o
+
+```
+
+解决：
+
+修改上级 `CMakeLists.txt`：将与 optimizer 有关的代码全部注释掉。
+
+```shell
+root@77da538bab4a:/home/work_3/TauristarPlatform/src/tauristar_platform/tauristar_perception/tauristar_avm/build# git diff ../CMakeLists.txt 
+diff --git a/src/tauristar_platform/tauristar_perception/tauristar_avm/CMakeLists.txt b/src/tauristar_platform/tauristar_perception/tauristar_avm/CMakeLists.txt
+index ba621d26..548bc85b 100644
+--- a/src/tauristar_platform/tauristar_perception/tauristar_avm/CMakeLists.txt
++++ b/src/tauristar_platform/tauristar_perception/tauristar_avm/CMakeLists.txt
+@@ -20,9 +20,9 @@ IF (AVM_STANDALONE)
+   include_directories("${THIRD_PARTY_ROOT}/yaml-cpp/include")
+ 
+   link_directories(${THIRD_PARTY_ROOT}/nl2sol/install_x86)
+-  set(OPTIMIZER_ROOT ${PROJECT_SOURCE_DIR}/../../optimizers)
+-  add_subdirectory(${OPTIMIZER_ROOT} optimizers)
+-  include_directories(${OPTIMIZER_ROOT})
++  #set(OPTIMIZER_ROOT ${PROJECT_SOURCE_DIR}/../../optimizers)
++  #add_subdirectory(${OPTIMIZER_ROOT} optimizers)
++  #include_directories(${OPTIMIZER_ROOT})
+ 
+   SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
+   SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
+@@ -57,7 +57,7 @@ ENDIF()
+ 
+ set (AVM_SYSTEM_LIBS
+   ${AVM_SYSTEM_LIBS}
+-  optimizer
++  #optimizer
+   yaml-cpp
+   ${OpenCV_LIBS}
+   ${Boost_LIBRARIES}
+
+```
+
+编译结果：
+
+```shell
+cc1plus: warning: include location "/usr/local/include" is unsafe for cross-compilation [-Wpoison-system-directories]
+cc1plus: warning: include location "/usr/local/include/opencv" is unsafe for cross-compilation [-Wpoison-system-directories]
+[ 96%] Linking CXX executable ../../bin/d2t_conv
+[ 96%] Built target d2t_conv
+[ 97%] Linking CXX executable ../../bin/t2d_conv
+[ 97%] Built target t2d_conv
+[ 97%] Linking CXX executable ../../bin/bvs_calib
+[ 97%] Built target bvs_calib
+[ 97%] Linking CXX executable ../../bin/avm_bvc
+[ 97%] Built target avm_bvc
+[ 97%] Linking CXX executable ../../bin/cvt_yuv
+[ 97%] Built target cvt_yuv
+[ 98%] Linking CXX executable ../../bin/avm_dynamic_cal
+[ 98%] Built target avm_dynamic_cal
+[100%] Linking CXX executable ../../bin/avm_dcal
+[100%] Built target avm_dcal
+[100%] Linking CXX executable ../../bin/avm_calib
+[100%] Built target avm_calib
+
+```
 
