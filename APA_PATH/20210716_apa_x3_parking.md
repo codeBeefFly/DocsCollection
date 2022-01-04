@@ -36,7 +36,7 @@ In the session.log recorded during real car running, after final goal has been r
 
 ### 2. **modification on backward trajectory as correction trajectory** **(suggestion)**
 
-From 4959-40, we can observe that there are sometimes weird moves after car have already inside the slots, though it gives more desired final pose of the vehicle, forwarding out and reverting into the slot for a long distance is not necessary, we should consider shorten the path if necessary. 
+From 4959-40, we can observe that there are sometimes weird moves after car have already parked inside the slots, though it gives more desired final pose of the vehicle, forwarding out of and reverting into the slot for a long distance is not necessary, we should consider shorten the path if necessary. 
 
    
 
@@ -72,13 +72,13 @@ From 4959-40, we can observe that there are sometimes weird moves after car have
 
 ### 3. find a way for smooth steering: avoid step motor like rotation (suggestion)
 
-this phenomenon has been observed quite a lot at the time of turning the wheels, but we did not take it seriously because of various reasons, and  we have solve it once by redirect the session logs from the console to session.log file, but the lag still exist, though so far, it dose not affect our final parking pose. It is hard to describe what kind of motion it is so I will record and upload some vids about it for further analysis. 
+this phenomenon has been observed quite a lot at the time of turning the wheels, but we did not take it seriously because of various reasons, and  we have solved it once by redirect the session logs from the console to session.log file, but lagging problem  still exist,  so far, it dose not affect our final parking pose. It is hard to describe what kind of motion it is so I will record and upload some vids about it for further analysis. 
 
 
 
 ### 4. path planning and parking control parameter adjustment, for x3-byd platform. (necessary)
 
-I am read codes related to path planning and parking control, which are belongs to following class-steps, the value used in ic421 may not a good one for x3-byd.
+I am reading codes related to path planning and parking control, which are belongs to following class-steps, the value used in ic421 may not a good one for x3-byd.
 
 ```yaml
       - key: ParkingMiddleGoals
