@@ -65,7 +65,19 @@ roslaunch developer_launch control_test_apa_exit.launch world:=left_parallel_6
 
 
 
-# 02. 如何调试 roslaunch？
+# 02. 如何调试 roslaunch？（已解决）
+
+
+
+在调试 DCVS TSP parking exit 的时候用的方法：
+
+注释掉目标`.launch`文件的需要调试的节点代码（`<node>`），或者使用`if (true，执行node脚本), unless`
+
+
+
+---
+
+
 
 在编译 ros 项目的时候，需要使用调试模式：
 
@@ -207,7 +219,7 @@ $ rospack find developer_launch
 
 
 
-# 04. 代码注释
+# 04. 代码注释（todo）
 
 
 
@@ -505,4 +517,10 @@ void ParkingExitPathWithRadarStep::Forward_cpu()
 }
 
 ```
+
+
+
+
+
+---
 
