@@ -2419,7 +2419,7 @@ process[demo_09_listener-6]: started with pid [45333]
 
 
 
-### 07. TF2 and TF
+### 07. TF2 and TF（略）
 
 
 
@@ -2433,7 +2433,155 @@ process[demo_09_listener-6]: started with pid [45333]
 
 
 
-## 02. XX
+## 02. rosbag
+
+
+
+### 01. rosbag 命令行
+
+#### 实现：
+
+1.准备
+
+创建目录保存录制的文件
+
+```
+mkdir ./xxx
+cd xxx
+```
+
+
+
+2.开始录制
+
+```
+rosbag record -a -O 目标文件
+```
+
+操作小乌龟一段时间，结束录制使用 ctrl + c，在创建的目录中会生成bag文件。
+
+
+
+3.查看文件
+
+```
+rosbag info 文件名
+```
+
+
+
+4.回放文件
+
+```
+rosbag play 文件名
+```
+
+重启乌龟节点，会发现，乌龟按照录制时的轨迹运动。
+
+
+
+### 02. rosbag 代码（c++）✦✦
+
+rosbag write
+
+```c++
+//
+// Created by ds18 on 1/8/22.
+//
+
+#include "ros/ros.h"
+#include "rosbag/bag.h"
+#include "std_msgs/String.h"
+
+
+int main(int argc, char *argv[])
+{
+    ros::init(argc,argv,"demo_chp05_bag_write");
+    ros::NodeHandle nh;
+
+    //创建bag对象
+    rosbag::Bag bag;
+
+    //打开
+    bag.open("/home/ds18/catkin_x2/docs/test.bag",rosbag::BagMode::Write);
+
+    //写
+    std_msgs::String msg;
+    msg.data = "hello world";
+    bag.write("/chatter",ros::Time::now(),msg);
+    bag.write("/chatter",ros::Time::now(),msg);
+    bag.write("/chatter",ros::Time::now(),msg);
+    bag.write("/chatter",ros::Time::now(),msg);
+
+    //关闭
+    bag.close();
+
+    return 0;
+}
+
+```
+
+
+
+rosbag read
+
+```c++
+//
+// Created by ds18 on 1/8/22.
+//
+
+/*
+    读取 bag 文件：
+*/
+
+#include "ros/ros.h"
+#include "rosbag/bag.h"
+#include "rosbag/view.h"
+#include "std_msgs/String.h"
+#include "std_msgs/Int32.h"
+
+int main(int argc, char *argv[])
+{
+
+    setlocale(LC_ALL,"");
+
+    ros::init(argc,argv,"demo_chp05_bag_read");
+    ros::NodeHandle nh;
+
+    //创建 bag 对象
+    rosbag::Bag bag;
+
+    //打开 bag 文件
+    bag.open("/home/ds18/catkin_x2/docs/test.bag",rosbag::BagMode::Read);
+    //读数据
+    for (rosbag::MessageInstance const m : rosbag::View(bag))
+    {
+        std_msgs::String::ConstPtr p = m.instantiate<std_msgs::String>();
+        if(p != nullptr){
+            ROS_INFO("读取的数据:%s",p->data.c_str());
+        }
+    }
+    //关闭文件流
+    bag.close();
+    
+    return 0;
+}
+
+```
+
+代码解释：
+
+```c++
+view 是 Bag 的 friend class
+
+class ROSBAG_STORAGE_DECL Bag
+{
+    friend class MessageInstance;
+    friend class View;
+	
+	...
+}
+```
 
 
 
@@ -2441,7 +2589,15 @@ process[demo_09_listener-6]: started with pid [45333]
 
 
 
-## 03. XX
+
+
+---
+
+
+
+## 03.  rqt 工具箱（略）
+
+
 
 
 
@@ -2452,4 +2608,6 @@ process[demo_09_listener-6]: started with pid [45333]
 
 
 ## 参考：
+
+link：[ros教程第五章](http://www.autolabor.com.cn/book/ROSTutorials/di-6-zhang-ji-qi-ren-xi-tong-fang-zhen.html)
 
