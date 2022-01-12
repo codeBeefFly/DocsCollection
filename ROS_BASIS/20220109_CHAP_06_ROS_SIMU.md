@@ -316,7 +316,7 @@ file --> save config as --> .../rviz/xxx.rviz
 
 
 
-#### 1. 标签：`<robot>`
+### 1. 标签：`<robot>`
 
 
 
@@ -336,13 +336,13 @@ file --> save config as --> .../rviz/xxx.rviz
 
 
 
-##### 属性：`name`
+#### 属性：`name`
 
 机器人名称。
 
 
 
-#### 2. 标签：`<link>`
+### 2. 标签：`<link>`
 
 
 
@@ -358,13 +358,13 @@ file --> save config as --> .../rviz/xxx.rviz
 
 
 
-##### 属性：`name`
+#### 属性：`name`
 
 刚体连杆名称。
 
 
 
-##### 子标签
+#### 子标签
 
 - visual ---> 描述外观(对应的数据是可视的)
   - geometry 设置连杆的形状
@@ -428,7 +428,7 @@ file --> save config as --> .../rviz/xxx.rviz
 
 
 
-##### 示例：长方体，圆柱体，球形部件
+#### 示例：长方体，圆柱体，球形部件
 
 文件：`demo_chp06_link_geometry.urdf`
 
@@ -489,7 +489,7 @@ file --> save config as --> .../rviz/xxx.rviz
 
 
 
-#### 3. 标签：`<joint>`
+### 3. 标签：`<joint>`
 
 `joint` 标签用于描述机器人关节的**运动学**和**动力学**属性，还可以指定关节运动的安全极限。
 
@@ -505,7 +505,7 @@ file --> save config as --> .../rviz/xxx.rviz
 
 
 
-##### 属性：`name，type`
+#### 属性：`name，type`
 
 - name  ---> 关节名称
 - type    ---> 关节运动形式
@@ -518,7 +518,7 @@ file --> save config as --> .../rviz/xxx.rviz
 
 
 
-##### 子标签
+#### 子标签
 
 - parent(必需的)
 
@@ -542,7 +542,7 @@ file --> save config as --> .../rviz/xxx.rviz
 
 
 
-##### 示例：机器人模型
+#### 示例：机器人模型
 
 底盘为长方体，在长方体的前面添加一摄像头，摄像头可以沿着 Z 轴 360 度旋转。
 
@@ -652,7 +652,7 @@ file --> save config as --> .../rviz/xxx.rviz
 
 
 
-##### 使用 `base_footprint` 优化
+#### 使用 `base_footprint` 优化
 
 机器人模型是半沉到地下的，因为默认情况下: 底盘的中心点位于地图原点上，所以会导致这种情况产生。
 
@@ -662,7 +662,7 @@ file --> save config as --> .../rviz/xxx.rviz
 
 
 
-##### 问题+解决：UnicodeEncodeError: 'ascii' codec can't encode characters
+#### 问题+解决：UnicodeEncodeError: 'ascii' codec can't encode characters
 
 rviz中提示坐标变换异常，导致机器人部件显示结构异常
 
@@ -672,8 +672,7 @@ rviz中提示坐标变换异常，导致机器人部件显示结构异常
 
 
 
-#### 4. 练习：搭建差速轮小车
-
+### 4. 练习：搭建差速轮小车
 
 
 **需求描述:**
@@ -751,7 +750,7 @@ axis= 1 1 1
 
 
 
-##### 搭建 urdf 模型：
+#### 搭建 urdf 模型：
 
 
 
@@ -903,7 +902,7 @@ axis= 1 1 1
 
 
 
-##### 编写 launch 文件
+#### 编写 launch 文件
 
 文件：`demo_chp06_myTurtleBot.launch`
 
@@ -944,12 +943,82 @@ axis= 1 1 1
 
 
 
-#### 5. URDF 工具
+### 5. URDF 工具
 
 
 
 - `check_urdf`命令可以检查复杂的 urdf 文件是否存在语法问题
 - `urdf_to_graphiz`命令可以查看 urdf 模型结构，显示不同 link 的层级关系
+
+
+
+---
+
+
+
+## 04. xacro 优化 urdf
+
+
+
+#### **URDF** 问题：
+
+**问题1：在设计关节的位置时，需要按照一定的公式计算，公式是固定的。**
+
+但是在 URDF 中依赖于人工计算，存在不便，容易计算失误，且当某些参数发生改变时，还需要重新计算。
+
+**问题2：URDF 中的部分内容是高度重复的。**
+
+驱动轮与支撑轮的设计实现，不同轮子只是部分参数不同，形状、颜色、翻转量都是一致的，在实际应用中，构建复杂的机器人模型时，更是易于出现高度重复的设计，按照一般的编程涉及到重复代码应该考虑封装。
+
+
+
+在 ROS 中，已经给出了类似编程的优化方案（通过变量结合函数），称之为:**Xacro**
+
+
+
+#### **概念**
+
+Xacro 是 XML Macros 的缩写，Xacro 是一种 XML 宏语言，是可编程的 XML。
+
+
+
+#### **原理**
+
+Xacro 可以声明变量，
+
+可以通过数学运算求解，
+
+使用流程控制控制执行顺序，
+
+还可以通过类似函数的实现，
+
+封装固定的逻辑，将逻辑中需要的可变的数据以参数的方式暴露出去，从而提高代码复用率以及程序的安全性。
+
+
+
+### 1. xacro 快速体验
+
+
+
+
+
+### 2. xacro 语法详解
+
+
+
+
+
+### 3. xacro 完整使用流程
+
+
+
+
+
+### 4. xacro 实操
+
+
+
+
 
 
 
