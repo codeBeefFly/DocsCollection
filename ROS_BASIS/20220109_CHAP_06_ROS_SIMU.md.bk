@@ -1158,166 +1158,17 @@ Copy
 
 
 
-**需求描述:**
 
-使用 Xacro 优化 URDF 版的小车底盘模型实现
-
-
-
-**结果演示:**
-
-<img src="2022-1-13 20220109_CHAP_06_ROS_SIMU 142645.assets/image-20220113154524566.png" alt="image-20220113154524566" style="zoom:80%;" align="left"/>
 
 
 
 #### 2. 文件 xacro 编写
-
-文件：`demo_chp06_myTurtleBot_xacro.launch`
-
-```xml
-<robot name="MyTurtleBot" xmlns:xacro="http://www.ros.org/wiki/xacro">
-
-    <material name="black">
-        <color rgba="0.0 0.0 0.0 0.8"/>
-    </material>
-    <material name="yellow">
-        <color rgba="0.5 0.3 0.0 0.5"/>
-    </material>
-
-    <!-- * * * * * * * * * chassis * * * * * * * * * -->
-	
-    <!-- xacro 属性 -->
-    <xacro:property name="PI" value="3.141"/>
-    <xacro:property name="base_footprint_radius" value="0.001"/>
-    <xacro:property name="base_link_radius" value="0.1"/>
-    <xacro:property name="base_link_length" value="0.08"/>
-    <xacro:property name="ground_clearance" value="0.015"/>
-
-    <link name="base_footprint">
-        <visual>
-            <geometry>
-                <sphere radius="${base_footprint_radius}"/>
-            </geometry>
-        </visual>
-    </link>
-
-    <link name="base_link">
-        <visual>
-            <geometry>
-                <cylinder radius="${base_link_radius}" length="${base_link_length}"/>
-            </geometry>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
-            <material name="yellow"/>
-        </visual>
-    </link>
-
-    <joint name="base_link2base_footprint" type="fixed">
-        <parent link="base_footprint"/>
-        <child link="base_link"/>
-        <origin xyz="0 0 ${ ground_clearance + base_link_length / 2 }"/>
-    </joint>
-
-
-    <!-- * * * * * * * * * driving wheels * * * * * * * * * -->
-
-    <!-- xacro 属性：属性封装 -->    
-    <xacro:property name="wheel_radius" value="0.0325"/>
-    <xacro:property name="wheel_length" value="0.015"/>
-
-    <!-- xacro 宏：函数封装-->
-    <xacro:macro name="add_wheel" params="name flag">
-
-        <link name="${name}_wheel">
-            <visual>
-                <geometry>
-                    <cylinder radius="${wheel_radius}" length="${wheel_length}"/>
-                </geometry>
-                <origin xyz="0.0 0.0 0.0" rpy="${PI / 2} 0.0 0.0"/>
-                <material name="black"/>
-            </visual>
-        </link>
-
-        <joint name="${name}_wheel2base_link" type="continuous">
-            <parent link="base_link"/>
-            <child link="${name}_wheel"/>
-            <origin xyz="0 ${flag * base_link_radius} ${ -(ground_clearance + base_link_length / 2 - wheel_radius) }"/>
-            <axis xyz="0 1 0"/>
-        </joint>
-
-    </xacro:macro>
-
-    <!>
-    <xacro:add_wheel name="left" flag="1"/>
-    <xacro:add_wheel name="right" flag="-1"/>
-
-
-    <!-- * * * * * * * * * universal wheels * * * * * * * * * -->
-
-    <!-- xacro 属性：属性封装 -->
-    <xacro:property name="universal_wheel_radius" value="0.0075"/>
-
-    <!-- xacro 宏：函数封装 -->
-    <xacro:macro name="add_universal_wheel" params="name flag">
-
-        <link name="${name}_wheel">
-            <visual>
-                <geometry>
-                    <sphere radius="${universal_wheel_radius}"/>
-                </geometry>
-                <origin xyz="0 0 0" rpy="0 0 0"/>
-                <material name="black"/>
-            </visual>
-        </link>
-
-        <joint name="${name}_wheel2base_link" type="continuous">
-            <parent link="base_link"/>
-            <child link="${name}_wheel"/>
-            <origin xyz="${ flag * (base_link_radius - universal_wheel_radius) } 0 ${ -(base_link_length / 2 + ground_clearance / 2) }"/>
-            <axis xyz="1 1 1"/>
-        </joint>
-
-    </xacro:macro>
-
-    <xacro:add_universal_wheel name="front" flag="1" />
-    <xacro:add_universal_wheel name="back" flag="-1" />
-
-</robot>
-```
 
 
 
 
 
 #### 3. 集成 launch 文件
-
-文件：`demo_chp06_myTurtleBot_xacro.launch`
-
-```xml
-<launch>
-
-    <!-- add urdf file to parameter server -->
-    <param name="robot_description" command="$(find xacro)/xacro $(find test_pkg)/urdf/demo_chp06_myTurtleBot.xacro"/>
-
-    <!-- run rviz -->
-
-<!--    <node pkg="rviz" type="rviz" name="rviz"/>-->
-
-    <node pkg="rviz" type="rviz" name="rviz"
-          args="-d $(find test_pkg)/rviz/demo_chp06_myTurtleBot.rviz"/>
-
-    <!-- run joint state publisher, necessary -->
-    <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher"/>
-
-    <!-- run robot state publisher -->
-    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"/>
-
-    <!-- for debug purpose -->
-    <!-- it is a repetition of joint_state_publisher_gui, comment it out otherwise will cause jittering -->
-    <node pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" name="joint_state_publisher_gui"/>
-
-</launch>
-
-```
 
 
 
