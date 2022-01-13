@@ -1166,7 +1166,7 @@ Copy
 
 **结果演示:**
 
-<img src="2022-1-13 20220109_CHAP_06_ROS_SIMU 142645.assets/image-20220113154524566.png" alt="image-20220113154524566" style="zoom:80%;" align="left"/>
+<img src="20220109_CHAP_06_ROS_SIMU.assets/image-20220113155023042.png" alt="image-20220113155023042" style="zoom:80%;" align="left" />
 
 
 
@@ -1329,6 +1329,630 @@ Copy
 
 
 
+#### 1. 需求
+
+> 添加摄像头和雷达传感器。
+
+
+
+#### 2. 演示
+
+<img src="20220109_CHAP_06_ROS_SIMU.assets/image-20220113161934156.png" alt="image-20220113161934156" style="zoom:80%;" align="left"/>
+
+
+
+#### 3. 实现流程
+
+机器人模型由多部件组成，可以将不同组件设置进单独文件，最终通过文件包含实现组件的拼装。
+
+1. 首先编写摄像头和雷达的 xacro 文件
+2. 然后再编写一个组合文件，组合底盘、摄像头与雷达
+3. 最后，通过 launch 文件启动 Rviz 并显示模型
+
+
+
+#### 4. 文件 xarco 组件编写
+
+文件结构：
+
+```shell
+$ tree
+.
+├── demo_chp06_myTurtleBot_camera.xacro
+├── demo_chp06_myTurtleBot_chassis.xacro
+├── demo_chp06_myTurtleBot_laser.xacro
+└── demo_chp06_myTurtleBot.xacro
+
+0 directories, 4 files
+```
+
+
+
+ **整车 xacro 文件：`demo_chp06_myTurtleBot.xacro`**
+
+```xml
+<robot name="MyTurtleBot" xmlns:xacro="http://wiki.ros.org/xacro">
+
+    <xacro:include filename="demo_chp06_myTurtleBot_chassis.xacro" />
+    <xacro:include filename="demo_chp06_myTurtleBot_camera.xacro" />
+    <xacro:include filename="demo_chp06_myTurtleBot_laser.xacro" />
+
+</robot>
+```
+
+
+
+**车体 xacro 文件：`demo_chp06_myTurtleBot_chassis.xacro`**
+
+```xml
+<robot name="MyTurtleBot_chassis" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <material name="black">
+        <color rgba="0.0 0.0 0.0 0.8"/>
+    </material>
+    <material name="yellow">
+        <color rgba="0.5 0.3 0.0 0.8"/>
+    </material>
+
+    <!-- * * * * * * * * * chassis * * * * * * * * * -->
+
+    <xacro:property name="PI" value="3.141"/>
+    <xacro:property name="base_footprint_radius" value="0.001"/>
+    <xacro:property name="base_link_radius" value="0.1"/>
+    <xacro:property name="base_link_length" value="0.08"/>
+    <xacro:property name="ground_clearance" value="0.015"/>
+
+    <link name="base_footprint">
+        <visual>
+            <geometry>
+                <sphere radius="${base_footprint_radius}"/>
+            </geometry>
+        </visual>
+    </link>
+
+    <link name="base_link">
+        <visual>
+            <geometry>
+                <cylinder radius="${base_link_radius}" length="${base_link_length}"/>
+            </geometry>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <material name="yellow"/>
+        </visual>
+    </link>
+
+    <joint name="base_link2base_footprint" type="fixed">
+        <parent link="base_footprint"/>
+        <child link="base_link"/>
+        <origin xyz="0 0 ${ ground_clearance + base_link_length / 2 }"/>
+    </joint>
+
+
+    <!-- * * * * * * * * * driving wheels * * * * * * * * * -->
+
+    <xacro:property name="wheel_radius" value="0.0325"/>
+    <xacro:property name="wheel_length" value="0.015"/>
+
+    <xacro:macro name="add_wheel" params="name flag">
+
+        <link name="${name}_wheel">
+            <visual>
+                <geometry>
+                    <cylinder radius="${wheel_radius}" length="${wheel_length}"/>
+                </geometry>
+                <origin xyz="0.0 0.0 0.0" rpy="${PI / 2} 0.0 0.0"/>
+                <material name="black"/>
+            </visual>
+        </link>
+
+        <joint name="${name}_wheel2base_link" type="continuous">
+            <parent link="base_link"/>
+            <child link="${name}_wheel"/>
+            <origin xyz="0 ${flag * base_link_radius} ${ -(ground_clearance + base_link_length / 2 - wheel_radius) }"/>
+            <axis xyz="0 1 0"/>
+        </joint>
+
+    </xacro:macro>
+
+    <xacro:add_wheel name="left" flag="1"/>
+    <xacro:add_wheel name="right" flag="-1"/>
+
+
+    <!-- * * * * * * * * * universal wheels * * * * * * * * * -->
+
+    <xacro:property name="universal_wheel_radius" value="0.0075"/>
+
+    <xacro:macro name="add_universal_wheel" params="name flag">
+
+        <link name="${name}_wheel">
+            <visual>
+                <geometry>
+                    <sphere radius="${universal_wheel_radius}"/>
+                </geometry>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <material name="black"/>
+            </visual>
+        </link>
+
+        <joint name="${name}_wheel2base_link" type="continuous">
+            <parent link="base_link"/>
+            <child link="${name}_wheel"/>
+            <origin xyz="${ flag * (base_link_radius - universal_wheel_radius) } 0 ${ -(base_link_length / 2 + ground_clearance / 2) }"/>
+            <axis xyz="1 1 1"/>
+        </joint>
+
+    </xacro:macro>
+
+    <xacro:add_universal_wheel name="front" flag="1" />
+    <xacro:add_universal_wheel name="rear" flag="-1" />
+
+</robot>
+```
+
+
+
+**摄像头 xacro 文件：`demo_chp06_myTurtleBot_camera.xacro`**
+
+```xml
+<robot name="MyTurtleBot_camera" xmlns:xacro="http://wiki.ros.org/xacro">
+
+    <!-- camera property macro -->
+
+    <xacro:property name="camera_length" value="0.01" />
+    <xacro:property name="camera_width" value="0.025" />
+    <xacro:property name="camera_height" value="0.025" />
+    <xacro:property name="camera_x" value="0.08" />
+    <xacro:property name="camera_y" value="0.0" />
+    <xacro:property name="camera_z" value="${base_link_length / 2 + camera_height / 2}" />
+
+
+    <link name="camera">
+        <visual>
+            <geometry>
+                <box size="${camera_length} ${camera_width} ${camera_height}" />
+            </geometry>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+            <material name="white">
+                <color rgba="1 1 1 0.8"/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="camera2base_link" type="fixed">
+        <parent link="base_link" />
+        <child link="camera" />
+        <origin xyz="${camera_x} ${camera_y} ${camera_z}" />
+    </joint>
+
+</robot>
+```
+
+
+
+**激光雷达 xacro 文件：`demo_chp06_myTurtleBot_laser.xacro`**
+
+```xml
+<robot name="MyTurtleBot_laser" xmlns:xacro="http://wiki.ros.org/xacro">
+
+    <!-- laser support frame property macro -->
+
+    <xacro:property name="support_length" value="0.15"/>
+    <xacro:property name="support_radius" value="0.01"/>
+    <xacro:property name="support_x" value="0.0"/>
+    <xacro:property name="support_y" value="0.0"/>
+    <xacro:property name="support_z" value="${base_link_length / 2 + support_length / 2}"/>
+
+    <link name="support">
+        <visual>
+            <geometry>
+                <cylinder radius="${support_radius}" length="${support_length}"/>
+            </geometry>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <material name="red">
+                <color rgba="0.8 0.2 0.0 0.8"/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="support2base_link" type="fixed">
+        <parent link="base_link"/>
+        <child link="support"/>
+        <origin xyz="${support_x} ${support_y} ${support_z}"/>
+    </joint>
+
+
+    <!-- laser property macro -->
+
+    <xacro:property name="laser_length" value="0.05"/>
+    <xacro:property name="laser_radius" value="0.03"/>
+    <xacro:property name="laser_x" value="0.0"/>
+    <xacro:property name="laser_y" value="0.0"/>
+    <xacro:property name="laser_z" value="${support_length / 2 + laser_length / 2}"/>
+
+    <link name="laser">
+        <visual>
+            <geometry>
+                <cylinder radius="${laser_radius}" length="${laser_length}"/>
+            </geometry>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <material name="black"/>
+        </visual>
+    </link>
+
+    <joint name="laser2support" type="fixed">
+        <parent link="support"/>
+        <child link="laser"/>
+        <origin xyz="${laser_x} ${laser_y} ${laser_z}"/>
+    </joint>
+
+</robot>
+```
+
+
+
+
+
+#### 5. 文件 launch 编写
+
+文件：`demo_chp06_myTurtleBot_xacro_2.launch`
+
+```shell
+<launch>
+
+    <!-- add urdf file to parameter server -->
+    <param name="robot_description" command="$(find xacro)/xacro $(find test_pkg)/urdf/xacro_myTurtleBot/demo_chp06_myTurtleBot.xacro"/>
+
+    <!-- run rviz -->
+
+<!--    <node pkg="rviz" type="rviz" name="rviz"/>-->
+
+    <node pkg="rviz" type="rviz" name="rviz"
+          args="-d $(find test_pkg)/rviz/demo_chp06_myTurtleBot.rviz"/>
+
+    <!-- run joint state publisher, necessary -->
+    <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher" output="screen"/>
+
+    <!-- run robot state publisher -->
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen"/>
+
+    <!-- for debug purpose -->
+    <!-- it is a repetition of joint_state_publisher_gui, comment it out otherwise will cause jittering -->
+    <node pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" name="joint_state_publisher_gui" output="screen"/>
+
+</launch>
+
+```
+
+
+
+
+
+---
+
+
+
+## 05. Rviz中控制机器人模型运动
+
+控制机器人运动，我查的资料是有两种方式：
+
+1. ros control：
+
+   ros_control is a generic robot controller package.
+
+2. arbotix：
+
+   arbotix_driver is a package designed for a specific hardware device.
+
+
+
+通过 URDF 结合 rviz 可以创建并显示机器人静态模型，可以调用 Arbotix 控制模型的运动。
+
+
+
+### 1. 简介：
+
+**Arbotix：**Arbotix 是一款控制电机、舵机的控制板，**并提供相应的 ros 功能包**，这个功能包的功能不仅可以驱动真实的 Arbotix 控制板，它还提供一个**差速控制器**，通过接受速度控制指令更新机器人的 joint 状态，从而帮助我们实现机器人在 rviz 中的运动。
+
+这个差速控制器在 arbotix_python 程序包中，完整的 arbotix 程序包还包括多种控制器，分别对应 dynamixel 电机、多关节机械臂以及不同形状的夹持器。
+
+
+
+### 2. 需求描述：
+
+控制机器人模型在 rviz 中做圆周运动。
+
+
+
+### 3. 结果演示：
+
+![img](http://www.autolabor.com.cn/book/ROSTutorials/assets/arbotix%E8%BF%90%E5%8A%A8%E6%8E%A7%E5%88%B6.gif)
+
+
+
+### 4. 实现流程：
+
+1. 安装 Arbotix
+2. 创建新功能包，准备机器人 urdf、xacro 文件
+3. 添加 Arbotix 配置文件
+4. 编写 launch 文件配置 Arbotix
+5. 启动 launch 文件并控制机器人模型运动
+
+
+
+### 5. 操作：
+
+<img src="20220109_CHAP_06_ROS_SIMU.assets/image-20220113173221196.png" alt="image-20220113173221196" style="zoom:80%;" align="left"/>
+
+**3.添加 arbotix 所需的配置文件**
+
+**添加 arbotix 所需配置文件**：`myTurtleBot_arbotix.yaml`
+
+```yaml
+controllers: {
+  base_controller: {
+    type: diff_controller,           #类型: 差速控制器
+#    type: omni_controller,
+    base_frame_id: base_footprint,   #参考坐标
+    base_width: 0.2,                 #两个轮子之间的间距
+    ticks_meter: 2000,               #控制频率
+    Kp: 12,                          #PID控制参数，使机器人车轮快速达到预期速度
+    Kd: 12,
+    Ki: 0,
+    Ko: 50,
+    accel_limit: 1.0                 #加速限制
+  }
+}
+
+```
+
+
+
+**4.launch 文件中配置 arbotix 节点**
+
+文件：`demo_chp06_myTurtleBot_xacro_arbotix.launch`
+
+```xml
+<launch>
+
+    <!-- add urdf file to parameter server -->
+    <param name="robot_description" command="$(find xacro)/xacro $(find test_pkg)/urdf/xacro_myTurtleBot_arbotix/demo_chp06_myTurtleBot.xacro"/>
+
+    <!-- run rviz -->
+
+<!--    <node pkg="rviz" type="rviz" name="rviz"/>-->
+
+    <node pkg="rviz" type="rviz" name="rviz"
+          args="-d $(find test_pkg)/rviz/demo_chp06_myTurtleBot_arbotix.rviz"/>
+
+    <!-- run joint state publisher, necessary -->
+    <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher" output="screen"/>
+
+    <!-- run robot state publisher -->
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen"/>
+
+    <!-- for debug purpose -->
+    <!-- it is a repetition of joint_state_publisher_gui, comment it out otherwise will cause jittering -->
+<!--    <node pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" name="joint_state_publisher_gui" output="screen"/>-->
+
+    <!-- run arbotix controller -->
+    <node name="arbotix" pkg="arbotix_python" type="arbotix_driver" output="screen">
+        <rosparam file="$(find test_pkg)/config/myTurtleBot_arbotix.yaml" command="load" />
+        <param name="sim" value="true" />
+    </node>
+
+</launch>
+
+```
+
+代码解释:
+
+<node> 调用了 arbotix_python 功能包下的 arbotix_driver 节点。
+
+<rosparam> arbotix 驱动机器人运行时，需要获取机器人信息，可以通过 file 加载配置文件。
+
+<param> 在仿真环境下，需要配置 sim 为 true。
+
+
+
+注意：要在 rviz 中打开插件 `odom`。
+
+
+
+发布速度：
+
+在一个终端中，输入命令：
+
+```shell
+rostopic pub -r 10 /cmd_vel geometry_msgs/Twist '{linear: {x: 0.2, y: 0, z: 0}, angular: {x: 0, y: 0, z: 0.5}}'
+```
+
+也就说我们可以发布 `cmd_vel` 话题消息控制小陈运动了，该实现策略有多种，可以另行编写节点，或者更简单些可以直接通过如下命令发布消息：
+
+
+
+如果要使用键盘发布速度，可以用命令：
+
+需要重映射 topic 名称。
+
+```shell
+rosrun turtlesim turtle_teleop_key /turtle1/cmd_vel:=/cmd_vel
+```
+
+参考文章内容：
+
+<img src="20220109_CHAP_06_ROS_SIMU.assets/image-20220113175203398.png" alt="image-20220113175203398" style="zoom:80%;" align="left" />
+
+
+
+查看 `rosnode`
+
+```shell
+$ rosnode list
+
+/arbotix
+/joint_state_publisher
+/robot_state_publisher
+/rosout
+/rostopic_105822_1641986971036
+/rqt_gui_py_node_75596
+/rviz
+/teleop_turtle
+```
+
+查看 `rosnode --> /arbotix`
+
+`arbotix` 节点订阅 `/cmd_vel` 话题：
+
+```shell
+$ rosnode info /arbotix 
+--------------------------------------------------------------------------------
+Node [/arbotix]
+Publications: 
+ * /diagnostics [diagnostic_msgs/DiagnosticArray]
+ * /joint_states [sensor_msgs/JointState]
+ * /odom [nav_msgs/Odometry]
+ * /rosout [rosgraph_msgs/Log]
+ * /tf [tf2_msgs/TFMessage]
+
+Subscriptions: 
+ * /cmd_vel [geometry_msgs/Twist]
+
+Services: 
+ * /arbotix/SetupAnalogIn
+ * /arbotix/SetupDigitalIn
+ * /arbotix/SetupDigitalOut
+ * /arbotix/get_loggers
+ * /arbotix/set_logger_level
+
+
+contacting node http://ubuntu:40525/ ...
+Pid: 113885
+Connections:
+ * topic: /joint_states
+    * to: /robot_state_publisher
+    * direction: outbound (39211 - 127.0.0.1:55404) [7]
+    * transport: TCPROS
+ * topic: /rosout
+    * to: /rosout
+    * direction: outbound (39211 - 127.0.0.1:55402) [16]
+    * transport: TCPROS
+ * topic: /tf
+    * to: /rqt_gui_py_node_75596
+    * direction: outbound (39211 - 127.0.0.1:55400) [9]
+    * transport: TCPROS
+ * topic: /tf
+    * to: /rviz
+    * direction: outbound (39211 - 127.0.0.1:55428) [12]
+    * transport: TCPROS
+ * topic: /odom
+    * to: /rviz
+    * direction: outbound (39211 - 127.0.0.1:55430) [17]
+    * transport: TCPROS
+ * topic: /cmd_vel
+    * to: /teleop_turtle (http://ubuntu:42423/)
+    * direction: inbound
+    * transport: TCPROS
+
+
+```
+
+查看 `rosnode --> /teleop_turtle`：
+
+`teleop_turtle` 节点发布 `/cmd_vel`话题：
+
+```shell
+$ rosnode info /teleop_turtle 
+--------------------------------------------------------------------------------
+Node [/teleop_turtle]
+Publications: 
+ * /cmd_vel [geometry_msgs/Twist]
+ * /rosout [rosgraph_msgs/Log]
+
+Subscriptions: None
+
+Services: 
+ * /teleop_turtle/get_loggers
+ * /teleop_turtle/set_logger_level
+
+
+contacting node http://ubuntu:42423/ ...
+Pid: 118356
+Connections:
+ * topic: /rosout
+    * to: /rosout
+    * direction: outbound (47875 - 127.0.0.1:43894) [13]
+    * transport: TCPROS
+ * topic: /cmd_vel
+    * to: /arbotix
+    * direction: outbound (47875 - 127.0.0.1:43888) [11]
+    * transport: TCPROS
+ * topic: /cmd_vel
+    * to: /rostopic_105822_1641986971036
+    * direction: outbound (47875 - 127.0.0.1:43892) [12]
+    * transport: TCPROS
+
+```
+
+
+
+**演示结果：**
+
+<img src="20220109_CHAP_06_ROS_SIMU.assets/image-20220113180840424.png" alt="image-20220113180840424" style="zoom:80%;" align="left"/>
+
+
+
+
+
+---
+
+
+
+## 06. URDF集成Gazebo
+
+
+
+### 1. URDF与Gazebo基本集成流程
+
+
+
+### 2. URDF集成Gazebo相关设置
+
+
+
+### 3. URDF集成Gazebo实操
+
+
+
+### 4. Gazebo仿真环境搭建
+
+
+
+
+
+---
+
+
+
+## 07. URDF、Gazebo与Rviz综合应用
+
+
+
+### 1. 机器人运动控制以及里程计信息显示
+
+
+
+### 2. 雷达信息仿真以及显示
+
+
+
+### 3. 摄像头信息仿真以及显示
+
+
+
+### 4. kinect信息仿真以及显示
+
+
+
+
 
 
 
@@ -1348,6 +1972,13 @@ Copy
 - [ROS学习初探之自建小车模型并进行仿真（六）](https://blog.csdn.net/qq_48427527/article/details/108492177)
 - [阿克曼前轮转向车gazebo模型](https://blog.csdn.net/benchuspx/article/details/117778279)
 - [Gazebo仿真——阿克曼（Ackermann）四轮小车模型](https://chanchanchan97.github.io/2020/04/26/Gazebo%E4%BB%BF%E7%9C%9F%E2%80%94%E2%80%94%E9%98%BF%E5%85%8B%E6%9B%BC%EF%BC%88Ackermann%EF%BC%89%E5%9B%9B%E8%BD%AE%E5%B0%8F%E8%BD%A6%E6%A8%A1%E5%9E%8B/)
+- [https://usermanual.wiki/Document/simulatormanualv120.394328797.pdf](https://usermanual.wiki/Document/simulatormanualv120.394328797.pdf)
+- [duthades](https://github.com/duthades)/[car_simulation_ros_gazebo](https://github.com/duthades/car_simulation_ros_gazebo)
+- [Differences between ros_control and arbotix driver package](https://answers.ros.org/question/260530/differences-between-ros_control-and-arbotix-driver-package/)
+- http://wiki.ros.org/arbotix_python/diff_controller
 - []()
 - []()
+- []()
+
+
 
