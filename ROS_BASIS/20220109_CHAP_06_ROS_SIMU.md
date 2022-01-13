@@ -984,13 +984,13 @@ Xacro 是 XML Macros 的缩写，Xacro 是一种 XML 宏语言，是可编程的
 
 #### **原理**
 
-Xacro 可以声明变量，
+1. Xacro 可以声明变量，
 
-可以通过数学运算求解，
+2. 可以通过数学运算求解，
 
-使用流程控制控制执行顺序，
+3. 可以使用流程控制控制执行顺序，
 
-还可以通过类似函数的实现，
+4. 可以通过类似函数的实现，
 
 封装固定的逻辑，将逻辑中需要的可变的数据以参数的方式暴露出去，从而提高代码复用率以及程序的安全性。
 
@@ -1000,15 +1000,177 @@ Xacro 可以声明变量，
 
 
 
+#### **1. 使用 xacro 优化 urdf 实现流程：**
+
+1. 需要使用变量封装底盘的半径、高度，
+2. 使用数学公式动态计算底盘的关节点坐标，
+3. 使用 Xacro 宏封装轮子重复的代码并调用宏创建两个轮子
+
+
+
+#### 2. 文件编写范例：
+
+在 xacro 中以**变量**的方式**封装属性**，以**函数**的方式**封装重复实现**：
+
+```xml
+<!-- 模型根节点 -->
+<robot name="mycar" xmlns:xacro="http://wiki.ros.org/xacro">
+    
+    <!-- 1. xacro 属性：属性封装 -->
+    <xacro:property name="wheel_radius" value="0.0325" />
+    <xacro:property name="wheel_length" value="0.0015" />
+    <xacro:property name="PI" value="3.1415927" />
+    <xacro:property name="base_link_length" value="0.08" />
+    <xacro:property name="lidi_space" value="0.015" />
+
+    <!-- 2. xacro 宏：函数，重复实现封装 -->
+    <xacro:macro name="wheel_func" params="wheel_name flag" >
+        
+        <link name="${wheel_name}_wheel">
+            <visual>
+                <geometry>
+                    <cylinder radius="${wheel_radius}" length="${wheel_length}" />
+                </geometry>
+
+                <origin xyz="0 0 0" rpy="${PI / 2} 0 0" />
+
+                <material name="wheel_color">
+                    <color rgba="0 0 0 0.3" />
+                </material>
+            </visual>
+        </link>
+
+        <!-- 3-2.joint -->
+        <joint name="${wheel_name}2link" type="continuous">
+            <parent link="base_link"  />
+            <child link="${wheel_name}_wheel" />
+            
+            <!-- 计算公式
+                x 无偏移
+                y 车体半径
+                z z= 车体高度 / 2 + 离地间距 - 车轮半径
+            -->
+            <origin xyz="0 ${0.1 * flag} ${(base_link_length / 2 + lidi_space - wheel_radius) * -1}" rpy="0 0 0" />
+            <axis xyz="0 1 0" />
+        </joint>
+
+    </xacro:macro>
+    
+    <!-- 2. 宏函数调用 -->
+    <xacro:wheel_func wheel_name="left" flag="1" />
+    <xacro:wheel_func wheel_name="right" flag="-1" />
+
+</robot>
+
+```
+
+
+
+#### 3. xacro 文件转换成 urdf
+
+命令：`rosrun xacro xacro xxx.xacro > xxx.urdf`
+
 
 
 ### 2. xacro 语法详解
+
+xacro 提供了可编程接口，包括
+
+1. 变量声明调用、
+2. 函数声明与调用等语法实现。
+3. 在使用 xacro 生成 urdf 时，根标签`robot`中必须包含命名空间声明：`xmlns:xacro="http://wiki.ros.org/xacro"`
+
+
+
+#### 1. xacro 属性
+
+> 封装 URDF 中的一些字段，比如: PAI 值，小车的尺寸，轮子半径 ....
+
+**属性定义**
+
+```xml
+<xacro:property name="xxxx" value="yyyy" />
+```
+
+**属性调用**
+
+```
+${属性名称}
+```
+
+**算数运算**
+
+```
+${数学表达式}
+```
+
+
+
+#### 2. xacro 宏
+
+> 类似于函数实现，提高代码复用率，优化代码结构，提高安全性
+
+
+
+**宏定义**
+
+```xml
+<xacro:macro name="宏名称" params="参数列表(多参数之间使用空格分隔)">
+
+    .....
+
+    参数调用格式: ${参数名}
+
+</xacro:macro>
+Copy
+```
+
+**宏调用**
+
+```xml
+<xacro:宏名称 参数1=xxx 参数2=xxx/>
+```
+
+
+
+#### 3. 文件包括
+
+>机器人由多部件组成，不同部件可能封装为单独的 xacro 文件，最后再将不同的文件集成，组合为完整机器人，可以使用文件包含实现
+
+```xml
+<robot name="xxx" xmlns:xacro="http://wiki.ros.org/xacro">
+      <xacro:include filename="my_base.xacro" />
+      <xacro:include filename="my_camera.xacro" />
+      <xacro:include filename="my_laser.xacro" />
+      ....
+</robot>
+```
 
 
 
 
 
 ### 3. xacro 完整使用流程
+
+
+
+#### 1. 需求与效果展示
+
+
+
+
+
+
+
+#### 2. 文件 xacro 编写
+
+
+
+
+
+#### 3. 集成 launch 文件
+
+
 
 
 
@@ -1033,3 +1195,10 @@ Xacro 可以声明变量，
 - http://wiki.ros.org/rviz
 - http://gazebosim.org/tutorials?tut=ros_overview
 - https://github.com/zx595306686/sim_demo.git
+- [ROS学习笔记12 —— urdf/xacro的使用以及gazebo属性的描述](https://blog.csdn.net/weixin_43455581/article/details/106362671)
+- [ROS学习初探之自建小车模型并进行仿真（六）](https://blog.csdn.net/qq_48427527/article/details/108492177)
+- [阿克曼前轮转向车gazebo模型](https://blog.csdn.net/benchuspx/article/details/117778279)
+- [Gazebo仿真——阿克曼（Ackermann）四轮小车模型](https://chanchanchan97.github.io/2020/04/26/Gazebo%E4%BB%BF%E7%9C%9F%E2%80%94%E2%80%94%E9%98%BF%E5%85%8B%E6%9B%BC%EF%BC%88Ackermann%EF%BC%89%E5%9B%9B%E8%BD%AE%E5%B0%8F%E8%BD%A6%E6%A8%A1%E5%9E%8B/)
+- []()
+- []()
+
