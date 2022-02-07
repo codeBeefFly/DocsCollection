@@ -191,7 +191,7 @@ near-side	|	lane	|	opposite-side
 
 
 
-##### case 1
+##### ------ case 1 ------------------------------------------------------------------ 
 
 ```
             car
@@ -199,11 +199,12 @@ goal        car
 car         car
 ```
 
-步骤 1-2-6-7
+> After the step 1 forward path, RS path will be computed directly to goal
+>
 
 
 
-##### case 2
+##### ------ case 2 ------------------------------------------------------------------
 
 ```
 car         car
@@ -211,10 +212,12 @@ goal        car
             car 
 ```
 
+> In the above case, car should be allowed to reverse farther in step 2. However, I currently do not have a good way to determine from radar if there is no car parked on the near side. We can determine if there are obstacles on the left or right side of car, but we can't be sure if the parked car is on the far side or the near side.
 
 
 
-##### case 3
+
+##### ------ case 3 ------------------------------------------------------------------
 
 ```
 car         
@@ -222,9 +225,12 @@ goal
 car 
 ```
 
+> If there are no cars on the opposite side, RS path will be computed directly to goal at step 1.
+> However, radar in simulation gives radar distance = 0, at the beginning of the run, so it still determines that there are obstacles on the opposite side, even thought there aren't. As a result, Step 1 will compute a forward path instead.
 
 
-##### case 4
+
+##### ------ case 4 ------------------------------------------------------------------
 
 ```
 car         car
@@ -234,7 +240,9 @@ car         car
 
 
 
-##### case 5
+
+
+##### ------ case 5 ------------------------------------------------------------------
 
 ```
             car
@@ -244,7 +252,7 @@ goal        car
 
 
 
-##### case 6
+##### ------ case 6 ------------------------------------------------------------------
 
 ```
 goal  
