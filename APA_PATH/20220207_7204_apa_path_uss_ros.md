@@ -135,7 +135,7 @@
 
 步骤2：如果 超声波雷达检测到 前方障碍物，停止 RS path 循迹，同时 开始 循迹 backward steering path。
 
-步骤3：如果 超声波雷达检测到 后方障碍物，停止 当前循迹，尝试不同转弯半径的 path，选择一条 path，使汽车处于一个“理想”的位置，以便倒车进入停车位 。
+步骤3：如果 超声波雷达检测到 后方障碍物，停止 当前循迹，尝试不同转弯半径的 path，选择一条 path，使汽车处于一个“理想”的位置，以便倒车进入停车位 。==需要对照代码看具体实现过程==
 
 步骤4：计算 到 goal 的 RS path。
 
@@ -143,11 +143,15 @@
 
 ### 03. comment 7：
 
+> **基于 commet 4：**
+>
 > Parking successful with no collisions. To avoid collisions from radar blind spots, obstacle points from ProcessRadarData were used.
 >
 > ==使用 ProcessRadarData 中的 obstacle points 避免碰撞。==
 >
 > In addition, step 1 drive forward was adjusted so that in step 2, the car can reverse into a spot in between the two parked cars.
+>
+> ==步骤1已经做出修改。==
 
 
 
@@ -155,26 +159,54 @@
 
 #### 1. 超声波雷达垂直测温检测与泊车流程图示：
 
+基于 commet 4 以及 commet 7 的改进。
+
 <img src="20220207_7204_apa_path_uss_ros.assets/image-20220207162706676.png" alt="image-20220207162706676" style="zoom:80%;" align="left"/>
 
 
 
-步骤1：
-
-步骤2：
-
-步骤3：
-
-步骤4：
-
-步骤5：
-
-步骤6：
-
-步骤7：
 
 
+| s.no. | sub-steps                                                    |      |
+| ----- | ------------------------------------------------------------ | ---- |
+| 步骤1 | 超声波雷达检测到垂直车位 goal<br />计算 start 到 goal 的 RS path<br />前向循迹 RS path |      |
+| 步骤2 | 后向循迹 RS path                                             |      |
+| 步骤3 | 检测到后向障碍物<br />停止 当前循迹                          |      |
+| 步骤4 |                                                              |      |
+| 步骤5 |                                                              |      |
+| 步骤6 |                                                              |      |
+| 步骤7 |                                                              |      |
 
 
 
 #### 2. 超声波雷达垂直车位检测与泊车的不同实例：
+
+位置图：
+
+```
+far-side	|	lane	|	opposite-side
+goal		|	lane	|	opposite-side
+near-side	|	lane	|	opposite-side
+```
+
+
+
+##### case 1
+
+```
+            car
+goal        car
+car         car
+```
+
+
+
+
+##### case 2
+
+
+##### case 3
+
+
+##### case 4
+
