@@ -169,13 +169,23 @@
 
 | s.no. | sub-steps                                                    |                                            |
 | ----- | ------------------------------------------------------------ | ------------------------------------------ |
-| 步骤1 | 超声波雷达检测到垂直车位 goal<br />计算 start 到 goal 的 RS path<br />循迹 RS path<br />或者，计算 forward path<br />循迹 forward path |                                            |
+| 步骤1 | 超声波雷达检测到垂直车位 goal<br />计算 start 到 goal 的 RS path（前向没有障碍物）<br />循迹 RS path<br />或者，计算 forward path（前向有障碍物）<br />循迹 forward path |                                            |
 | 步骤2 | 循迹 步骤1 path<br />或，检测到前向障碍物，后向循迹 arc path |                                            |
 | 步骤3 | 如果 检测到后向障碍物<br />停止 当前循迹<br />执行 步骤4     | 条件1：<br />有 后向障碍物<br />执行 步骤4 |
 | 步骤4 | 尝试不同转弯半径 并计算 RS path，<br />选择一条 path，使汽车处于一个“理想”的位置，以便倒车进入停车位 <br />循迹 RS path |                                            |
 | 步骤5 | 如果 检测到前向障碍物<br />停止当前循迹<br />执行 步骤2      | 条件2：<br />有 前向障碍物<br />执行 步骤2 |
 | 步骤6 | 同 步骤4，循迹 RS path，到达 goal                            |                                            |
 | 步骤7 | 到达 goal                                                    |                                            |
+
+==在 步骤1 中，假设 ego-car 向上（前）行驶：==
+
+==如果 右侧超声波雷达 没有检测到障碍物，则计算 start 到 goal 的 RS path。==
+
+==如果 右侧超声波雷达 检测到障碍物，则计算 forward path。==
+
+==具体流程结合代码。==
+
+
 
 
 
@@ -185,13 +195,13 @@
 
 ```
 far-side	|	lane	|	opposite-side
-goal		|	lane	|	opposite-side
+goal		|	ego-car	|	opposite-side
 near-side	|	lane	|	opposite-side
 ```
 
 
-
-##### ------ case 1 ------------------------------------------------------------------ 
+------ ### ------------------------------------------------------------------
+##### case 1 
 
 ```
             car
@@ -201,10 +211,13 @@ car         car
 
 > After the step 1 forward path, RS path will be computed directly to goal
 >
+> ==完成 步骤1 forward path 之后，计算当前 pose 到 goal 的 RS path。==
 
 
 
-##### ------ case 2 ------------------------------------------------------------------
+------ ### ------------------------------------------------------------------
+
+##### case 2
 
 ```
 car         car
@@ -212,12 +225,18 @@ goal        car
             car 
 ```
 
-> In the above case, car should be allowed to reverse farther in step 2. However, I currently do not have a good way to determine from radar if there is no car parked on the near side. We can determine if there are obstacles on the left or right side of car, but we can't be sure if the parked car is on the far side or the near side.
+> In the above case, car should be allowed to reverse farther in step 2. 
+>
+> ==在 步骤2 中，汽车需要倒退更多距离。==
+>
+> However, I currently do not have a good way to determine from radar if there is no car parked on the near side. We can determine if there are obstacles on the left or right side of car, but we can't be sure if the parked car is on the far side or the near side.
+>
+> ==只能确定 far-side 或 near-side 障碍物，但是无法确定 far-side 或 near-side 是否有车辆。==
 
 
 
-
-##### ------ case 3 ------------------------------------------------------------------
+------ ### ------------------------------------------------------------------
+##### case 3
 
 ```
 car         
@@ -226,11 +245,20 @@ car
 ```
 
 > If there are no cars on the opposite side, RS path will be computed directly to goal at step 1.
+>
+> ==如果对面车位没有汽车，理论上 前向雷达探测的 障碍物距离 应该是雷达的最大探测距离。步骤1 中 直接计算 RS path 从 start 到 goal。==
+>
 > However, radar in simulation gives radar distance = 0, at the beginning of the run, so it still determines that there are obstacles on the opposite side, even thought there aren't. As a result, Step 1 will compute a forward path instead.
+>
+> ==当前问题：==
+>
+> ==仿真环境中 雷达的模拟信号 在程序运行的初始阶段给出的值为 0（前方有障碍物，距离为0m），导致的结果：步骤1 中会计算一个 forward path 而不是 RS path 从 start 到 goal。==
 
 
 
-##### ------ case 4 ------------------------------------------------------------------
+------ ### ------------------------------------------------------------------
+
+##### case 4 
 
 ```
 car         car
@@ -238,11 +266,14 @@ goal        car
 car         car 
 ```
 
+> Follow the steps shown in comment 12.（完整的泊车的流程图示）
+>
 
 
 
+------ ### ------------------------------------------------------------------
 
-##### ------ case 5 ------------------------------------------------------------------
+##### case 5 
 
 ```
             car
@@ -250,13 +281,21 @@ goal        car
             car 
 ```
 
+> Same steps as case 1.
+>
+> ==前方有障碍物，完成 步骤1 forward path 之后，计算当前 pose 到 goal 的 RS path。==
 
 
-##### ------ case 6 ------------------------------------------------------------------
+
+------ ### ------------------------------------------------------------------
+
+##### case 6
 
 ```
 goal  
 ```
 
-
+> Same steps as case 3.
+>
+> ==步骤1 中 直接计算 RS path 从 start 到 goal。==
 
