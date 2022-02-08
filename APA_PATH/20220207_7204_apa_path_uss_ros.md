@@ -299,3 +299,12 @@ goal
 >
 > ==步骤1 中 直接计算 RS path 从 start 到 goal。==
 
+
+
+
+
+### comment 14：
+
+超声波雷达坐标系图示：
+
+<img src="20220207_7204_apa_path_uss_ros.assets/image-20220208174927183.png" alt="image-20220208174927183" style="zoom:80%;" align="left"/>
