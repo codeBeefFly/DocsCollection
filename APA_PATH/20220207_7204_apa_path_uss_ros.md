@@ -72,11 +72,45 @@
 
 
 
+---
+
+
+
+## 02. 进度：2022年2月11日
+
+### 01. 关于代码中 m_parking_step 的概念：
+
+
+
+| s.no | m_parking_step | explaination |      |      |
+| ---- | -------------- | ------------ | ---- | ---- |
+| 1    | 0              |              |      |      |
+| 2    | 1              |              |      |      |
+| 3    | 2              |              |      |      |
+| 4    | 3              |              |      |      |
+| 5    | 4              |              |      |      |
+| 6    | 5              |              |      |      |
+| 7    | 10             |              |      |      |
+|      |                |              |      |      |
+|      |                |              |      |      |
+
+
+
+### 02. 阿克曼转向模型：
+
+<img src="20220207_7204_apa_path_uss_ros.assets/image-20220211204051113.png" alt="image-20220211204051113" style="zoom:50%;" align="left"/>
+
+
+
+---
+
+
+
 ## 01. 进度：2022年2月7日
 
 
 
-### 01. commet 3：
+### 01. comment 3：
 
 > Current flow:
 >
@@ -114,7 +148,7 @@
 
 
 
-### 02. commet 4：
+### 02. comment 4：
 
 > step 1: compute RS path from start to goal
 > step 2: if front obstacle detected, stop following RS path, and follow backward steering path
@@ -303,8 +337,30 @@ goal
 
 
 
-### comment 14：
+### 05. comment 14：
 
-超声波雷达坐标系图示：
+#### 1. 超声波雷达坐标系图示：
 
-<img src="20220207_7204_apa_path_uss_ros.assets/image-20220208174927183.png" alt="image-20220208174927183" style="zoom:80%;" align="left"/>
+<img src="20220207_7204_apa_path_uss_ros.assets/image-20220208174927183.png" alt="image-20220208174927183" style="zoom:40%;" align="left"/>
+
+#### 2. APA 坐标系
+<img src="20220207_7204_apa_path_uss_ros.assets/image-20220210131040581.png" alt="image-20220210131040581" style="zoom:40%;" align="left"/>
+
+
+
+
+
+
+
+---
+
+
+
+## 参考：
+
+
+
+
+
+---
+
