@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.93.6 commit date:2021-11-16, commit time:14:54, hash:c842a90e2fa1</authoring_tool>
     </contributor>
-    <created>2022-02-22T13:57:58</created>
-    <modified>2022-02-22T13:57:58</modified>
+    <created>2022-02-22T13:55:51</created>
+    <modified>2022-02-22T13:55:51</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -78,14 +78,14 @@
   <library_effects>
     <effect id="材质-effect">
       <profile_COMMON>
-        <newparam sid="ps_5by5_2halfx5_l4_parallel_png-surface">
+        <newparam sid="parkingSpace_5by5_2halfx5_l6_parallel_png-surface">
           <surface type="2D">
-            <init_from>ps_5by5_2halfx5_l4_parallel_png</init_from>
+            <init_from>parkingSpace_5by5_2halfx5_l6_parallel_png</init_from>
           </surface>
         </newparam>
-        <newparam sid="ps_5by5_2halfx5_l4_parallel_png-sampler">
+        <newparam sid="parkingSpace_5by5_2halfx5_l6_parallel_png-sampler">
           <sampler2D>
-            <source>ps_5by5_2halfx5_l4_parallel_png-surface</source>
+            <source>parkingSpace_5by5_2halfx5_l6_parallel_png-surface</source>
           </sampler2D>
         </newparam>
         <technique sid="common">
@@ -94,7 +94,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <diffuse>
-              <texture texture="ps_5by5_2halfx5_l4_parallel_png-sampler" texcoord="UV 贴图"/>
+              <texture texture="parkingSpace_5by5_2halfx5_l6_parallel_png-sampler" texcoord="UV 贴图"/>
             </diffuse>
             <index_of_refraction>
               <float sid="ior">1.45</float>
@@ -105,8 +105,8 @@
     </effect>
   </library_effects>
   <library_images>
-    <image id="ps_5by5_2halfx5_l4_parallel_png" name="ps_5by5_2halfx5_l4_parallel_png">
-      <init_from>ps_5by5_2halfx5_l4_parallel.png</init_from>
+    <image id="parkingSpace_5by5_2halfx5_l6_parallel_png" name="parkingSpace_5by5_2halfx5_l6_parallel_png">
+      <init_from>parkingSpace_5by5_2halfx5_l6_parallel.png</init_from>
     </image>
   </library_images>
   <library_materials>
